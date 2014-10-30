@@ -47,7 +47,7 @@ gem 'rails_config'
 gem 'devise'
 gem 'omniauth'
 gem 'omniauth-openid'
-gem 'alto_guisso', git: "https://bitbucket.org/instedd/alto_guisso.git", branch: 'master'
+gem 'alto_guisso', git: "https://github.com/instedd/alto_guisso.git", branch: 'master'
 
 group :development, :test do
   gem 'pry-byebug'
