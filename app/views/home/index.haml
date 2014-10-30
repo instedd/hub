@@ -1,5 +1,5 @@
 %h3 This is InSTEDD HUB's home.
 
-/ - unless current_user
-/   Please
-/   = link_to "Sign in", guisso_sign_in_path_for(:user)
+- unless current_user
+  Please
+  = link_to "Sign in", guisso_sign_in_path_for(:user)

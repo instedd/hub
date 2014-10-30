@@ -43,6 +43,12 @@ gem 'bootstrap-sass', '2.3.2.1'
 gem 'instedd-bootstrap', git: "https://bitbucket.org/instedd/instedd-bootstrap.git", branch: 'master'
 gem 'haml-rails'
 
+gem 'rails_config'
+gem 'devise'
+gem 'omniauth'
+gem 'omniauth-openid'
+gem 'alto_guisso', git: "https://bitbucket.org/instedd/alto_guisso.git", branch: 'master'
+
 group :development, :test do
   gem 'pry-byebug'
 end
