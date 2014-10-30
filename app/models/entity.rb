@@ -6,7 +6,13 @@ module Entity
   def lookup(path)
     return self if path.empty?
     property_name = path.shift
-    properties[property_name].lookup(path)
+
+    case property_name
+    when "$events"
+      EventsNode.new(self).lookup(path)
+    else
+      properties[property_name].lookup(path)
+    end
   end
 
   def properties
@@ -22,14 +28,16 @@ module Entity
     reflection = {}
     if p = properties
       reflection[:properties] = Hash[p.map do |k, v|
-        [k, {kind: v.kind, path: v.path}]
+        [k, {name: v.name, kind: v.kind, path: v.path}]
       end]
     end
     if a = actions
       reflection[:actions] = a
     end
     if e = events
-      reflection[:events] = e
+      reflection[:events] = Hash[e.map do |k, v|
+        [k, {name: v.name, path: v.path}]
+      end]
     end
     reflection
   end

@@ -51,4 +51,5 @@ gem 'alto_guisso', git: "https://bitbucket.org/instedd/alto_guisso.git", branch:
 
 group :development, :test do
   gem 'pry-byebug'
+  gem 'rspec-rails'
 end

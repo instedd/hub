@@ -6,7 +6,13 @@ module EntitySet
   def lookup(path)
     return self if path.empty?
     entity_id = path.shift
-    find_entity(entity_id).lookup(path)
+
+    case entity_id
+    when "$events"
+      EventsNode.new(self).lookup(path)
+    else
+      find_entity(entity_id).lookup(path)
+    end
   end
 
   def actions

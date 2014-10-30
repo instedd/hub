@@ -3,7 +3,11 @@ class ONAConnector < Connector
   store_accessor :settings, :url
 
   def properties
-    {"Forms" => Forms.new(self)}
+    {"forms" => Forms.new(self)}
+  end
+
+  def connector
+    self
   end
 
   private
@@ -11,31 +15,42 @@ class ONAConnector < Connector
   class Forms
     include EntitySet
 
-    def initialize(connector)
-      @connector = connector
+    delegate :connector, to: :@parent
+
+    def initialize(parent)
+      @parent = parent
     end
 
     def path
-      "/Forms"
+      "/forms"
+    end
+
+    def name
+      "Forms"
     end
 
     def entities
       @entities ||= begin
-        forms = JSON.parse(RestClient.get("#{@connector.url}/api/v1/forms.json"))
-        forms.map { |form| Form.new(@connector, form["formid"], form["title"]) }
+        forms = JSON.parse(RestClient.get("#{connector.url}/api/v1/forms.json"))
+        forms.map { |form| Form.new(self, form["formid"], form["title"]) }
       end
     end
 
     def find_entity(id)
-      Form.new(@connector, id)
+      Form.new(self, id)
     end
   end
 
   class Form
     include Entity
+    include Evented
 
-    def initialize(connector, id, name = nil)
-      @connector = connector
+    delegate :connector, to: :@parent
+
+    attr_reader :id
+
+    def initialize(parent, id, name = nil)
+      @parent = parent
       @id = id
       @name = name
     end
@@ -45,26 +60,35 @@ class ONAConnector < Connector
     end
 
     def path
-      "/Forms/#{@id}"
-    end
-
-    def form_definition
-      @form_definition ||= begin
-        JSON.parse(RestClient.get("#{@connector.url}/api/v1/forms/#{@id}/form.json"))
-      end
+      "#{@parent.path}/#{@id}"
     end
 
     def events
-      ["new_data"]
+      {
+        "new_data" => NewDataEvent.new(self)
+      }
     end
-
-    def reflect_event(event)
-      case event
-      when "new_data"
-        form_definition["children"]
-      end
-    end
-
   end
 
+  class NewDataEvent
+    include Event
+
+    def initialize(parent)
+      @parent = parent
+    end
+
+    delegate :connector, to: :@parent
+
+    def name
+      "New data"
+    end
+
+    def path
+      "#{@parent.path}/$events/new_data"
+    end
+
+    def args
+      JSON.parse(RestClient.get("#{connector.url}/api/v1/forms/#{@parent.id}/form.json"))
+    end
+  end
 end
