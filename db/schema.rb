@@ -11,9 +11,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 0) do
+ActiveRecord::Schema.define(version: 20141028214650) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+  enable_extension "hstore"
+
+  create_table "connectors", force: true do |t|
+    t.string   "name"
+    t.string   "type"
+    t.hstore   "settings"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
 end
