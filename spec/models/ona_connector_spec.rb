@@ -1,5 +1,3 @@
-require "rails_helper"
-
 describe ONAConnector do
   describe "lookup" do
     let(:connector) { ONAConnector.new url: "http://example.com" }
