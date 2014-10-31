@@ -1,15 +1,4 @@
 GIT
-  remote: https://bitbucket.org/instedd/instedd-bootstrap.git
-  revision: e3dd7bb922cb89c5007cc371afafb31ac391bdf1
-  branch: master
-  specs:
-    instedd-bootstrap (0.0.1)
-      bootstrap-sass
-      bootstrap-sass (~> 2.3.2)
-      rails
-      sass-rails
-
-GIT
   remote: git://github.com/instedd/alto_guisso.git
   revision: 170ad8f8cdf0e46438db06668894bb986111182b
   branch: master
@@ -20,6 +9,17 @@ GIT
       rack-oauth2
       rails (>= 3.0)
       ruby-openid
+
+GIT
+  remote: https://bitbucket.org/instedd/instedd-bootstrap.git
+  revision: e3dd7bb922cb89c5007cc371afafb31ac391bdf1
+  branch: master
+  specs:
+    instedd-bootstrap (0.0.1)
+      bootstrap-sass
+      bootstrap-sass (~> 2.3.2)
+      rails
+      sass-rails
 
 GEM
   remote: https://rubygems.org/

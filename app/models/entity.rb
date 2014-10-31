@@ -1,8 +1,4 @@
 module Entity
-  def kind
-    :entity
-  end
-
   def lookup(path)
     return self if path.empty?
     property_name = path.shift
@@ -15,6 +11,10 @@ module Entity
     end
   end
 
+  def reflect_path
+    path
+  end
+
   def properties
   end
 
@@ -24,11 +24,18 @@ module Entity
   def events
   end
 
-  def reflect
+  def reflect(reflect_url_proc)
     reflection = {}
     if p = properties
       reflection[:properties] = Hash[p.map do |k, v|
-        [k, {name: v.name, kind: v.kind, path: v.path}]
+        h = {label: v.label, type: v.type}
+        if v.path
+          h[:path] = v.path
+          if reflect_path = v.reflect_path
+            h[:reflect_url] = reflect_url_proc.call(reflect_path)
+          end
+        end
+        [k, h]
       end]
     end
     if a = actions
@@ -36,7 +43,7 @@ module Entity
     end
     if e = events
       reflection[:events] = Hash[e.map do |k, v|
-        [k, {name: v.name, path: v.path}]
+        [k, {label: v.label, path: v.path, reflect_url: reflect_url_proc.call(v.path)}]
       end]
     end
     reflection

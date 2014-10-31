@@ -6,7 +6,7 @@ Rails.application.routes.draw do
   resources :connectors do
     member do
       get 'reflect'
-      get 'reflect/*path' => 'connectors#reflect'
+      get 'reflect/*path' => 'connectors#reflect', as: 'reflect_with_path'
     end
   end
 

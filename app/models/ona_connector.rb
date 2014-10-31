@@ -22,18 +22,32 @@ class ONAConnector < Connector
     end
 
     def path
-      "/forms"
+      "forms"
     end
 
-    def name
+    def label
       "Forms"
+    end
+
+    def type
+      {
+        kind: :entity_set,
+        entity_type: {
+          kind: :struct,
+          members: []
+        }
+      }
     end
 
     def entities
       @entities ||= begin
-        forms = JSON.parse(RestClient.get("#{connector.url}/api/v1/forms.json"))
+        forms = $forms ||= JSON.parse(RestClient.get("#{connector.url}/api/v1/forms.json"))
         forms.map { |form| Form.new(self, form["formid"], form["title"]) }
       end
+    end
+
+    def reflect_entities
+      entities
     end
 
     def find_entity(id)
@@ -43,7 +57,6 @@ class ONAConnector < Connector
 
   class Form
     include Entity
-    include Evented
 
     delegate :connector, to: :@parent
 
@@ -55,7 +68,7 @@ class ONAConnector < Connector
       @name = name
     end
 
-    def name
+    def label
       @name
     end
 
@@ -79,7 +92,7 @@ class ONAConnector < Connector
 
     delegate :connector, to: :@parent
 
-    def name
+    def label
       "New data"
     end
 

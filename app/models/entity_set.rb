@@ -1,8 +1,4 @@
 module EntitySet
-  def kind
-    :entity_set
-  end
-
   def lookup(path)
     return self if path.empty?
     entity_id = path.shift
@@ -15,16 +11,20 @@ module EntitySet
     end
   end
 
+  def reflect_path
+    path
+  end
+
   def actions
   end
 
   def events
   end
 
-  def reflect
+  def reflect(reflect_url_proc)
     reflection = {}
     reflection[:entities] = entities.map do |entity|
-      {name: entity.name, kind: entity.kind, path: entity.path}
+      {label: entity.label, path: entity.path, reflect_url: reflect_url_proc.call(entity.path)}
     end
     if a = actions
       reflection[:actions] = a

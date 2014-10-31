@@ -1,18 +1,26 @@
 describe ONAConnector do
   describe "lookup" do
     let(:connector) { ONAConnector.new url: "http://example.com" }
+    let(:url_proc) { ->(path) { "http://server/#{path}" }}
 
     it "finds root" do
       expect(connector.lookup []).to be(connector)
     end
 
     it "reflects on root" do
-      expect(connector.reflect).to eq({
+      expect(connector.reflect(url_proc)).to eq({
         properties: {
           "forms" => {
-            name: "Forms",
-            kind: :entity_set,
-            path: "/forms",
+            label: "Forms",
+            type: {
+              kind: :entity_set,
+              entity_type: {
+                kind: :struct,
+                members: []
+              }
+            },
+            path: "forms",
+            reflect_url: "http://server/forms"
           }
         }
       })
@@ -24,12 +32,12 @@ describe ONAConnector do
                            and_return(%([{"formid": 1, "title": "Form 1"}]))
 
       forms = connector.lookup %w(forms)
-      expect(forms.reflect).to eq({
+      expect(forms.reflect(url_proc)).to eq({
         entities: [
           {
-            name: "Form 1",
-            kind: :entity,
-            path: "/forms/1",
+            label: "Form 1",
+            path: "forms/1",
+            reflect_url: "http://server/forms/1"
           }
         ]
       })
@@ -37,11 +45,12 @@ describe ONAConnector do
 
     it "reflects on form" do
       form = connector.lookup %w(forms 1)
-      expect(form.reflect).to eq({
+      expect(form.reflect(url_proc)).to eq({
         events: {
           "new_data" => {
-            name: "New data",
-            path: "/forms/1/$events/new_data",
+            label: "New data",
+            path: "forms/1/$events/new_data",
+            reflect_url: "http://server/forms/1/$events/new_data"
           }
         }
       })
@@ -49,7 +58,7 @@ describe ONAConnector do
 
     # it "reflects form new_data event" do
     #   form = connector.lookup %w(forms 1)
-    #   expect(form.reflect).to eq({events: %w(new_data)})
+    #   expect(form.reflect(url_proc)).to eq({events: %w(new_data)})
     # end
   end
 end

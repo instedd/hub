@@ -3,9 +3,9 @@ module Event
     {}
   end
 
-  def reflect
+  def reflect(*)
     {
-      name: name,
+      label: label,
       args: args,
     }
   end

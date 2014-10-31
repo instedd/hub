@@ -12,7 +12,7 @@ class EventsNode
 
   def reflect
     Hash[@parent.events.map do |k, v|
-        [k, {name: v.name, path: v.path}]
+        [k, {label: v.label, path: v.path}]
     end]
   end
 end
