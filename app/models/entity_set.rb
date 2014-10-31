@@ -4,6 +4,8 @@ module EntitySet
     entity_id = path.shift
 
     case entity_id
+    when "$actions"
+      ActionsNode.new(self).lookup(path)
     when "$events"
       EventsNode.new(self).lookup(path)
     else
@@ -27,11 +29,27 @@ module EntitySet
       {label: entity.label, path: entity.path, reflect_url: reflect_url_proc.call(entity.path)}
     end
     if a = actions
-      reflection[:actions] = a
+      reflection[:actions] = Hash[a.map do |k, v|
+        [k, {label: v.label, path: v.path, reflect_url: reflect_url_proc.call(v.path)}]
+      end]
     end
     if e = events
-      reflection[:events] = e
+      reflection[:events] = Hash[e.map do |k, v|
+        [k, {label: v.label, path: v.path, reflect_url: reflect_url_proc.call(v.path)}]
+      end]
     end
     reflection
+  end
+
+  # TOOD: dedice what's a default type of an entity set
+  # which we don't want to see as a dataset
+  def type
+    {
+      kind: :entity_set,
+      entity_type: {
+        kind: :struct,
+        members: []
+      }
+    }
   end
 end

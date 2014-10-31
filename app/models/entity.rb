@@ -4,6 +4,8 @@ module Entity
     property_name = path.shift
 
     case property_name
+    when "$actions"
+      ActionsNode.new(self).lookup(path)
     when "$events"
       EventsNode.new(self).lookup(path)
     else
@@ -39,7 +41,9 @@ module Entity
       end]
     end
     if a = actions
-      reflection[:actions] = a
+      reflection[:actions] = Hash[a.map do |k, v|
+        [k, {label: v.label, path: v.path, reflect_url: reflect_url_proc.call(v.path)}]
+      end]
     end
     if e = events
       reflection[:events] = Hash[e.map do |k, v|

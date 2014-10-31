@@ -6,10 +6,6 @@ class ONAConnector < Connector
     {"forms" => Forms.new(self)}
   end
 
-  def connector
-    self
-  end
-
   private
 
   class Forms
@@ -27,16 +23,6 @@ class ONAConnector < Connector
 
     def label
       "Forms"
-    end
-
-    def type
-      {
-        kind: :entity_set,
-        entity_type: {
-          kind: :struct,
-          members: []
-        }
-      }
     end
 
     def entities
@@ -86,11 +72,11 @@ class ONAConnector < Connector
   class NewDataEvent
     include Event
 
+    delegate :connector, to: :@parent
+
     def initialize(parent)
       @parent = parent
     end
-
-    delegate :connector, to: :@parent
 
     def label
       "New data"
