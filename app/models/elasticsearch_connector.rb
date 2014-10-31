@@ -148,7 +148,7 @@ class ElasticsearchConnector < Connector
         if props = value["properties"]
           [key, {type: {kind: :struct, members: elasticsearch_properties(props)}}]
         else
-          [key, value["type"]]
+          [key, {type: value["type"]}]
         end
       end]
     end
