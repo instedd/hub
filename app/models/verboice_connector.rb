@@ -1,7 +1,7 @@
 class VerboiceConnector < Connector
   include Entity
 
-  store_accessor :settings, :url
+  store_accessor :settings, :url, :username, :password
   after_initialize :initialize_defaults, :if => :new_record?
 
   def properties
@@ -46,12 +46,40 @@ class VerboiceConnector < Connector
     end
 
     def entities
-      @entities = []
+      @entities ||= begin
+        resource = RestClient::Resource.new("#{connector.url}/api/projects.json", connector.username, connector.password)
+        projects ||= JSON.parse(resource.get())
+
+        projects.map { |project| Project.new(self, project["id"], project["name"]) }
+      end
     end
 
     def reflect_entities
       entities
     end
+
+    def find_entity(id)
+      Project.new(@connector, id)
+    end
+  end
+
+  class Project
+    include Entity
+
+    def initialize(connector, id, name)
+      @connector = connector
+      @id = id
+      @label = name
+    end
+
+    def label
+      @label
+    end
+
+    def path
+      "projects/#{@id}"
+    end
+
   end
 
 end
