@@ -4,6 +4,6 @@ class Connector < ActiveRecord::Base
   end
 
   def lookup_path(path)
-    lookup path.split('/')
+    lookup path.to_s.split('/')
   end
 end

@@ -91,11 +91,61 @@ class ONAConnector < Connector
     end
 
     def poll
+      max_id = load_state
+      url = "#{connector.url}/api/v1/data/#{@parent.id}.json"
+      if max_id
+        query = %({"_id":{"$gt":#{max_id}}})
+        url << %(?query=#{CGI.escape query})
+      end
+
+      all_data = JSON.parse(RestClient.get(url))
+      form = JSON.parse(RestClient.get("#{connector.url}/api/v1/forms/#{@parent.id}/form.json"))
+      events = all_data.map do |data|
+        output = process_data data, form["children"]
+        output["_id"] = data["_id"]
+        output
+      end
+      if events.empty?
+        return []
+      end
+
+      max_id = events.max_by { |o| o["_id"] }["_id"]
+      save_state(max_id)
+      events
+    end
+
+    def process_data(data, children, prefix = "", output = {})
+      children.each do |c|
+        data_path = "#{prefix}#{c["name"]}"
+        type = c["type"]
+        name = c["name"]
+        case type
+        when "geopoint"
+          value = data[data_path]
+          if value
+            lat, lon = value.split.map(&:to_f)
+            output[name] = {lat: lat, lon: lon}
+          else
+            output[name] = nil
+          end
+        when "group"
+          output[name] ||= sub = {}
+          process_data data, c["children"], "#{data_path}/", sub
+        when "repeat"
+          value = Array(data[data_path])
+          output[name] = value.map { |v| process_data(v, c["children"], "#{data_path}/") }
+        else
+          output[name] = data[data_path]
+        end
+      end
+      output
     end
 
     def args
       form = JSON.parse(RestClient.get("#{connector.url}/api/v1/forms/#{@parent.id}/form.json"))
-      type_children(form, form["children"])
+      args = type_children(form, form["children"])
+      args["_id"] = {type: :integer}
+      args
     end
 
     def type_children(form, children)
@@ -115,7 +165,7 @@ class ONAConnector < Connector
         when "deviceid"
           {type: :string}
         when "geopoint"
-          {type: {kind: :struct, members: {x: :float, y: :float}}}
+          {type: {kind: :struct, members: {lat: :float, lon: :float}}}
         when "select one"
           members = ona_children(form, c).map { |m| {value: m["name"], label: ona_label(m) } }
           {type: {kind: :enum, value_type: :string, members: members}}
