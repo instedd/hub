@@ -66,7 +66,7 @@ class VerboiceConnector < Connector
   class Project
     include Entity
 
-    def initialize(connector, id, name)
+    def initialize(connector, id, name = nil)
       @connector = connector
       @id = id
       @label = name
@@ -78,6 +78,34 @@ class VerboiceConnector < Connector
 
     def path
       "projects/#{@id}"
+    end
+
+    def actions
+      {
+        "call" => CallAction.new(self)
+      }
+    end
+
+  end
+
+  class CallAction
+    include Action
+    delegate :connector, to: :@parent
+
+    def initialize(parent)
+      @parent = parent
+    end
+
+    def label
+      "Call"
+    end
+
+    def path
+      "#{@parent.path}/$actions/call"
+    end
+
+    def args
+      {channel: {type: "string", label: "Channel"}, number: {type: "string", label: "Number"}}
     end
 
   end
