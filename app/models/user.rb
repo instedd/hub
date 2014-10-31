@@ -5,4 +5,7 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable,
          :validatable, :confirmable, :omniauthable,
          :lockable
+
+  has_many :identities, dependent: :destroy
+
 end

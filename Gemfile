@@ -47,6 +47,7 @@ gem 'rails_config'
 gem 'devise'
 gem 'omniauth'
 gem 'omniauth-openid'
+gem 'rack-oauth2', github: "manastech/rack-oauth2", branch: 'master'
 gem 'alto_guisso', github: "instedd/alto_guisso", branch: 'master'
 
 group :development, :test do
