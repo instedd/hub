@@ -10,7 +10,7 @@ GIT
       sass-rails
 
 GIT
-  remote: https://github.com/instedd/alto_guisso.git
+  remote: git://github.com/instedd/alto_guisso.git
   revision: 170ad8f8cdf0e46438db06668894bb986111182b
   branch: master
   specs:
