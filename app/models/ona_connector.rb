@@ -101,7 +101,72 @@ class ONAConnector < Connector
     end
 
     def args
-      JSON.parse(RestClient.get("#{connector.url}/api/v1/forms/#{@parent.id}/form.json"))
+      form = JSON.parse(RestClient.get("#{connector.url}/api/v1/forms/#{@parent.id}/form.json"))
+      type_children(form, form["children"])
+    end
+
+    def type_children(form, children)
+      args = {}
+      children.each do |c|
+        type = case c["type"]
+        when "date"
+          {type: :date}
+        when "start"
+          {type: :datetime, label: "Start"}
+        when "end"
+          {type: :datetime, label: "End"}
+        when "today"
+          {type: :date, label: "Today"}
+        when "datetime"
+          {type: :datetime}
+        when "deviceid"
+          {type: :string}
+        when "geopoint"
+          {type: {kind: :struct, members: {x: :float, y: :float}}}
+        when "select one"
+          members = ona_children(form, c).map { |m| {value: m["name"], label: ona_label(m) } }
+          {type: {kind: :enum, value_type: :string, members: members}}
+        when "select all that apply"
+          members = ona_children(form, c).map { |m| {value: m["name"], label: ona_label(m) } }
+          {type: {kind: :array, item_type: {kind: :enum, value_type: :string, members: members}}}
+        when "group"
+          members = type_children(form, c["children"])
+          {type: {kind: :struct, members: members}} if members.any?
+        when "text"
+          {type: :string}
+        when "integer"
+          {type: :integer}
+        when "decimal"
+          {type: :float}
+        when "calculate"
+          {type: :string}
+        when "repeat"
+          members = type_children(form, c["children"])
+          {type: :array, item_type: {kind: :struct, members: members}}
+        when "note"
+          # skip
+        else
+          raise "Unsupported ONA type: #{c["type"]}"
+        end
+        if type
+          type[:label] ||= ona_label(c)
+          args[c["name"]] = type
+        end
+      end
+      args
+    end
+
+    def ona_label(obj)
+      label = obj["label"]
+      if label.is_a?(Hash)
+        label["English"]
+      else
+        label
+      end
+    end
+
+    def ona_children(form, obj)
+      obj["children"] || form["choices"][obj["itemset"]]
     end
   end
 end
