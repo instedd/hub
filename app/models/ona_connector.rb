@@ -86,6 +86,13 @@ class ONAConnector < Connector
       "#{@parent.path}/$events/new_data"
     end
 
+    def subscribe
+      EventSubscription.create(connector: connector, event: path, poll: true)
+    end
+
+    def poll
+    end
+
     def args
       form = JSON.parse(RestClient.get("#{connector.url}/api/v1/forms/#{@parent.id}/form.json"))
       type_children(form, form["children"])
@@ -155,4 +162,5 @@ class ONAConnector < Connector
       obj["children"] || form["choices"][obj["itemset"]]
     end
   end
+
 end
