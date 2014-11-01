@@ -53,4 +53,5 @@ gem 'alto_guisso', github: "instedd/alto_guisso", branch: 'master'
 group :development, :test do
   gem 'pry-byebug'
   gem 'rspec-rails'
+  gem "bower-rails", "~> 0.9.1"
 end
