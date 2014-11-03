@@ -28,7 +28,7 @@ class ONAConnector < Connector
     def entities
       @entities ||= begin
         forms ||= JSON.parse(RestClient.get("#{connector.url}/api/v1/forms.json"))
-        forms.map { |form| Form.new(self, form["formid"], form["title"]) }
+        forms.map { |form| Form.new(self, form["formid"], form) }
       end
     end
 
@@ -48,14 +48,21 @@ class ONAConnector < Connector
 
     attr_reader :id
 
-    def initialize(parent, id, name = nil)
+    def initialize(parent, id, form = nil)
       @parent = parent
       @id = id
-      @name = name
+      @form = form
+    end
+
+    def properties
+      @form ||= JSON.parse(RestClient.get("#{connector.url}/api/v1/forms/#{@id}.json"))
+      {
+        "id" => SimpleProperty.new("Id", :integer, @id)
+      }
     end
 
     def label
-      @name
+      @form["title"]
     end
 
     def path

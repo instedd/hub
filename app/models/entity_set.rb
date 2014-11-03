@@ -23,6 +23,10 @@ module EntitySet
   def events
   end
 
+  def query(query_url_proc)
+    entities.map { |e| e.query(query_url_proc) }
+  end
+
   def reflect(reflect_url_proc)
     reflection = {}
     reflection[:entities] = entities.map do |entity|

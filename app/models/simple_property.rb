@@ -1,6 +1,7 @@
 class SimpleProperty
   attr_accessor :label
   attr_accessor :type
+  attr_accessor :value
 
   def initialize(label, type, value)
     @label = label

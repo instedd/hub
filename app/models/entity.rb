@@ -26,6 +26,18 @@ module Entity
   def events
   end
 
+  def query(query_url_proc)
+    if p = properties
+      Hash[p.map do |k, v|
+        if v.is_a?(EntitySet)
+          [k, query_url_proc.call(v.path)]
+        else
+          [k, v.value]
+        end
+      end]
+    end
+  end
+
   def reflect(reflect_url_proc)
     reflection = {}
     if p = properties
