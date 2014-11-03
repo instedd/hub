@@ -59,15 +59,18 @@ class VerboiceConnector < Connector
     end
 
     def find_entity(id)
-      Project.new(@connector, id)
+      Project.new(connector, id)
     end
   end
 
   class Project
     include Entity
 
+    attr_reader :id
+    delegate :connector, to: :@parent
+
     def initialize(connector, id, name = nil)
-      @connector = connector
+      @parent = connector
       @id = id
       @label = name
     end
@@ -89,8 +92,9 @@ class VerboiceConnector < Connector
   end
 
   class CallAction
-    include Action
     delegate :connector, to: :@parent
+
+    include Action
 
     def initialize(parent)
       @parent = parent
@@ -106,6 +110,11 @@ class VerboiceConnector < Connector
 
     def args
       {channel: {type: "string", label: "Channel"}, number: {type: "string", label: "Number"}}
+    end
+
+    def invoke(args)
+      resource = RestClient::Resource.new("#{connector.url}/api/call?channel=#{args["channel"]}&address=#{args["number"]}", connector.username, connector.password)
+      resource.get() {|response, request, result| response }
     end
 
   end

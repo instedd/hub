@@ -11,6 +11,8 @@ Rails.application.routes.draw do
       get 'reflect/*path' => 'connectors#reflect', as: 'reflect_with_path'
       get 'data' => 'connectors#query'
       get 'data/*path' => 'connectors#query', as: 'query_with_path'
+
+      post 'invoke/*path' => 'connectors#invoke'
     end
   end
 

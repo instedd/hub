@@ -1,5 +1,6 @@
 class ConnectorsController < ApplicationController
   add_breadcrumb 'Connectors', :connectors_path
+  protect_from_forgery except: :invoke
 
   expose(:connectors) { current_user.connectors }
   expose(:connector) do
@@ -58,5 +59,12 @@ class ConnectorsController < ApplicationController
     target = connector.lookup_path(params[:path])
     query_url_proc = ->(path) { query_with_path_connector_url(params[:id], path) }
     render json: target.query(query_url_proc)
+  end
+
+  def invoke
+    connector = Connector.find(params[:id])
+    target = connector.lookup_path(params[:path])
+    response = target.invoke(JSON.parse(request.body.read))
+    render json: response
   end
 end
