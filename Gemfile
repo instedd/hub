@@ -43,6 +43,7 @@ gem 'bootstrap-sass', '2.3.2.1'
 gem 'instedd-bootstrap', git: "https://bitbucket.org/instedd/instedd-bootstrap.git", branch: 'master'
 gem 'haml-rails'
 
+gem 'angularjs-rails'
 gem 'rails_config'
 gem 'devise'
 gem 'omniauth'
