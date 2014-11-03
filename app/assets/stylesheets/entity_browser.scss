@@ -2,18 +2,35 @@
   .columns {
     margin: 0px;
     border: 1px solid gray;
+    white-space: nowrap;
+    overflow-x: auto;
 
     > li {
-      float : left;
+      display: inline-block;
+      float: none;
       min-width : 200px;
       height: 200px;
-      overflow: scroll;
       border-right: 1px solid gray;
+      overflow-y: scroll;
     }
 
     .column {
       list-style-type: none;
       margin: 2px;
+    }
+  }
+
+  .selected {
+    background-color: #0088cc;
+    a {
+      color: white;
+    }
+  }
+
+  .child_selected {
+    background-color: #ddd;
+    a {
+      color: black;
     }
   }
 }

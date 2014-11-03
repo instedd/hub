@@ -2,9 +2,9 @@
   %ul.columns.clearfix
     %li(ng-repeat='column in columns')
       %ul.column(ng-controller="EntityBrowserColumnCtrl")
-        %li(ng-repeat='item in items' ng-switch on="item.__type")
+        %li(ng-repeat='item in items' ng-class='{selected: is_selected(item), child_selected: is_child_selected(item)}' ng-switch on="item.__type")
 
-          %a.container(ng-click='open(item)' href='javascript:' ng-switch-when='connector')
+          %a.connector(ng-click='open(item)' href='javascript:' ng-switch-when='connector')
             %i.icon-book
             {{item.label}}
 
@@ -16,6 +16,6 @@
             %i.icon-th-large
             {{item.label}}
 
-          %a.action(ng-switch-when='action')
-            %i.icon-bullhorn
+          %a.action(ng-click='select(item)' href='javascript:' ng-switch-when='action')
+            %i.icon-play
             {{item.label}}

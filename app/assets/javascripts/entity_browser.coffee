@@ -3,12 +3,16 @@ angular
 
 .directive 'ihEntityBrowser', ->
   restrict: 'E'
+  scope:
+    onSelect: '&'
+    connectors: '='
   templateUrl: '/angular/entity_browser.html'
 
 .controller 'EntityBrowserCtrl', ($scope) ->
   for c in $scope.connectors
     c['__type'] = 'connector'
   $scope.columns = [$scope.connectors]
+  $scope.selection = []
 
 .controller 'EntityBrowserColumnCtrl', ($scope, $http) ->
   $scope.items = $scope.column
@@ -16,6 +20,22 @@ angular
 
   $scope.open = (item) ->
     $scope.columns.splice($scope.column_index + 1, Number.MAX_VALUE, get_children(item))
+    $scope.select(item)
+
+  $scope.select = (item) ->
+    $scope.selection.splice($scope.column_index, Number.MAX_VALUE)
+    $scope.selection.push item
+    $scope.onSelect()(item)
+
+  $scope.is_in_selection = (item) ->
+    $scope.column_index < $scope.selection.length &&
+    $scope.selection[$scope.column_index] == item
+
+  $scope.is_selected = (item) ->
+    $scope.is_in_selection(item) && $scope.column_index == $scope.selection.length - 1
+
+  $scope.is_child_selected = (item) ->
+    $scope.is_in_selection(item) && $scope.column_index != $scope.selection.length - 1
 
   get_children = (item) ->
     res = []

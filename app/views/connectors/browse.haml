@@ -1,10 +1,30 @@
-%h1 Browse
+%h1 New task
 
-%pre
-  = @connectors
+%div{'ng-app'=>'CreateTaskApp', 'ng-init'=>"connectors=#{@connectors.to_json}"}
+  .row-fluid(ng-controller='CreateTaskCtrl')
+    .span6
+      %h1 Event
 
-%div{'ng-app'=>'HubApp', 'ng-init'=>"connectors=#{@connectors.to_json}"}
+      %a(href='javascript:' ng-click='openEventDialog()')
+        %span(ng-if='event')
+          {{event.label}}
+          %span.path ({{event.path}})
+        %span(ng-if='!event') (none)
 
-  %ih-entity-browser
+      #eventModal.modal.hide.fade
+        .modal-header
+          %button(type="button" class="close" data-dismiss="modal") &times;
+          %h3 Choose Event
+        .modal-body
+          %ih-entity-browser(on-select='eventSelected' connectors='connectors')
+        .modal-footer
+          %a(href='javascript:' class='btn' ng-click='closeEventDialog()') Cancel
+          %a(href='javascript:' class='btn btn-primary' ng-click='acceptEventDialog()') Select
 
+    .span6
+      %h1 Action
+
+/ %div{'ng-app'=>'HubApp', 'ng-init'=>"connectors=#{@connectors.to_json}"}
+
+/   %ih-entity-browser(connectors='connectors')
 
