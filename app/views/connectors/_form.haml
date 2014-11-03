@@ -11,7 +11,7 @@
     = f.label :name
     = f.text_field :name
   = f.hidden_field :type
-  = render "form_#{connector.class.name.split('::').last.underscore}", f: f
+  = render "form_#{connector.class.name.split('::').last.underscore[0 .. -11]}", f: f
   .actions
     %hr
       - if connector.new_record?
