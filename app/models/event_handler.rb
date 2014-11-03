@@ -1,5 +1,7 @@
 class EventHandler < ActiveRecord::Base
   belongs_to :connector
+  belongs_to :target_connector, class_name: 'Connector', foreign_key: 'target_connector_id'
+  serialize :binding, Hash
 
   module QueuePollJob
     def self.perform
@@ -8,5 +10,16 @@ class EventHandler < ActiveRecord::Base
         Resque.enqueue_to(:hub, Connector::PollJob, connector_id)
       end
     end
+  end
+
+  def trigger(data)
+    target_action = target_connector.lookup_path(action)
+    target_action.invoke bind_event_data(data)
+  end
+
+  private
+
+  def bind_event_data(data)
+    data
   end
 end

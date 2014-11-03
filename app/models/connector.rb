@@ -19,7 +19,9 @@ class Connector < ActiveRecord::Base
 
       handlers_by_event.each do |event_path, handlers|
         event_data = connector.lookup_path(event_path).poll
-        # TODO: trigger events with event data
+        handlers.product(event_data) do |handler, data|
+          handler.trigger data
+        end
       end
     end
   end
