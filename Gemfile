@@ -50,6 +50,9 @@ gem 'omniauth-openid'
 gem 'rack-oauth2', github: "manastech/rack-oauth2", branch: 'master'
 gem 'alto_guisso', github: "instedd/alto_guisso", branch: 'master'
 gem 'decent_exposure'
+gem 'resque'
+gem 'resque-scheduler'
+gem 'foreman'
 
 group :development, :test do
   gem 'pry-byebug'

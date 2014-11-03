@@ -1,10 +1,12 @@
 class EventSubscription < ActiveRecord::Base
   belongs_to :connector
 
-  def self.run_poll_subscriptions
-    subscriptions = EventSubscription.where(poll: true).includes(:connector).all
-    subscriptions.group_by {|s| [s.connector, s.event]}.each do |(connector, event), subscription|
-      connector.lookup_path(event).poll
+  module QueuePollJob
+    def self.perform
+      connector_ids = EventSubscription.where(poll: true).distinct.pluck(:connector_id)
+      connector_ids.each do |connector_id|
+        Resque.enqueue_to(:hub, Connector::PollJob, connector_id)
+      end
     end
   end
 end

@@ -1,3 +1,5 @@
+require 'resque/server'
+
 Rails.application.routes.draw do
   devise_for :users, controllers: {omniauth_callbacks: "omniauth_callbacks"}
   guisso_for :user
@@ -12,4 +14,5 @@ Rails.application.routes.draw do
     end
   end
 
+  mount Resque::Server.new, at: '/_resque', constraints: { ip: '127.0.0.1' }
 end
