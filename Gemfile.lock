@@ -24,11 +24,10 @@ GIT
 
 GIT
   remote: https://bitbucket.org/instedd/instedd-bootstrap.git
-  revision: a440bd7b1ec1e5852032aeb3f948122be939b32b
+  revision: 675a9a69a07866868491ae41883cd735d34e9752
   branch: master
   specs:
     instedd-bootstrap (0.0.1)
-      bootstrap-sass
       bootstrap-sass (~> 2.3.2)
       rails
       sass-rails
