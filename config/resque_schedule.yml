@@ -1,6 +1,6 @@
 queue_poll_subscriptions:
   every: 5m
-  class: EventSubscription::QueuePollJob
+  class: EventHandler::QueuePollJob
   queue: hub
   args:
   description: Enqueue a job for every connector having subscribed events

@@ -96,7 +96,7 @@ class ONAConnector < Connector
     end
 
     def subscribe
-      EventSubscription.create(connector: connector, event: path, poll: true)
+      EventHandler.create(connector: connector, event: path, poll: true)
     end
 
     def poll

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141103154434) do
+ActiveRecord::Schema.define(version: 20141103193711) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -27,7 +27,7 @@ ActiveRecord::Schema.define(version: 20141103154434) do
     t.integer  "user_id"
   end
 
-  create_table "event_subscriptions", force: true do |t|
+  create_table "event_handlers", force: true do |t|
     t.integer  "connector_id"
     t.string   "event"
     t.boolean  "poll"
@@ -35,7 +35,7 @@ ActiveRecord::Schema.define(version: 20141103154434) do
     t.datetime "updated_at"
   end
 
-  add_index "event_subscriptions", ["connector_id"], name: "index_event_subscriptions_on_connector_id", using: :btree
+  add_index "event_handlers", ["connector_id"], name: "index_event_handlers_on_connector_id", using: :btree
 
   create_table "identities", force: true do |t|
     t.integer  "user_id"

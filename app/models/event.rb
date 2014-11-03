@@ -11,7 +11,7 @@ module Event
   end
 
   def subscribe
-    EventSubscription.create(connector: connector, event: path, poll: responds_to?(:poll))
+    EventHandler.create(connector: connector, event: path, poll: responds_to?(:poll))
   end
 
   def load_state

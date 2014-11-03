@@ -1,6 +1,6 @@
 class Connector < ActiveRecord::Base
   belongs_to :user
-  has_many :event_subscriptions
+  has_many :event_handlers
 
   validates_presence_of :name
 
@@ -15,9 +15,9 @@ class Connector < ActiveRecord::Base
   module PollJob
     def self.perform(connector_id)
       connector = Connector.find(connector_id)
-      subscriptions = connector.event_subscriptions.where(poll: true).group_by(&:event)
+      handlers_by_event = connector.event_handlers.where(poll: true).group_by(&:event)
 
-      subscriptions.each do |event_path, subs|
+      handlers_by_event.each do |event_path, handlers|
         event_data = connector.lookup_path(event_path).poll
         # TODO: trigger events with event data
       end
