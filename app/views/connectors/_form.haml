@@ -1,0 +1,21 @@
+= form_for(connector.becomes(Connector)) do |f|
+  - if connector.errors.any?
+    #error_explanation
+      %h2
+        = pluralize(connector.errors.count, "error")
+        prohibited this connector from being saved:
+      %ul
+        - connector.errors.full_messages.each do |msg|
+          %li= msg
+  .field
+    = f.label :name
+    = f.text_field :name
+  = f.hidden_field :type
+  = render "form_#{connector.class.name.split('::').last.underscore}", f: f
+  .actions
+    %hr
+      - if connector.new_record?
+        %button.btn{:type => "submit"} Save
+      - else
+        %button.btn{:type => "submit"} Update
+        = icon_link_to :'icf-delete', 'Delete this connector', connector_path(connector), method: :delete, :'data-confirm' => "Are you sure you want to delete this connector?", class: "pull-right"

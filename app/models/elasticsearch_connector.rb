@@ -2,6 +2,8 @@ class ElasticsearchConnector < Connector
   include Entity
   store_accessor :settings, :url
 
+  validates_presence_of :url
+
   def properties
     {"indices" => Indices.new(self)}
   end

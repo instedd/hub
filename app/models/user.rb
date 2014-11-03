@@ -7,5 +7,5 @@ class User < ActiveRecord::Base
          :lockable
 
   has_many :identities, dependent: :destroy
-
+  has_many :connectors, dependent: :destroy
 end

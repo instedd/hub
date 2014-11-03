@@ -2,6 +2,8 @@ class ONAConnector < Connector
   include Entity
   store_accessor :settings, :url
 
+  validates_presence_of :url
+
   def properties
     {"forms" => Forms.new(self)}
   end
