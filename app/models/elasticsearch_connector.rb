@@ -154,5 +154,9 @@ class ElasticsearchConnector < Connector
         end
       end]
     end
+
+    def invoke(args)
+      RestClient.post("#{connector.url}/#{index_name}/#{type_name}", args.to_json)
+    end
   end
 end
