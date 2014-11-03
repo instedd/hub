@@ -67,4 +67,13 @@ class ConnectorsController < ApplicationController
     response = target.invoke(JSON.parse(request.body.read))
     render json: response
   end
+
+  def browse
+    @connectors = Connector.all.map do |c|
+      {
+        label: c.name,
+        reflect_url: reflect_with_path_connector_url(c.id, '/'),
+      }
+    end
+  end
 end

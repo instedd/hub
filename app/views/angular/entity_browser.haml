@@ -1,0 +1,21 @@
+%div.entity-browser(ng-controller="EntityBrowserCtrl")
+  %ul.columns.clearfix
+    %li(ng-repeat='column in columns')
+      %ul.column(ng-controller="EntityBrowserColumnCtrl")
+        %li(ng-repeat='item in items' ng-switch on="item.__type")
+
+          %a.container(ng-click='open(item)' href='javascript:' ng-switch-when='connector')
+            %i.icon-book
+            {{item.label}}
+
+          %a.entity_set(ng-click='open(item)' href='javascript:' ng-switch-when='entity_set')
+            %i.icon-folder-close
+            {{item.label}}
+
+          %a.entity(ng-click='open(item)' href='javascript:' ng-switch-when='entity')
+            %i.icon-th-large
+            {{item.label}}
+
+          %a.action(ng-switch-when='action')
+            %i.icon-bullhorn
+            {{item.label}}

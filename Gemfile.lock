@@ -24,7 +24,7 @@ GIT
 
 GIT
   remote: https://bitbucket.org/instedd/instedd-bootstrap.git
-  revision: 675a9a69a07866868491ae41883cd735d34e9752
+  revision: a440bd7b1ec1e5852032aeb3f948122be939b32b
   branch: master
   specs:
     instedd-bootstrap (0.0.1)
@@ -126,6 +126,9 @@ GEM
     mono_logger (1.1.0)
     multi_json (1.10.1)
     netrc (0.8.0)
+    ngannotate-rails (0.10.1)
+      execjs
+      rails (>= 3.1)
     omniauth (1.2.2)
       hashie (>= 1.2, < 4)
       rack (~> 1.0)
@@ -260,6 +263,7 @@ DEPENDENCIES
   instedd-bootstrap!
   jbuilder (~> 2.0)
   jquery-rails
+  ngannotate-rails
   omniauth
   omniauth-openid
   pg

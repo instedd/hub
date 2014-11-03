@@ -3,4 +3,8 @@ class HomeController < ApplicationController
 
   def index
   end
+
+  def angular_template
+    render "angular/#{params[:path]}", layout: false
+  end
 end

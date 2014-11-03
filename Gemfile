@@ -54,6 +54,7 @@ gem 'decent_exposure'
 gem 'resque'
 gem 'resque-scheduler'
 gem 'foreman'
+gem 'ngannotate-rails'
 
 group :development, :test do
   gem 'pry-byebug'

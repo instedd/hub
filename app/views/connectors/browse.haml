@@ -1,0 +1,10 @@
+%h1 Browse
+
+%pre
+  = @connectors
+
+%div{'ng-app'=>'HubApp', 'ng-init'=>"connectors=#{@connectors.to_json}"}
+
+  %ih-entity-browser
+
+

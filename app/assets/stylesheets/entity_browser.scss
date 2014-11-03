@@ -1,0 +1,19 @@
+.entity-browser {
+  .columns {
+    margin: 0px;
+    border: 1px solid gray;
+
+    > li {
+      float : left;
+      min-width : 200px;
+      height: 200px;
+      overflow: scroll;
+      border-right: 1px solid gray;
+    }
+
+    .column {
+      list-style-type: none;
+      margin: 2px;
+    }
+  }
+}

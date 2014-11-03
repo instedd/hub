@@ -5,6 +5,8 @@ Rails.application.routes.draw do
   guisso_for :user
   root :to => 'home#index'
 
+  get 'angular/*path' => 'home#angular_template'
+
   resources :connectors do
     member do
       get 'reflect'
@@ -13,6 +15,10 @@ Rails.application.routes.draw do
       get 'data/*path' => 'connectors#query', as: 'query_with_path'
 
       post 'invoke/*path' => 'connectors#invoke'
+    end
+
+    collection do
+      get 'browse'
     end
   end
 
