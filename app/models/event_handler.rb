@@ -1,7 +1,7 @@
 class EventHandler < ActiveRecord::Base
   belongs_to :connector
   belongs_to :target_connector, class_name: 'Connector', foreign_key: 'target_connector_id'
-  serialize :binding, Hash
+  serialize :binding
 
   module QueuePollJob
     def self.perform
@@ -20,6 +20,7 @@ class EventHandler < ActiveRecord::Base
   private
 
   def bind_event_data(data)
-    data
+    @mapper ||= JsonMapper.new(binding || [])
+    @mapper.map data
   end
 end
