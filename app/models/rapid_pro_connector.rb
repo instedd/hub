@@ -8,6 +8,10 @@ class RapidProConnector < Connector
     {"flows" => Flows.new(self)}
   end
 
+  def request_headers
+    {"Authorization" => "Token #{token}"}
+  end
+
   private
 
   class Flows
@@ -28,7 +32,7 @@ class RapidProConnector < Connector
     end
 
     def entities
-      headers = {"Authorization" => "Token #{connector.token}"}
+      headers = connector.request_headers
       url = "#{connector.url}/api/v1/flows.json"
       all_flows = []
 
@@ -68,6 +72,41 @@ class RapidProConnector < Connector
 
     def path
       "#{@parent.path}/#{@id}"
+    end
+
+    def events
+      {
+        "new_run" => NewRunEvent.new(self)
+      }
+    end
+  end
+
+  class NewRunEvent
+    include Event
+
+    delegate :connector, to: :@parent
+
+    def initialize(parent)
+      @parent = parent
+    end
+
+    def label
+      "New run"
+    end
+
+    def path
+      "#{@parent.path}/$events/new_run"
+    end
+
+    def args
+      headers = connector.request_headers
+      results = JSON.parse(RestClient.get("#{connector.url}/api/v1/flows.json?flow=#{@parent.id}", headers))
+      flow = results["results"].first
+      rulesets = flow["rulesets"]
+      Hash[rulesets.map do |rule|
+        [rule["label"], {type: :string}]
+      end
+      ]
     end
   end
 end
