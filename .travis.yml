@@ -3,3 +3,6 @@ before_script:
 - bundle exec rake db:setup
 script:
 - bundle exec rspec
+notifications:
+  slack:
+    secure: P0yA4bsOKeu9TMtIe8+bxaZZFIXwmcnfira7ZF4g+YuGJoegKOgKxr/qmIKOSZ1IXnlTUnRvDNR4M4wH84tqOswQet9q9z366cAVvHBsPdyrlxLPZEK+aH5GpqBW6diwLlZi9BvWqP8Sz1dIm8VDAO93XLZVVbtpYNADowkIdSI=
