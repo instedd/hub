@@ -194,7 +194,7 @@ class ONAConnector < Connector
           {type: :string}
         when "repeat"
           members = type_children(form, c["children"])
-          {type: :array, item_type: {kind: :struct, members: members}}
+          {type: {kind: :array, item_type: {kind: :struct, members: members}}}
         when "note"
           # skip
         else

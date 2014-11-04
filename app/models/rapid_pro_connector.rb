@@ -12,6 +12,12 @@ class RapidProConnector < Connector
     RestClient.get url, auth_headers
   end
 
+  def http_post_json(url, data)
+    headers = auth_headers
+    headers["Content-type"] = "application/json"
+    RestClient.post url, data.to_json, headers
+  end
+
   def http_get_json_paginated(url)
     while url
       response = JSON.parse http_get(url)
@@ -87,6 +93,12 @@ class RapidProConnector < Connector
         "new_run" => NewRunEvent.new(self)
       }
     end
+
+    def actions
+      {
+        "run" => RunAction.new(self)
+      }
+    end
   end
 
   class NewRunEvent
@@ -155,6 +167,39 @@ class RapidProConnector < Connector
       max_created_on = all_results.max_by { |result| result["created_on"] }["created_on"]
       save_state(max_created_on)
       events
+    end
+  end
+
+  class RunAction
+    delegate :connector, to: :@parent
+
+    include Action
+
+    def initialize(parent)
+      @parent = parent
+    end
+
+    def label
+      "Run"
+    end
+
+    def path
+      "#{@parent.path}/$actions/run"
+    end
+
+    def args
+      {
+        phone: {type: {kind: :array, item_type: :string}},
+        extra: {type: {kind: :struct, members: [], open: true}},
+      }
+    end
+
+    def invoke(args)
+      connector.http_post_json "#{connector.url}/api/v1/runs.json", {
+        flow: @parent.id.to_i,
+        phone: args["phone"],
+        extra: args["extra"],
+      }
     end
   end
 end
