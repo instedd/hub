@@ -23,6 +23,8 @@ class JsonMapper
       case mapping["type"]
       when "struct"
         map_members(context, mapping["members"])
+      when "literal"
+        mapping["value"]
       end
     end
   end

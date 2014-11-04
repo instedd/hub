@@ -58,4 +58,12 @@ describe JsonMapper do
     source = {"x" => [{"y" => 123}]}
     expect(mapper.map(source)).to eq({"foo" => 123})
   end
+
+  it "maps literal value" do
+    mapper = JsonMapper.new({
+      "type" => "literal",
+      "value" => [1, 2, 3]
+    })
+    expect(mapper.map(nil)).to eq([1, 2, 3])
+  end
 end
