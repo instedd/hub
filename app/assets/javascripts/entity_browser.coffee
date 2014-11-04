@@ -53,6 +53,10 @@ angular
         schema['__type'] = 'action'
         res.push schema
 
+      for prop, schema of data.events
+        schema['__type'] = 'event'
+        res.push schema
+
     res
 
 entity_to_items = (entity) ->
