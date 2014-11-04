@@ -78,7 +78,7 @@ angular
     $http.get(item.reflect_url).success (data) ->
 
       for prop, schema of data.properties
-        schema['__type'] = schema.type.kind
+        schema['__type'] = schema.type
         res.push schema
 
       for prop, schema of data.entities
