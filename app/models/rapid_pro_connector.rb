@@ -8,7 +8,19 @@ class RapidProConnector < Connector
     {"flows" => Flows.new(self)}
   end
 
-  def request_headers
+  def http_get(url)
+    RestClient.get url, auth_headers
+  end
+
+  def http_get_json_paginated(url)
+    while url
+      response = JSON.parse http_get(url)
+      yield response
+      url = response["next"]
+    end
+  end
+
+  def auth_headers
     {"Authorization" => "Token #{token}"}
   end
 
@@ -32,16 +44,12 @@ class RapidProConnector < Connector
     end
 
     def entities
-      headers = connector.request_headers
       url = "#{connector.url}/api/v1/flows.json"
       all_flows = []
 
-      while true
-        response = JSON.parse RestClient.get url, headers
+      connector.http_get_json_paginated(url) do |response|
         flows = response["results"].map { |result| Flow.new(self, result["flow"], result["name"]) }
         all_flows.concat flows
-        url = response["next"]
-        break unless url
       end
 
       all_flows.sort_by! { |flow| flow.label.downcase }
@@ -99,14 +107,54 @@ class RapidProConnector < Connector
     end
 
     def args
-      headers = connector.request_headers
+      headers = connector.auth_headers
       results = JSON.parse(RestClient.get("#{connector.url}/api/v1/flows.json?flow=#{@parent.id}", headers))
       flow = results["results"].first
       rulesets = flow["rulesets"]
-      Hash[rulesets.map do |rule|
+      values = Hash[rulesets.map do |rule|
         [rule["label"], {type: :string}]
+      end]
+      {
+        concat: {type: :string},
+        phone: {type: :string},
+        values: {type: {kind: :struct, members: values}}
+      }
+    end
+
+    def subscribe
+      EventHandler.create(connector: connector, event: path, poll: true)
+    end
+
+    def poll
+      max_created_on = load_state
+
+      url = "#{connector.url}/api/v1/runs.json?flow=#{@parent.id}"
+      if max_created_on
+        url << "&after=#{CGI.escape max_created_on}"
       end
-      ]
+
+      all_results = []
+      connector.http_get_json_paginated(url) do |results|
+        all_results.concat results["results"]
+      end
+
+      events = all_results.map do |result|
+        values =         {
+          "contact" => result["contact"],
+          "phone" => result["phone"],
+          "values" => Hash[result["values"].map do |value|
+            [value["label"], value["value"]]
+          end],
+        }
+      end
+
+      if events.empty?
+        return []
+      end
+
+      max_created_on = all_results.max_by { |result| result["created_on"] }["created_on"]
+      save_state(max_created_on)
+      events
     end
   end
 end
