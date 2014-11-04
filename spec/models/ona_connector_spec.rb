@@ -44,8 +44,18 @@ describe ONAConnector do
     end
 
     it "reflects on form" do
+      allow(RestClient).to receive(:get).
+                           with("http://example.com/api/v1/forms/1.json").
+                           and_return(%({"formid": 1, "title": "Form 1"}))
+
       form = connector.lookup %w(forms 1)
       expect(form.reflect(url_proc)).to eq({
+        properties: {
+          "id" => {
+            label: "Id",
+            type: :integer
+          }
+        },
         events: {
           "new_data" => {
             label: "New data",
