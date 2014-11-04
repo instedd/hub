@@ -45,15 +45,7 @@ module EntitySet
     reflection
   end
 
-  # TOOD: dedice what's a default type of an entity set
-  # which we don't want to see as a dataset
   def type
-    {
-      kind: :entity_set,
-      entity_type: {
-        kind: :struct,
-        members: []
-      }
-    }
+    :entity_set
   end
 end

@@ -12,13 +12,7 @@ describe ONAConnector do
         properties: {
           "forms" => {
             label: "Forms",
-            type: {
-              kind: :entity_set,
-              entity_type: {
-                kind: :struct,
-                members: []
-              }
-            },
+            type: :entity_set,
             path: "forms",
             reflect_url: "http://server/forms"
           }
