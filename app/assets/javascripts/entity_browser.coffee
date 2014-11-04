@@ -43,7 +43,6 @@ angular
   connectors = []
 
   $http.get('/connectors.json').success (data) ->
-    console.log(data)
     for c in data
       c['__type'] = 'connector'
       connectors.push(c)

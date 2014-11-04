@@ -1,0 +1,11 @@
+.source-box
+  %ul
+    %li(ng-repeat='(key, prop) in model track by key')
+      %span.badge(ng-click='selected(key)') {{key}}
+      %i.type :: {{human_type(prop)}}
+      %i {{prop.label}}
+
+      %div(ng-include="'/angular/source_box_struct_members.html'" ng-if='is_struct(prop)')
+      %div(ng-include="'/angular/source_box_array_members.html'" ng-if='is_array(prop)')
+
+

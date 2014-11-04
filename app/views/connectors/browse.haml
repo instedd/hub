@@ -6,15 +6,13 @@
       %h1 Event
 
       %ih-entity-picker(model='event' type='event')
-      %pre {{event}}
+      / %pre {{event_reflect}}
+
+      %ih-source-box(model='event_reflect.args')
 
     .span6
       %h1 Action
 
       %ih-entity-picker(model='action' type='action')
       %pre {{action}}
-
-/ %div{'ng-app'=>'HubApp', 'ng-init'=>"connectors=#{@connectors.to_json}"}
-
-/   %ih-entity-browser(connectors='connectors')
 

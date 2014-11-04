@@ -15,5 +15,3 @@
 //= require instedd-bootstrap
 //= require angular
 //= require_tree .
-
-angular.module('HubApp', ['InSTEDD.Hub.Browser']);
