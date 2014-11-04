@@ -14,5 +14,7 @@
       %h1 Action
 
       %ih-entity-picker(model='action' type='action')
-      %pre {{action}}
+      / %pre {{action_reflect}}
+
+      %ih-target-box(model='action_reflect.args')
 
