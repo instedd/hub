@@ -5,24 +5,14 @@
     .span6
       %h1 Event
 
-      %a(href='javascript:' ng-click='openEventDialog()')
-        %span(ng-if='event')
-          {{event.label}}
-          %span.path ({{event.path}})
-        %span(ng-if='!event') (none)
-
-      #eventModal.modal.hide.fade
-        .modal-header
-          %button(type="button" class="close" data-dismiss="modal") &times;
-          %h3 Choose Event
-        .modal-body
-          %ih-entity-browser(on-select='eventSelected' connectors='connectors')
-        .modal-footer
-          %a(href='javascript:' class='btn' ng-click='closeEventDialog()') Cancel
-          %a(href='javascript:' class='btn btn-primary' ng-click='acceptEventDialog()') Select
+      %ih-entity-picker(model='event' type='event')
+      %pre {{event}}
 
     .span6
       %h1 Action
+
+      %ih-entity-picker(model='action' type='action')
+      %pre {{action}}
 
 / %div{'ng-app'=>'HubApp', 'ng-init'=>"connectors=#{@connectors.to_json}"}
 

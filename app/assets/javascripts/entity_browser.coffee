@@ -1,6 +1,38 @@
 angular
 .module('InSTEDD.Hub.Browser', [])
 
+.directive 'ihModal', ->
+  restrict: 'A'
+  link: (scope, element, attrs) ->
+    scope.$on 'modal:show', ->
+      $(element).modal('show')
+      return #avoid returning dom
+
+    scope.$on 'modal:hide', ->
+      $(element).modal('hide')
+      return #avoid returning dom
+
+.directive 'ihEntityPicker', ->
+  restrict: 'E'
+  scope:
+    model: '='
+    type: '@'
+  templateUrl: '/angular/entity_picker.html'
+  controller: ($scope) ->
+    $scope.openEventDialog = ->
+      $scope.$broadcast 'modal:show'
+      false
+
+    $scope.acceptEventDialog = ->
+      $scope.model = $scope.dialog_selection
+      $scope.closeEventDialog()
+
+    $scope.closeEventDialog = ->
+      $scope.$broadcast 'modal:hide'
+
+    $scope.eventSelected = (item) ->
+      $scope.dialog_selection = item
+
 .directive 'ihEntityBrowser', ->
   restrict: 'E'
   scope:
@@ -8,10 +40,11 @@ angular
     connectors: '='
   templateUrl: '/angular/entity_browser.html'
 
-.controller 'EntityBrowserCtrl', ($scope) ->
-  for c in $scope.connectors
+.controller 'EntityBrowserCtrl', ($scope, $rootScope) ->
+  connectors = $rootScope.connectors
+  for c in connectors
     c['__type'] = 'connector'
-  $scope.columns = [$scope.connectors]
+  $scope.columns = [connectors]
   $scope.selection = []
 
 .controller 'EntityBrowserColumnCtrl', ($scope, $http) ->
