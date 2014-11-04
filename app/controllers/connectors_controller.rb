@@ -14,6 +14,18 @@ class ConnectorsController < ApplicationController
   end
 
   def index
+    respond_to do |format|
+      format.html
+      format.json do
+        c = connectors.map do |c|
+          {
+            label: c.name,
+            reflect_url: reflect_connector_url(c.id),
+          }
+        end
+        render json: c
+      end
+    end
   end
 
   def new
@@ -69,11 +81,5 @@ class ConnectorsController < ApplicationController
   end
 
   def browse
-    @connectors = Connector.all.map do |c|
-      {
-        label: c.name,
-        reflect_url: reflect_with_path_connector_url(c.id, '/'),
-      }
-    end
   end
 end

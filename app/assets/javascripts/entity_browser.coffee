@@ -37,13 +37,17 @@ angular
   restrict: 'E'
   scope:
     onSelect: '&'
-    connectors: '='
   templateUrl: '/angular/entity_browser.html'
 
-.controller 'EntityBrowserCtrl', ($scope, $rootScope) ->
-  connectors = $rootScope.connectors
-  for c in connectors
-    c['__type'] = 'connector'
+.controller 'EntityBrowserCtrl', ($scope, $rootScope, $http) ->
+  connectors = []
+
+  $http.get('/connectors.json').success (data) ->
+    console.log(data)
+    for c in data
+      c['__type'] = 'connector'
+      connectors.push(c)
+
   $scope.columns = [connectors]
   $scope.selection = []
 
