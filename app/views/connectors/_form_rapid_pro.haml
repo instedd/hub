@@ -1,0 +1,6 @@
+.field
+  = f.label :url, "URL"
+  = f.text_field :url, value: connector.url || "https://rapidpro.io"
+.field
+  = f.label :token, "API Token"
+  = f.text_field :token, value: connector.token
