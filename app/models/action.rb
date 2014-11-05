@@ -17,6 +17,7 @@ module Action
     "#{parent.path}/$actions/#{sub_path}"
   end
 
+  abstract :sub_path
   abstract def invoke(args, user)
   end
 end

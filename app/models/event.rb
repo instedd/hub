@@ -1,4 +1,9 @@
 module Event
+  abstract :sub_path, :label
+
+  attr_reader :parent
+  delegate :connector, to: :parent
+
   def args
     {}
   end
@@ -20,6 +25,10 @@ module Event
       binding: binding,
       poll: respond_to?(:poll)
     )
+  end
+
+  def path
+    "#{parent.path}/$events/#{sub_path}"
   end
 
   def load_state

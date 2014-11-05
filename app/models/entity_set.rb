@@ -1,4 +1,8 @@
 module EntitySet
+  abstract :path, :label
+  attr_reader :parent
+  delegate :connector, to: :parent
+
   def lookup(path)
     return self if path.empty?
     entity_id = path.shift

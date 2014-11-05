@@ -1,7 +1,6 @@
 class ONAConnector < Connector
   include Entity
   store_accessor :settings, :url
-
   validates_presence_of :url
 
   def properties
@@ -12,8 +11,6 @@ class ONAConnector < Connector
 
   class Forms
     include EntitySet
-
-    delegate :connector, to: :@parent
 
     def initialize(parent)
       @parent = parent
@@ -45,9 +42,6 @@ class ONAConnector < Connector
 
   class Form
     include Entity
-
-    delegate :connector, to: :@parent
-
     attr_reader :id
 
     def initialize(parent, id, form = nil)
@@ -67,8 +61,8 @@ class ONAConnector < Connector
       @form["title"]
     end
 
-    def path
-      "#{@parent.path}/#{@id}"
+    def sub_path
+      id
     end
 
     def events
@@ -81,8 +75,6 @@ class ONAConnector < Connector
   class NewDataEvent
     include Event
 
-    delegate :connector, to: :@parent
-
     def initialize(parent)
       @parent = parent
     end
@@ -91,20 +83,20 @@ class ONAConnector < Connector
       "New data"
     end
 
-    def path
-      "#{@parent.path}/$events/new_data"
+    def sub_path
+      "new_data"
     end
 
     def poll
       max_id = load_state
-      url = "#{connector.url}/api/v1/data/#{@parent.id}.json"
+      url = "#{connector.url}/api/v1/data/#{parent.id}.json"
       if max_id
         query = %({"_id":{"$gt":#{max_id}}})
         url << %(?query=#{CGI.escape query})
       end
 
       all_data = JSON.parse(RestClient.get(url))
-      form = JSON.parse(RestClient.get("#{connector.url}/api/v1/forms/#{@parent.id}/form.json"))
+      form = JSON.parse(RestClient.get("#{connector.url}/api/v1/forms/#{parent.id}/form.json"))
       events = all_data.map do |data|
         output = process_data data, form["children"]
         output["_id"] = data["_id"]
@@ -147,7 +139,7 @@ class ONAConnector < Connector
     end
 
     def args
-      form = JSON.parse(RestClient.get("#{connector.url}/api/v1/forms/#{@parent.id}/form.json"))
+      form = JSON.parse(RestClient.get("#{connector.url}/api/v1/forms/#{parent.id}/form.json"))
       args = type_children(form, form["children"])
       args["_id"] = {type: :integer}
       args

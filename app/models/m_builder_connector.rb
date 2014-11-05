@@ -8,10 +8,6 @@ class MBuilderConnector < Connector
     {"applications" => Applications.new(self)}
   end
 
-  def connector
-    self
-  end
-
   private
 
   def initialize_defaults
@@ -20,8 +16,6 @@ class MBuilderConnector < Connector
 
   class Applications
     include EntitySet
-
-    delegate :connector, to: :@parent
 
     def initialize(parent)
       @parent = parent
@@ -56,7 +50,6 @@ class MBuilderConnector < Connector
   class Application
     include Entity
     attr_reader :id
-    delegate :connector, to: :@parent
 
     def initialize(parent, id, application=nil)
       @parent = parent
@@ -68,14 +61,15 @@ class MBuilderConnector < Connector
       @application['name']
     end
 
+    def sub_path
+      id
+    end
+
     def properties
       {
         "id" => SimpleProperty.new("Id", :integer, @id),
         "name" => SimpleProperty.new("Name", :string, '')
       }
-    end
-    def path
-      "#{@parent.path}/#{@id}"
     end
 
     def actions

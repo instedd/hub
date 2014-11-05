@@ -8,10 +8,6 @@ class VerboiceConnector < Connector
     {"projects" => Projects.new(self)}
   end
 
-  def connector
-    self
-  end
-
   private
 
   def initialize_defaults
@@ -20,8 +16,6 @@ class VerboiceConnector < Connector
 
   class Projects
     include EntitySet
-
-    delegate :connector, to: :@parent
 
     def initialize(parent)
       @parent = parent
@@ -67,8 +61,6 @@ class VerboiceConnector < Connector
     include Entity
 
     attr_reader :id
-    delegate :connector, to: :@parent
-
     def initialize(connector, id, name = nil)
       @parent = connector
       @id = id
@@ -79,8 +71,8 @@ class VerboiceConnector < Connector
       @label
     end
 
-    def path
-      "projects/#{@id}"
+    def sub_path
+      id
     end
 
     def actions
@@ -92,8 +84,6 @@ class VerboiceConnector < Connector
   end
 
   class CallAction
-    delegate :connector, to: :@parent
-
     include Action
 
     def initialize(parent)
@@ -104,8 +94,8 @@ class VerboiceConnector < Connector
       "Call"
     end
 
-    def path
-      "#{@parent.path}/$actions/call"
+    def sub_path
+      "call"
     end
 
     def args

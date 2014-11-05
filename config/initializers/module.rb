@@ -18,7 +18,7 @@ class Module
         else
           p.last
         end
-      end.join(', ')
+      end.join(', ') rescue ""
       self.class_eval <<-METHOD
         def #{method}(*args)
           raise self.class.name + " must define the method #{self.name}##{method}(#{params})"

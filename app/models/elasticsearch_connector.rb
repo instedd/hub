@@ -13,8 +13,6 @@ class ElasticsearchConnector < Connector
   class Indices
     include EntitySet
 
-    delegate :connector, to: :@parent
-
     def initialize(parent)
       @parent = parent
     end
@@ -39,9 +37,6 @@ class ElasticsearchConnector < Connector
 
   class Index
     include Entity
-
-    delegate :connector, to: :@parent
-
     attr_reader :name
 
     def initialize(parent, name = nil)
@@ -57,8 +52,8 @@ class ElasticsearchConnector < Connector
       @name
     end
 
-    def path
-      "#{@parent.path}/#{@name}"
+    def sub_path
+      @name
     end
 
     def properties
@@ -68,8 +63,7 @@ class ElasticsearchConnector < Connector
 
   class Types
     include EntitySet
-
-    delegate :connector, :index_name, to: :@parent
+    delegate :index_name, to: :parent
 
     def initialize(parent)
       @parent = parent
@@ -95,16 +89,15 @@ class ElasticsearchConnector < Connector
 
   class Type
     include Entity
-
-    delegate :connector, :index_name, to: :@parent
+    delegate :index_name, to: :parent
 
     def initialize(parent, name = nil)
       @parent = parent
       @name = name
     end
 
-    def path
-      "#{@parent.path}/#{@name}"
+    def sub_path
+      @name
     end
 
     def label
@@ -124,8 +117,7 @@ class ElasticsearchConnector < Connector
 
   class InsertAction
     include Action
-
-    delegate :connector, :index_name, :type_name, to: :@parent
+    delegate :index_name, :type_name, to: :parent
 
     def initialize(parent)
       @parent = parent
@@ -135,8 +127,8 @@ class ElasticsearchConnector < Connector
       "Insert"
     end
 
-    def path
-      "#{@parent.path}/$actions/insert"
+    def sub_path
+      "insert"
     end
 
     def args

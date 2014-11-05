@@ -1,4 +1,11 @@
 module Entity
+  abstract :label, :sub_path
+  attr_reader :parent
+
+  def self.included(mod)
+    mod.delegate :connector, to: :parent unless mod.method_defined?(:connector)
+  end
+
   def lookup(path)
     return self if path.empty?
     property_name = path.shift
@@ -15,6 +22,10 @@ module Entity
 
   def reflect_path
     path
+  end
+
+  def path
+    "#{parent.path}/#{sub_path}"
   end
 
   def properties
