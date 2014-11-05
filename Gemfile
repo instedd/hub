@@ -62,3 +62,5 @@ group :development, :test do
   gem "bower-rails", "~> 0.9.1"
   gem "machinist"
 end
+
+gem 'webmock', group: :test
