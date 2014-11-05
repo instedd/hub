@@ -23,5 +23,7 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :event_handlers
+
   mount Resque::Server.new, at: '/_resque', constraints: { ip: '127.0.0.1' }
 end

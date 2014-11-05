@@ -1,0 +1,21 @@
+= form_for(event_handler) do |f|
+  - if event_handler.errors.any?
+    #error_explanation
+      %h2
+        = pluralize(event_handler.errors.count, "error")
+        prohibited this task from being saved:
+      %ul
+        - event_handler.errors.full_messages.each do |msg|
+          %li= msg
+  .field
+    = f.label :name
+    = f.text_field :name
+
+
+  .actions
+    %hr
+      - if event_handler.new_record?
+        %button.btn{:type => "submit"} Save
+      - else
+        %button.btn{:type => "submit"} Update
+        = icon_link_to :'icf-delete', 'Delete this task', event_handler_path(event_handler), method: :delete, :'data-confirm' => "Are you sure you want to delete this task?", class: "pull-right"
