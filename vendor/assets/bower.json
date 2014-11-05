@@ -1,6 +1,7 @@
 {
   "name": "dsl-generated dependencies",
   "dependencies": {
-    "angular": "1.2.25"
+    "angular": "1.2.25",
+    "angular-native-dragdrop": "latest"
   }
 }

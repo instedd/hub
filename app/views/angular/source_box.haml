@@ -1,7 +1,7 @@
 .source-box
   %ul
     %li(ng-repeat='(key, prop) in model track by key')
-      %span.badge(ng-click='selected(key)') {{key}}
+      %span.pill(ui-draggable="true" drag="{{path(key)}}") {{key}}
       %i.type :: {{human_type(prop)}}
       %i {{prop.label}}
 

@@ -18,12 +18,11 @@ angular
       prop.type?.kind == 'array'
 
     $scope.selected = (key) ->
-      console.log($scope.expr(key))
+      console.log($scope.path(key))
 
-    $scope.expr = (key) ->
-      if $scope.prefix? && $scope.prefix != ''
-        "#{$scope.prefix}.#{key}"
+    $scope.path = (key) ->
+      # build the path from parents source_box
+      (if $scope.$parent.path?
+        $scope.$parent.path($scope.prefix)
       else
-       "#{key}"
-
-
+        []).concat([key])

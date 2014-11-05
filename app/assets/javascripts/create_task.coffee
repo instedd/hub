@@ -1,5 +1,5 @@
 angular
-.module('CreateTaskApp', ['InSTEDD.Hub.Browser', 'InSTEDD.Hub.SourceBox', 'InSTEDD.Hub.TargetBox'])
+.module('CreateTaskApp', ['InSTEDD.Hub.Browser', 'InSTEDD.Hub.SourceBox', 'InSTEDD.Hub.TargetBox', 'ang-drag-drop'])
 
 .controller 'CreateTaskCtrl', ($scope, $http) ->
 

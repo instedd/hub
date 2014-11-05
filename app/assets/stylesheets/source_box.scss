@@ -1,4 +1,8 @@
-.source-box {
+.source-box, .target-box {
+  li {
+    line-height: 28px;
+  }
+
   .type {
     color: lightblue;
   }

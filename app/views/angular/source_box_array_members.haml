@@ -1,8 +1,6 @@
-%ul
-  %li
-    %span.badge(ng-click='selected(key + ".count")') count
-    %i.type :: integer
+/ %ul
+/   %li
+/     %span.badge(ng-click='selected([key, "count"])') count
+/     %i.type :: integer
 
-%ih-source-box(model='{first: { type: prop.type.item_type } }' prefix='expr(key)')
-
-%ih-source-box(model='{last: { type: prop.type.item_type } }' prefix='expr(key)')
+/ %ih-source-box(model='{first: { type: prop.type.item_type } }')

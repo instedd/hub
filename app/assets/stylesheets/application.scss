@@ -15,3 +15,14 @@
  */
 
 @import "instedd-bootstrap";
+
+.pill {
+  @include border-radius(15px);
+  padding: 2px 8px;
+  display: inline-block;
+  line-height: 20px;
+  white-space: nowrap;
+  color: #999;
+  cursor: move;
+  border: 1px solid #ddd;
+}

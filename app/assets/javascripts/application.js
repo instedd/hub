@@ -14,4 +14,5 @@
 //= require jquery_ujs
 //= require instedd-bootstrap
 //= require angular
+//= require angular-native-dragdrop
 //= require_tree .
