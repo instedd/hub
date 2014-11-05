@@ -95,10 +95,6 @@ class ONAConnector < Connector
       "#{@parent.path}/$events/new_data"
     end
 
-    def subscribe
-      EventHandler.create(connector: connector, event: path, poll: true)
-    end
-
     def poll
       max_id = load_state
       url = "#{connector.url}/api/v1/data/#{@parent.id}.json"

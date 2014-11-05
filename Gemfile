@@ -59,4 +59,5 @@ group :development, :test do
   gem 'pry-byebug'
   gem 'rspec-rails'
   gem "bower-rails", "~> 0.9.1"
+  gem "machinist"
 end

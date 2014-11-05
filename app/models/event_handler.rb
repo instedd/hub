@@ -1,5 +1,6 @@
 class EventHandler < ActiveRecord::Base
   belongs_to :connector
+  belongs_to :user
   belongs_to :target_connector, class_name: 'Connector', foreign_key: 'target_connector_id'
   serialize :binding
 

@@ -10,8 +10,16 @@ module Event
     }
   end
 
-  def subscribe
-    EventHandler.create(connector: connector, event: path, poll: responds_to?(:poll))
+  def subscribe(action, binding, user)
+    EventHandler.create(
+      connector: connector,
+      event: path,
+      action: action.path,
+      target_connector: action.connector,
+      user: user,
+      binding: binding,
+      poll: respond_to?(:poll)
+    )
   end
 
   def load_state

@@ -133,10 +133,6 @@ class RapidProConnector < Connector
       }
     end
 
-    def subscribe
-      EventHandler.create(connector: connector, event: path, poll: true)
-    end
-
     def poll
       max_created_on = load_state
 
