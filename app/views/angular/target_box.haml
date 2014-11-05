@@ -1,10 +1,10 @@
 .source-box.form-inline
   %ul
-    %li(ng-repeat='(key, prop) in model track by key')
+    %li(ng-repeat='(key, prop) in model.members track by key')
       %label {{key}}
-      %i.type :: {{human_type(prop)}}
-      %input.input-small(type='text')
+      %i.type :: {{human_type(key)}}
+      %input.input-small(type='text' ng-if='!is_struct(key)' ng-model='prop.value')
 
-      %div(ng-include="'/angular/target_box_struct_members.html'" ng-if='is_struct(prop)')
+      %div(ng-include="'/angular/target_box_struct_members.html'" ng-if='is_struct(key)')
 
 

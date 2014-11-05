@@ -23,3 +23,28 @@ angular
 
     $http.get(action.reflect_url).success (data) ->
       $scope.action_reflect = data
+
+  $scope.$watch 'action_reflect', (action_reflect) ->
+    unless action_reflect?
+      $scope.mapping = null
+      return
+
+    $scope.mapping = default_mapping({type: {kind: 'struct', members: action_reflect.args}})
+
+
+  default_mapping = (object) ->
+    if object.type?.kind == 'struct'
+      res = {
+        type: "struct"
+        members: { }
+      }
+
+      for key, value of object.type.members
+        res.members[key] = default_mapping(value)
+
+      res
+    else
+      {
+        type: "literal"
+        value: null
+      }

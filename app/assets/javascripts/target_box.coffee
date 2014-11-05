@@ -5,22 +5,12 @@ angular
   restrict: 'E',
   scope:
     model: '='
+    schema: '='
     prefix: '='
   templateUrl: '/angular/target_box.html'
   controller: ($scope) ->
-    $scope.human_type = (prop) ->
-      prop.type?.kind || prop.type || prop
+    $scope.human_type = (key) ->
+      $scope.schema[key].type.kind || $scope.schema[key].type
 
-    $scope.is_struct = (prop) ->
-      prop.type?.kind == 'struct'
-
-    $scope.is_array = (prop) ->
-      prop.type?.kind == 'array'
-
-    $scope.expr = (key) ->
-      if $scope.prefix? && $scope.prefix != ''
-        "#{$scope.prefix}.#{key}"
-      else
-       "#{key}"
-
-
+    $scope.is_struct = (key) ->
+      $scope.schema[key].type.kind == 'struct'
