@@ -112,11 +112,9 @@ class VerboiceConnector < Connector
       {channel: {type: "string", label: "Channel"}, number: {type: "string", label: "Number"}}
     end
 
-    def invoke(args)
+    def invoke(args, user)
       resource = RestClient::Resource.new("#{connector.url}/api/call?channel=#{args["channel"]}&address=#{args["number"]}", connector.username, connector.password)
       resource.get() {|response, request, result| response }
     end
-
   end
-
 end
