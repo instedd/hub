@@ -12,6 +12,12 @@ angular
     $scope.human_type = (key) ->
       $scope.schema[key].type.kind || $scope.schema[key].type
 
+    $scope.input_type = (key) ->
+      res = $scope.schema[key].type
+      res = 'number' if res == 'float' || res == 'integer'
+      res = 'text' if res == 'string'
+      res
+
     $scope.is_struct = (key) ->
       $scope.schema[key].type.kind == 'struct'
 

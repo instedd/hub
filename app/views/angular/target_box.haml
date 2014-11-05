@@ -4,7 +4,7 @@
       %label {{key}}
       %i.type :: {{human_type(key)}}
 
-      %input.input-small(type='text' ng-if='!is_struct(key) && prop.type == "literal"' ng-model='prop.value' ui-on-drop="dropOverMember(key, $data)")
+      %input(type='{{input_type(key)}}' ng-if='!is_struct(key) && prop.type == "literal"' ng-model='prop.value' ui-on-drop="dropOverMember(key, $data)")
 
       .pill(ng-if='is_mapped(prop)')
         {{prop.join('.')}}
