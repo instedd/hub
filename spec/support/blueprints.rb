@@ -9,3 +9,7 @@ end
 Connector.blueprint do
   name { "Connector #{sn}" }
 end
+
+ONAConnector.blueprint do
+  url { "http://example.com" }
+end

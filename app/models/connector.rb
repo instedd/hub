@@ -3,6 +3,12 @@ class Connector < ActiveRecord::Base
   has_many :event_handlers
 
   validates_presence_of :name
+  validates_presence_of :guid
+
+  before_validation :generate_guid
+  def generate_guid
+    self.guid ||= Guid.new.to_s
+  end
 
   def connector
     self
@@ -10,6 +16,10 @@ class Connector < ActiveRecord::Base
 
   def lookup_path(path)
     lookup path.to_s.split('/')
+  end
+
+  def self.with_optional_user(user)
+    where('user_id = ? OR user_id is null', user.id)
   end
 
   module PollJob

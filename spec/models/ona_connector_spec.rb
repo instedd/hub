@@ -1,7 +1,12 @@
 describe ONAConnector do
   describe "lookup" do
-    let(:connector) { ONAConnector.new url: "http://example.com" }
+    let(:connector) { ONAConnector.make url: "http://example.com" }
     let(:url_proc) { ->(path) { "http://server/#{path}" }}
+
+    it "has guid when saved" do
+      connector.save!
+      expect(connector.guid).to_not be_nil
+    end
 
     it "finds root" do
       expect(connector.lookup []).to be(connector)

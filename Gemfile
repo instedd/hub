@@ -54,6 +54,7 @@ gem 'resque'
 gem 'resque-scheduler'
 gem 'foreman'
 gem 'ngannotate-rails'
+gem 'guid'
 
 group :development, :test do
   gem 'pry-byebug'

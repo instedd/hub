@@ -1,3 +1,9 @@
 %h4 Edit '#{connector.name}' trigger
 
 = render 'form'
+
+%hr
+
+%ul
+  %li GUID: #{connector.guid}
+  %li= link_to "Reflect", "/connectors/#{connector.guid}/reflect"
