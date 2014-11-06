@@ -10,15 +10,18 @@ angular
   templateUrl: '/angular/target_box.html'
   controller: ($scope) ->
     $scope.human_type = (key) ->
+      return "???" unless $scope.schema
       $scope.schema[key].type.kind || $scope.schema[key].type
 
     $scope.input_type = (key) ->
+      return "text" unless $scope.schema
       res = $scope.schema[key].type
       res = 'number' if res == 'float' || res == 'integer'
       res = 'text' if res == 'string'
       res
 
     $scope.is_struct = (key) ->
+      return false unless $scope.schema
       $scope.schema[key].type.kind == 'struct'
 
     $scope.is_mapped = (prop) ->
@@ -28,6 +31,5 @@ angular
       $scope.model.members[key] = {type: 'literal', value: null}
 
     $scope.dropOverMember = (key, path) ->
-      # console.log(key, path)
       $scope.model.members[key] = path
 

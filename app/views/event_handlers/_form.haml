@@ -1,21 +1,47 @@
-= form_for(event_handler) do |f|
-  - if event_handler.errors.any?
-    #error_explanation
-      %h2
-        = pluralize(event_handler.errors.count, "error")
-        prohibited this task from being saved:
-      %ul
-        - event_handler.errors.full_messages.each do |msg|
-          %li= msg
-  .field
-    = f.label :name
-    = f.text_field :name
+%div{'ng-app'=>'CreateTaskApp', 'ng-init' => init_scope(event: {connector: event_handler.connector.try(:guid), path: event_handler.event}, action: {connector: event_handler.target_connector.try(:guid), path: event_handler.action}, binding: event_handler.binding)}
 
+  %div(ng-controller='CreateTaskCtrl')
+    = form_for(event_handler) do |f|
+      %input(type='hidden' name='task[event]' value='{{event_json}}')
+      %input(type='hidden' name='task[action]' value='{{action_json}}')
+      %input(type='hidden' name='task[binding]' value='{{binding_json}}')
 
-  .actions
-    %hr
-      - if event_handler.new_record?
-        %button.btn{:type => "submit"} Save
-      - else
-        %button.btn{:type => "submit"} Update
-        = icon_link_to :'icf-delete', 'Delete this task', event_handler_path(event_handler), method: :delete, :'data-confirm' => "Are you sure you want to delete this task?", class: "pull-right"
+      - if event_handler.errors.any?
+        .row-fluid
+          .span12
+            #error_explanation
+              %h2
+                = pluralize(event_handler.errors.count, "error")
+                prohibited this task from being saved:
+              %ul
+                - event_handler.errors.full_messages.each do |msg|
+                  %li= msg
+      .row-fluid
+        .span12
+          .field
+            = f.label :name
+            = f.text_field :name
+
+      .row-fluid
+        .span6
+          %h2 Event
+
+          %ih-entity-picker(model='event' type='event')
+          %ih-source-box(model='event_reflect.args')
+
+        .span6
+          %h2 Action
+
+          %ih-entity-picker(model='action' type='action' on-change='updateBinding()')
+
+          %ih-target-box(model='binding' schema='action_reflect.args')
+
+      .row-fluid
+        .span12
+          .actions
+            %hr
+              - if event_handler.new_record?
+                %button.btn{:type => "submit"} Save
+              - else
+                %button.btn{:type => "submit"} Update
+                = icon_link_to :'icf-delete', 'Delete this task', event_handler_path(event_handler), method: :delete, :'data-confirm' => "Are you sure you want to delete this task?", class: "pull-right"

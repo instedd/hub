@@ -17,10 +17,6 @@ Rails.application.routes.draw do
 
       post 'invoke/*path' => 'connectors#invoke'
     end
-
-    collection do
-      get 'browse'
-    end
   end
 
   resources :event_handlers

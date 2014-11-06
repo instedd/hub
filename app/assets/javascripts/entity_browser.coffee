@@ -17,6 +17,7 @@ angular
   scope:
     model: '='
     type: '@'
+    onChange: '&'
   templateUrl: '/angular/entity_picker.html'
   controller: ($scope) ->
     $scope.openEventDialog = ->
@@ -27,6 +28,7 @@ angular
       return if !$scope.is_selection_valid()
       $scope.model = $scope.dialog_selection
       $scope.closeEventDialog()
+      $scope.onChange()
 
     $scope.closeEventDialog = ->
       $scope.$broadcast 'modal:hide'

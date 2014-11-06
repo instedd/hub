@@ -81,9 +81,6 @@ class ConnectorsController < ApplicationController
     render json: response
   end
 
-  def browse
-  end
-
   private
 
   def connector_from_guid
