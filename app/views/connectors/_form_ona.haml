@@ -1,3 +1,25 @@
 .field
   = f.label :url, "URL"
   = f.text_field :url, value: connector.url || "https://ona.io"
+.field
+  = f.label :auth_method, "Authentication method"
+  %div.radio
+    %label
+      = f.radio_button :auth_method, "anonymous", checked: connector.auth_method == "anonymous"
+      Anonymous
+  %div.radio
+    %label
+      = f.radio_button :auth_method, "api_token", checked: connector.auth_method == "api_token"
+      Api Token
+      = f.text_field :api_token, value: connector.api_token
+
+:javascript
+  $(function() {
+    function refresh() {
+      $("#connector_api_token").prop('disabled', $("#connector_auth_method_anonymous").is(':checked'));
+    }
+
+    $("#connector_auth_method_anonymous, #connector_auth_method_api_token").change(refresh);
+    refresh();
+  });
+

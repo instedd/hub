@@ -1,10 +1,30 @@
 class ONAConnector < Connector
   include Entity
-  store_accessor :settings, :url
+  store_accessor :settings, :url, :auth_method, :api_token
+
   validates_presence_of :url
+  validates_presence_of :auth_method
+  validates_presence_of :api_token, if: proc { auth_method == "api_token" }
+
+  before_validation :clear_api_token, if: proc { auth_method != "api_token" }
+  def clear_api_token
+    self.api_token = nil
+  end
 
   def properties
     {"forms" => Forms.new(self)}
+  end
+
+  def get(relative_uri)
+    headers = {}
+    if auth_method == "api_token"
+      headers["Authorization"] = "Token #{api_token}"
+    end
+    RestClient.get "#{self.url}/api/v1/#{relative_uri}", headers
+  end
+
+  def get_json(relative_uri)
+    JSON.parse get(relative_uri)
   end
 
   private
@@ -26,7 +46,7 @@ class ONAConnector < Connector
 
     def entities(user)
       @entities ||= begin
-        forms ||= JSON.parse(RestClient.get("#{connector.url}/api/v1/forms.json"))
+        forms ||= connector.get_json "forms.json"
         forms.map { |form| Form.new(self, form["formid"], form) }
       end
     end
@@ -51,7 +71,7 @@ class ONAConnector < Connector
     end
 
     def properties
-      @form ||= JSON.parse(RestClient.get("#{connector.url}/api/v1/forms/#{@id}.json"))
+      @form ||= connector.get_json("forms/#{@id}.json")
       {
         "id" => SimpleProperty.new("Id", :integer, @id)
       }
@@ -89,14 +109,14 @@ class ONAConnector < Connector
 
     def poll
       max_id = load_state
-      url = "#{connector.url}/api/v1/data/#{parent.id}.json"
+      url = "data/#{parent.id}.json"
       if max_id
         query = %({"_id":{"$gt":#{max_id}}})
         url << %(?query=#{CGI.escape query})
       end
 
-      all_data = JSON.parse(RestClient.get(url))
-      form = JSON.parse(RestClient.get("#{connector.url}/api/v1/forms/#{parent.id}/form.json"))
+      all_data = connector.get_json url
+      form = connector.get_json "forms/#{parent.id}/form.json"
       events = all_data.map do |data|
         output = process_data data, form["children"]
         output["_id"] = data["_id"]
@@ -139,7 +159,7 @@ class ONAConnector < Connector
     end
 
     def args
-      form = JSON.parse(RestClient.get("#{connector.url}/api/v1/forms/#{parent.id}/form.json"))
+      form = connector.get_json "forms/#{parent.id}/form.json"
       args = type_children(form, form["children"])
       args["_id"] = {type: :integer}
       args
