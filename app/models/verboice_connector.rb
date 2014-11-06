@@ -31,13 +31,7 @@ class VerboiceConnector < Connector
     end
 
     def type
-      {
-        kind: :entity_set,
-        entity_type: {
-          kind: :struct,
-          members: []
-        }
-      }
+      :entity_set
     end
 
     def entities(user)
@@ -63,23 +57,30 @@ class VerboiceConnector < Connector
 
   class Project
     include Entity
+    attr_reader :id, :label
 
-    attr_reader :id
     def initialize(parent, id, name = nil)
       @parent = parent
       @id = id
       @label = name
     end
 
-    def label
-      @label
-    end
-
     def sub_path
       id
     end
 
+<<<<<<< HEAD
     def actions(user)
+=======
+    def properties
+      {
+        "id" => SimpleProperty.new("Id", :integer, @id),
+        "name" => SimpleProperty.new("Name", :string, @label)
+      }
+    end
+
+    def actions
+>>>>>>> Added tests for VerboiceConnector
       {
         "call" => CallAction.new(self)
       }
@@ -103,7 +104,15 @@ class VerboiceConnector < Connector
     end
 
     def args
-      {channel: {type: "string", label: "Channel"}, number: {type: "string", label: "Number"}}
+      {
+        channel: {
+          type: "string",
+          label: "Channel"
+        }, number: {
+          type: "string",
+          label: "Number"
+        }
+      }
     end
 
     def invoke(args, user)
