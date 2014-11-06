@@ -49,7 +49,7 @@ module Entity
     end
   end
 
-  def reflect(reflect_url_proc)
+  def reflect(reflect_url_proc, user)
     reflection = {}
     if p = properties
       reflection[:properties] = Hash[p.map do |k, v|

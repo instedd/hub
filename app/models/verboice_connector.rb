@@ -1,7 +1,7 @@
 class VerboiceConnector < Connector
   include Entity
 
-  store_accessor :settings, :url, :username, :password
+  store_accessor :settings, :url, :username, :password, :shared
   after_initialize :initialize_defaults, :if => :new_record?
 
   def properties
@@ -11,7 +11,8 @@ class VerboiceConnector < Connector
   private
 
   def initialize_defaults
-    self.url = "http://verboice.instedd.org" unless self.url
+    self.url = "https://verboice.instedd.org" unless self.url
+    self.shared = false unless self.shared
   end
 
   class Projects
@@ -39,12 +40,9 @@ class VerboiceConnector < Connector
       }
     end
 
-    def entities
+    def entities(user)
       @entities ||= begin
-        resource = RestClient::Resource.new("#{connector.url}/api/projects.json", connector.username, connector.password)
-        projects ||= JSON.parse(resource.get())
-
-        projects.map { |project| Project.new(self, project["id"], project["name"]) }
+        get_projects(connector, user).map { |project| Project.new(self, project["id"], project["name"]) }
       end
     end
 
@@ -53,7 +51,19 @@ class VerboiceConnector < Connector
     end
 
     def find_entity(id)
-      Project.new(connector, id)
+      Project.new(self, id)
+    end
+
+    private
+
+    def get_projects(connector, user)
+      if connector.shared and Guisso.enabled?
+        resource = Guisso.trusted_resource(connector.url, user.email)
+        JSON.parse(resource.get("#{connector.url}/api/projects.json"))
+      else
+        resource = RestClient::Resource.new("#{connector.url}/api/projects.json", connector.username, connector.password)
+        JSON.parse(resource.get())
+      end
     end
   end
 
@@ -61,8 +71,8 @@ class VerboiceConnector < Connector
     include Entity
 
     attr_reader :id
-    def initialize(connector, id, name = nil)
-      @parent = connector
+    def initialize(parent, id, name = nil)
+      @parent = parent
       @id = id
       @label = name
     end

@@ -63,7 +63,7 @@ class ConnectorsController < ApplicationController
     connector = connector_from_guid()
     target = connector.lookup_path(params[:path])
     reflect_url_proc = ->(path) { reflect_with_path_connector_url(params[:id], path) }
-    render json: target.reflect(reflect_url_proc)
+    render json: target.reflect(reflect_url_proc, current_user)
   end
 
   def query

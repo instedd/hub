@@ -13,3 +13,6 @@ end
 ONAConnector.blueprint do
   url { "http://example.com" }
 end
+
+VerboiceConnector.blueprint do
+end

@@ -8,7 +8,7 @@ module Event
     {}
   end
 
-  def reflect(*)
+  def reflect(proc, user)
     {
       label: label,
       args: args,

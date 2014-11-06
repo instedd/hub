@@ -31,9 +31,9 @@ module EntitySet
     entities.map { |e| e.query(query_url_proc) }
   end
 
-  def reflect(reflect_url_proc)
+  def reflect(reflect_url_proc, user)
     reflection = {}
-    reflection[:entities] = entities.map do |entity|
+    reflection[:entities] = entities(user).map do |entity|
       {label: entity.label, path: entity.path, reflect_url: reflect_url_proc.call(entity.path)}
     end
     if a = actions
