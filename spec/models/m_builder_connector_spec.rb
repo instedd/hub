@@ -2,13 +2,14 @@ describe MBuilderConnector do
   describe "lookup" do
     let(:connector) { MBuilderConnector.new url: "http://example.com", username: 'jdoe', password: '1234' }
     let(:url_proc) { ->(path) { "http://server/#{path}" }}
+    let(:user) { User.make }
 
     it "finds root" do
       expect(connector.lookup []).to be(connector)
     end
 
     it "reflects on root" do
-      expect(connector.reflect(url_proc)).to eq({
+      expect(connector.reflect(url_proc, user)).to eq({
         properties: {
           "applications" => {
             label: "Applications",
@@ -25,7 +26,7 @@ describe MBuilderConnector do
         to_return(status: 200, body: %([{"id": 1, "name": "Application 1"}]), headers: {})
 
       applications = connector.lookup %w(applications)
-      expect(applications.reflect(url_proc)).to eq({
+      expect(applications.reflect(url_proc, user)).to eq({
         entities: [
           {
             label: "Application 1",
@@ -50,7 +51,7 @@ describe MBuilderConnector do
           }]), headers: {})
 
       application = connector.lookup %w(applications 1)
-      expect(application.reflect(url_proc)).to eq({
+      expect(application.reflect(url_proc, user)).to eq({
         properties: {
           "id" => {
             label: "Id",

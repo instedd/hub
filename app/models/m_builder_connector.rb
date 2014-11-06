@@ -29,7 +29,7 @@ class MBuilderConnector < Connector
       "Applications"
     end
 
-    def entities
+    def entities(user)
       @entities ||= begin
         resource = RestClient::Resource.new("#{connector.url}/api/applications", connector.username, connector.password)
         applications ||= JSON.parse(resource.get())

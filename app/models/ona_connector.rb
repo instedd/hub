@@ -24,7 +24,7 @@ class ONAConnector < Connector
       "Forms"
     end
 
-    def entities
+    def entities(user)
       @entities ||= begin
         forms ||= JSON.parse(RestClient.get("#{connector.url}/api/v1/forms.json"))
         forms.map { |form| Form.new(self, form["formid"], form) }
