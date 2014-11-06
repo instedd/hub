@@ -20,7 +20,8 @@ class ConnectorsController < ApplicationController
         c = connectors.map do |c|
           {
             label: c.name,
-            reflect_url: reflect_connector_url(c.id),
+            guid: c.guid,
+            reflect_url: reflect_connector_url(c.guid),
           }
         end
         render json: c
