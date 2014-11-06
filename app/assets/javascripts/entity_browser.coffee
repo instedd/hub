@@ -24,6 +24,7 @@ angular
       false
 
     $scope.acceptEventDialog = ->
+      return if !$scope.is_selection_valid()
       $scope.model = $scope.dialog_selection
       $scope.closeEventDialog()
 
@@ -32,6 +33,9 @@ angular
 
     $scope.eventSelected = (item) ->
       $scope.dialog_selection = item
+
+    $scope.is_selection_valid = ->
+      $scope.dialog_selection? && $scope.dialog_selection.type == $scope.type
 
 .directive 'ihEntityBrowser', ->
   restrict: 'E'
@@ -61,7 +65,7 @@ angular
   $scope.select = (item) ->
     $scope.selection.splice($scope.column_index, Number.MAX_VALUE)
     $scope.selection.push item
-    $scope.onSelect()(item)
+    $scope.onSelect()({connector: $scope.selection[0].guid, path: item.path, type: item.__type})
 
   $scope.is_in_selection = (item) ->
     $scope.column_index < $scope.selection.length &&

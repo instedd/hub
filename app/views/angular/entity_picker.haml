@@ -1,8 +1,8 @@
 .entity-picker
   %a(href='javascript:' ng-click='openEventDialog()')
     %span(ng-if='model')
-      {{model.label}}
-      %span.path ({{model.path}})
+      %span.path {{model.path}}
+      ({{model.connector}})
     %span(ng-if='!model') (none)
 
   .modal.hide.fade(ih-modal)
@@ -13,4 +13,4 @@
       %ih-entity-browser(on-select='eventSelected' connectors='connectors')
     .modal-footer
       %a(href='javascript:' class='btn' ng-click='closeEventDialog()') Cancel
-      %a(href='javascript:' class='btn btn-primary' ng-click='acceptEventDialog()') Select
+      %a(href='javascript:' class='btn btn-primary' ng-click='acceptEventDialog()' ng-disabled='!is_selection_valid()') Select
