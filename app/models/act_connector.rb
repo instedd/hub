@@ -60,13 +60,13 @@ class ACTConnector < Connector
     end
 
     def poll
-      since_date = load_state
+      since_id = load_state
       url = "#{connector.url}/api/v1/cases/"
-      url += "?since=#{since_date}" if since_date.present?
+      url += "?since_id=#{since_id}" if since_id.present?
       cases = JSON.parse(RestClient.get(url))
       
       # assumes cases are sorted by date
-      save_state(cases.last[:timestamp]) unless cases.empty?
+      save_state(cases.last["id"]) unless cases.empty?
       
       cases
     end
