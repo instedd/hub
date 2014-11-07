@@ -10,14 +10,18 @@ Connector.blueprint do
   name { "Connector #{sn}" }
 end
 
+ACTConnector.blueprint do
+  url { "http://example.com" }
+end
+
+ElasticsearchConnector.blueprint do
+end
+
 ONAConnector.blueprint do
   url { "http://example.com" }
   auth_method { "anonymous" }
 end
 
-ACTConnector.blueprint do
-  url { "http://example.com" }
-end
-
 VerboiceConnector.blueprint do
 end
+
