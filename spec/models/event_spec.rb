@@ -86,17 +86,6 @@ describe Event do
     expect(handler.binding).to eq("some_binding")
   end
 
-  # connector = Connector.find(connector_id)
-  #   handlers_by_event = connector.event_handlers.where(poll: true).group_by(&:event)
-
-  #   handlers_by_event.each do |event_path, handlers|
-  #     handlers.each do |handler|
-  #       event_data = connector.lookup_path(event_path, handler.user).poll
-  #       handler.trigger event_data
-  #     end
-  #   end
-
-
   it "should trigger an action for every queued jobs" do
     event = MockPollEvent.new(event_connector)
     action = MockAction.new(action_connector)
