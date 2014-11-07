@@ -14,7 +14,7 @@ class EventHandler < ActiveRecord::Base
   end
 
   def trigger(data)
-    target_action = target_connector.lookup_path(action)
+    target_action = target_connector.lookup_path(action, user)
     target_action.invoke bind_event_data(data), user
   end
 

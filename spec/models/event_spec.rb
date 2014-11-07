@@ -9,10 +9,13 @@ describe Event do
     end
 
     def poll
+      {
+        "event1" => "foo"
+      }
     end
 
     def path
-      "mock/event"
+      "mock/$events/event"
     end
   end
 
@@ -24,13 +27,47 @@ describe Event do
     end
 
     def path
-      "mock/action"
+      "mock/$actions/action"
+    end
+    def invoke(options, user)
+      binding.pry
     end
   end
 
+  class MockConnector < Connector
+    include Entity
+    def properties
+      {"mock" => MockProperty.new(self)}
+    end
+  end
+
+  class MockProperty
+    include Entity
+
+    def initialize(parent)
+      @parent = parent
+    end
+
+    def path
+      "mock"
+    end
+
+    def actions(user)
+      {
+        "action" => MockAction.new(self)
+      }
+    end
+    def events
+      {
+        "event" => MockPollEvent.new(self)
+      }
+    end
+  end
+
+
   let(:user) { User.make! }
-  let(:event_connector) { Connector.make! }
-  let(:action_connector) { Connector.make! }
+  let(:event_connector) { MockConnector.create! name: "Event Connector" }
+  let(:action_connector) { MockConnector.create! name: "Action Connector" }
 
   it "subscribes action" do
     event = MockPollEvent.new(event_connector)
@@ -41,11 +78,31 @@ describe Event do
 
     handler = handlers.first
     expect(handler.connector_id).to eq(event_connector.id)
-    expect(handler.event).to eq("mock/event")
-    expect(handler.action).to eq("mock/action")
+    expect(handler.event).to eq("mock/$events/event")
+    expect(handler.action).to eq("mock/$actions/action")
     expect(handler.poll).to be_truthy
     expect(handler.target_connector_id).to eq(action_connector.id)
     expect(handler.user_id).to eq(user.id)
     expect(handler.binding).to eq("some_binding")
+  end
+
+  # connector = Connector.find(connector_id)
+  #   handlers_by_event = connector.event_handlers.where(poll: true).group_by(&:event)
+
+  #   handlers_by_event.each do |event_path, handlers|
+  #     handlers.each do |handler|
+  #       event_data = connector.lookup_path(event_path, handler.user).poll
+  #       handler.trigger event_data
+  #     end
+  #   end
+
+
+  it "should trigger an action for every queued jobs" do
+    event = MockPollEvent.new(event_connector)
+    action = MockAction.new(action_connector)
+    event.subscribe(action, "some_binding", user)
+
+    expect_any_instance_of(MockAction).to receive(:invoke)
+    Connector::PollJob.perform(event_connector.id)
   end
 end

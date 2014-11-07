@@ -6,6 +6,7 @@ class Connector < ActiveRecord::Base
   validates_presence_of :guid
 
   before_validation :generate_guid
+
   def generate_guid
     self.guid ||= Guid.new.to_s
   end
@@ -25,12 +26,14 @@ class Connector < ActiveRecord::Base
   module PollJob
     def self.perform(connector_id)
       connector = Connector.find(connector_id)
-      handlers_by_event = connector.event_handlers.where(poll: true).group_by(&:event)
+      handlers_by_event = connector.event_handlers.where(poll: true).group_by do |handler|
+        [handler.event, handler.user]
+      end
 
-      handlers_by_event.each do |event_path, handlers|
-        event_data = connector.lookup_path(event_path, connector.user).poll #TODO for a shared connector, this should be the user that scheduled the poll
-        handlers.product(event_data) do |handler, data|
-          handler.trigger data
+      handlers_by_event.each do |event_user_pair, handlers|
+        event_data = connector.lookup_path(event_user_pair.first, event_user_pair.last).poll
+        handlers.each do |handler|
+          handler.trigger event_data
         end
       end
     end
