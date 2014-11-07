@@ -69,9 +69,7 @@ class VerboiceConnector < Connector
       id
     end
 
-<<<<<<< HEAD
-    def actions(user)
-=======
+
     def properties
       {
         "id" => SimpleProperty.new("Id", :integer, @id),
@@ -79,8 +77,7 @@ class VerboiceConnector < Connector
       }
     end
 
-    def actions
->>>>>>> Added tests for VerboiceConnector
+    def actions(user)
       {
         "call" => CallAction.new(self)
       }
