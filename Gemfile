@@ -19,9 +19,6 @@ gem 'sdoc', '~> 0.4.0',          group: :doc
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
-# Use Capistrano for deployment
-# gem 'capistrano-rails', group: :development
-
 gem 'rest-client'
 gem 'bootstrap-sass', '2.3.2.1'
 gem 'instedd-bootstrap', git: "https://bitbucket.org/instedd/instedd-bootstrap.git", branch: 'master'
@@ -39,16 +36,18 @@ gem 'resque-scheduler'
 gem 'foreman'
 gem 'ngannotate-rails'
 gem 'guid'
+gem 'bower-rails'
 
 group :development do
   gem 'spring'
   gem 'spring-commands-rspec'
+  gem 'capistrano-rails'
+  gem 'capistrano-rvm'
 end
 
 group :development, :test do
   gem 'pry-byebug'
   gem 'rspec-rails'
-  gem "bower-rails", "~> 0.9.1"
 end
 
 group :test do
