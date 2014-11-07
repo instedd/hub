@@ -6,7 +6,11 @@ describe ElasticsearchConnector do
   let(:connector) { ElasticsearchConnector.make url: URL }
   let(:url_proc) { ->(path) { "http://server/#{path}" }}
 
-  before(:all) do
+  def refresh_index
+    RestClient.post "#{INDEX_URL}/_refresh", ""
+  end
+
+  before(:each) do
     RestClient.delete INDEX_URL rescue nil
     RestClient.post INDEX_URL, %(
       {
@@ -82,6 +86,11 @@ describe ElasticsearchConnector do
             label: "Insert",
             path: "indices/instedd_hub_test/types/type1/$actions/insert",
             reflect_url: "http://server/indices/instedd_hub_test/types/type1/$actions/insert"
+          },
+          "update" => {
+            label: "Update",
+            path: "indices/instedd_hub_test/types/type1/$actions/update",
+            reflect_url: "http://server/indices/instedd_hub_test/types/type1/$actions/update"
           }
         }
       })
@@ -92,8 +101,35 @@ describe ElasticsearchConnector do
       expect(result).to eq({
         label: "Insert",
         args: {
-          "age" => {type: "integer"},
-          "name" => {type: "string"}
+          properties: {
+            type: {
+              kind: :struct,
+              members: {
+                "age" => {type: "integer"},
+                "name" => {type: "string"},
+              },
+            },
+          },
+        }
+      })
+    end
+
+    it "update action" do
+      result = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/update", user).reflect(url_proc, user)
+      expect(result).to eq({
+        label: "Update",
+        args: {
+          primary_key_name: "string",
+          primary_key_value: "object",
+          properties: {
+            type: {
+              kind: :struct,
+              members: {
+                "age" => {type: "integer"},
+                "name" => {type: "string"},
+              },
+            },
+          },
         }
       })
     end
@@ -101,15 +137,44 @@ describe ElasticsearchConnector do
 
   it "executes insert action" do
     action = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/insert", user)
-    action.invoke({"name" => "John", "age" => 30}, user)
+    action.invoke({"properties" => {"name" => "john", "age" => 30}}, user)
+    refresh_index
 
-    RestClient.post "#{INDEX_URL}/_refresh", ""
     response = JSON.parse RestClient.get "#{INDEX_URL}/_search"
     hits = response["hits"]["hits"]
     expect(hits.length).to eq(1)
 
     source = hits[0]["_source"]
-    expect(source["name"]).to eq("John")
+    expect(source["name"]).to eq("john")
     expect(source["age"]).to eq(30)
+  end
+
+  it "executes update action" do
+    RestClient.post("http://localhost:9200/instedd_hub_test/type1", %({"name": "john", "age": 20}))
+    RestClient.post("http://localhost:9200/instedd_hub_test/type1", %({"name": "peter", "age": 40}))
+    refresh_index
+
+    action = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/update", user)
+    action.invoke(
+      {
+        "primary_key_name" => "name",
+        "primary_key_value" => "john",
+        "properties" => {"name" => "john", "age" => 10},
+      },
+      user
+    )
+    refresh_index
+
+    response = JSON.parse RestClient.get "#{INDEX_URL}/_search"
+    hits = response["hits"]["hits"]
+    expect(hits.length).to eq(2)
+
+    sources = hits.map { |hit| hit["_source"] }
+
+    john = sources.find { |source| source["name"] == "john" }
+    expect(john["age"]).to eq(10)
+
+    peter = sources.find { |source| source["name"] == "peter" }
+    expect(peter["age"]).to eq(40)
   end
 end

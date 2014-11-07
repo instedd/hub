@@ -110,7 +110,8 @@ class ElasticsearchConnector < Connector
 
     def actions(user)
       {
-        "insert" => InsertAction.new(self)
+        "insert" => InsertAction.new(self),
+        "update" => UpdateAction.new(self),
       }
     end
   end
@@ -132,9 +133,16 @@ class ElasticsearchConnector < Connector
     end
 
     def args
-      response = JSON.parse RestClient.get("#{connector.url}/#{index_name}/_mapping?pretty")
+      response = JSON.parse RestClient.get("#{connector.url}/#{index_name}/_mapping")
       properties = response[index_name]["mappings"][type_name]["properties"]
-      elasticsearch_properties properties
+      {
+        properties: {
+          type: {
+            kind: :struct,
+            members: elasticsearch_properties(properties),
+          },
+        },
+      }
     end
 
     def elasticsearch_properties(hash)
@@ -148,8 +156,80 @@ class ElasticsearchConnector < Connector
     end
 
     def invoke(args, user)
-      args.delete "_id"
-      RestClient.post("#{connector.url}/#{index_name}/#{type_name}", args.to_json)
+      properties = args["properties"]
+      properties.delete "_id"
+      RestClient.post("#{connector.url}/#{index_name}/#{type_name}", properties.to_json)
+    end
+  end
+
+  class UpdateAction
+    include Action
+    delegate :index_name, :type_name, to: :parent
+
+    def initialize(parent)
+      @parent = parent
+    end
+
+    def label
+      "Update"
+    end
+
+    def sub_path
+      "update"
+    end
+
+    def args
+      response = JSON.parse RestClient.get("#{connector.url}/#{index_name}/_mapping")
+      properties = response[index_name]["mappings"][type_name]["properties"]
+      {
+        primary_key_name: "string",
+        primary_key_value: "object",
+        properties: {
+          type: {
+            kind: :struct,
+            members: elasticsearch_properties(properties),
+          },
+        },
+      }
+    end
+
+    def elasticsearch_properties(hash)
+      Hash[hash.map do |key, value|
+        if props = value["properties"]
+          [key, {type: {kind: :struct, members: elasticsearch_properties(props)}}]
+        else
+          [key, {type: value["type"]}]
+        end
+      end]
+    end
+
+    def invoke(args, user)
+      primary_key_name = args["primary_key_name"]
+      primary_key_value = args["primary_key_value"]
+      properties = args["properties"]
+
+      query = {
+        query: {
+          filtered: {
+            filter: {
+              term: {
+                primary_key_name => primary_key_value
+              }
+            }
+          }
+        }
+      }
+
+      result = JSON.parse RestClient.post("#{connector.url}/#{index_name}/#{type_name}/_search", query.to_json)
+      hits = result["hits"]["hits"]
+      hits.each do |hit|
+        id = hit["_id"]
+        source = hit["_source"]
+        source.merge! properties
+        source.delete "_id"
+
+        response = RestClient.post "#{connector.url}/#{index_name}/#{type_name}/#{id}", source.to_json
+      end
     end
   end
 end
