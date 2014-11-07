@@ -113,8 +113,8 @@ class VerboiceConnector < Connector
     end
 
     def invoke(args, user)
-      resource = RestClient::Resource.new("#{connector.url}/api/call?channel=#{args["channel"]}&address=#{args["number"]}", connector.username, connector.password)
-      resource.get() {|response, request, result| response }
+      GuissoRestClient.new(connector, user).get("#{connector.url}/api/call?channel=#{args["channel"]}&address=#{args["number"]}")
     end
+
   end
 end
