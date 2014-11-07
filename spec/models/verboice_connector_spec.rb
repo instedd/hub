@@ -13,7 +13,7 @@ describe VerboiceConnector do
     let(:user) { User.make }
 
     it "finds root" do
-      expect(connector.lookup []).to be(connector)
+      expect(connector.lookup [], user).to be(connector)
     end
 
     it "reflects on root" do
@@ -43,7 +43,7 @@ describe VerboiceConnector do
             "schedules": []
           }]), headers: {})
 
-      applications = connector.lookup %w(projects)
+      applications = connector.lookup(%w(projects), user)
       expect(applications.reflect(url_proc, user)).to eq({
         entities: [
           {
@@ -56,7 +56,7 @@ describe VerboiceConnector do
     end
 
     it "reflects on project" do
-      application = connector.lookup %w(projects 495)
+      application = connector.lookup %w(projects 495), user
       expect(application.reflect(url_proc, user)).to eq({
         properties: {
           "id" => {
@@ -79,7 +79,7 @@ describe VerboiceConnector do
     end
 
     it "reflects on call" do
-      application = connector.lookup %w(projects 495 $actions call)
+      application = connector.lookup %w(projects 495 $actions call), user
       expect(application.reflect(url_proc)).to eq({
         label:"Call",
         args: {
