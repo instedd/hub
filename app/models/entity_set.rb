@@ -3,17 +3,17 @@ module EntitySet
   attr_reader :parent
   delegate :connector, to: :parent
 
-  def lookup(path)
+  def lookup(path, user)
     return self if path.empty?
     entity_id = path.shift
 
     case entity_id
     when "$actions"
-      ActionsNode.new(self).lookup(path)
+      ActionsNode.new(self).lookup(path, user)
     when "$events"
-      EventsNode.new(self).lookup(path)
+      EventsNode.new(self).lookup(path, user)
     else
-      find_entity(entity_id).lookup(path)
+      find_entity(entity_id).lookup(path, user)
     end
   end
 
@@ -21,7 +21,7 @@ module EntitySet
     path
   end
 
-  def actions
+  def actions(user)
   end
 
   def events
@@ -36,7 +36,7 @@ module EntitySet
     reflection[:entities] = entities(user).map do |entity|
       {label: entity.label, path: entity.path, reflect_url: reflect_url_proc.call(entity.path)}
     end
-    if a = actions
+    if a = actions(user)
       reflection[:actions] = Hash[a.map do |k, v|
         [k, {label: v.label, path: v.path, reflect_url: reflect_url_proc.call(v.path)}]
       end]

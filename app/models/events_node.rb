@@ -3,7 +3,7 @@ class EventsNode
     @parent = parent
   end
 
-  def lookup(path)
+  def lookup(path, user)
     return self if path.empty?
 
     event_name = path.shift

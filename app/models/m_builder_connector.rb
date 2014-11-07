@@ -1,7 +1,7 @@
 class MBuilderConnector < Connector
   include Entity
 
-  store_accessor :settings, :url, :username, :password
+  store_accessor :settings, :url, :username, :password, :shared
   after_initialize :initialize_defaults, :if => :new_record?
 
   def properties
@@ -11,7 +11,8 @@ class MBuilderConnector < Connector
   private
 
   def initialize_defaults
-    self.url ||= "http://mbuilder.instedd.org"
+    self.url ||= "https://mbuilder.instedd.org"
+    self.shared ||= false
   end
 
   class Applications
@@ -31,10 +32,9 @@ class MBuilderConnector < Connector
 
     def entities(user)
       @entities ||= begin
-        resource = RestClient::Resource.new("#{connector.url}/api/applications", connector.username, connector.password)
-        applications ||= JSON.parse(resource.get())
-
-        applications.map { |application| Application.new(self, application["id"], application) }
+        GuissoRestClient.new(connector, user).get("#{connector.url}/api/applications").map do |application|
+          Application.new(self, application["id"], application)
+        end
       end
     end
 
@@ -72,10 +72,9 @@ class MBuilderConnector < Connector
       }
     end
 
-    def actions
+    def actions(user)
       @triggers ||= begin
-        resource = RestClient::Resource.new("#{connector.url}/api/applications/#{@id}/actions", connector.username, connector.password)
-        triggers ||= JSON.parse(resource.get())
+        triggers = GuissoRestClient.new(connector, user).get("#{connector.url}/api/applications/#{@id}/actions")
         trigger_hash = Hash.new
         triggers.each do |trigger|
           trigger_hash["trigger_#{trigger["id"]}"]= TriggerAction.new(self, trigger["id"], trigger)
@@ -106,14 +105,13 @@ class MBuilderConnector < Connector
       @trigger["parameters"]
     end
 
-    def invoke(options)
+    def invoke(options, user)
       uri = URI("#{connector.url}/external/application/#{parent.id}/trigger/asd")
       uri.query= args.keys.map do |arg|
           "#{arg}=#{options[arg]}"
         end.join '&'
 
-      resource = RestClient::Resource.new(uri.to_s, connector.username, connector.password)
-      resource.post("") {|response, request, result| response }
+      GuissoRestClient.new(connector, user).post(uri.to_s)
     end
   end
 end

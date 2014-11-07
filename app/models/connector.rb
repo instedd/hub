@@ -14,8 +14,8 @@ class Connector < ActiveRecord::Base
     self
   end
 
-  def lookup_path(path)
-    lookup path.to_s.split('/')
+  def lookup_path(path, current_user)
+    lookup path.to_s.split('/'), current_user
   end
 
   def self.with_optional_user(user)
@@ -28,7 +28,7 @@ class Connector < ActiveRecord::Base
       handlers_by_event = connector.event_handlers.where(poll: true).group_by(&:event)
 
       handlers_by_event.each do |event_path, handlers|
-        event_data = connector.lookup_path(event_path).poll
+        event_data = connector.lookup_path(event_path, connector.user).poll #TODO for a shared connector, this should be the user that scheduled the poll
         handlers.product(event_data) do |handler, data|
           handler.trigger data
         end

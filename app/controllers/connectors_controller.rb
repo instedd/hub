@@ -62,22 +62,22 @@ class ConnectorsController < ApplicationController
 
   def reflect
     connector = connector_from_guid()
-    target = connector.lookup_path(params[:path])
+    target = connector.lookup_path(params[:path], current_user)
     reflect_url_proc = ->(path) { reflect_with_path_connector_url(params[:id], path) }
     render json: target.reflect(reflect_url_proc, current_user)
   end
 
   def query
     connector = connector_from_guid()
-    target = connector.lookup_path(params[:path])
+    target = connector.lookup_path(params[:path], current_user)
     query_url_proc = ->(path) { query_with_path_connector_url(params[:id], path) }
-    render json: target.query(query_url_proc)
+    render json: target.query(query_url_proc, current_user)
   end
 
   def invoke
     connector = connector_from_guid()
-    target = connector.lookup_path(params[:path])
-    response = target.invoke(JSON.parse(request.body.read))
+    target = connector.lookup_path(params[:path], current_user)
+    response = target.invoke(JSON.parse(request.body.read), current_user)
     render json: response
   end
 

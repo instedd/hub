@@ -57,13 +57,7 @@ class VerboiceConnector < Connector
     private
 
     def get_projects(connector, user)
-      if connector.shared and Guisso.enabled?
-        resource = Guisso.trusted_resource(connector.url, user.email)
-        JSON.parse(resource.get("#{connector.url}/api/projects.json").body)
-      else
-        resource = RestClient::Resource.new("#{connector.url}/api/projects.json", connector.username, connector.password)
-        JSON.parse(resource.get())
-      end
+      GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects.json")
     end
   end
 
@@ -85,7 +79,7 @@ class VerboiceConnector < Connector
       id
     end
 
-    def actions
+    def actions(user)
       {
         "call" => CallAction.new(self)
       }

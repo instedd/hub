@@ -10,7 +10,7 @@ describe ONAConnector do
     end
 
     it "finds root" do
-      expect(connector.lookup []).to be(connector)
+      expect(connector.lookup [], user).to be(connector)
     end
 
     it "reflects on root" do
@@ -30,7 +30,7 @@ describe ONAConnector do
       stub_request(:get, "http://example.com/api/v1/forms.json").
         to_return(status: 200, body: %([{"formid": 1, "title": "Form 1"}]), headers: {})
 
-      forms = connector.lookup %w(forms)
+      forms = connector.lookup %w(forms), user
       expect(forms.reflect(url_proc, user)).to eq({
         entities: [
           {
@@ -46,7 +46,7 @@ describe ONAConnector do
       stub_request(:get, "http://example.com/api/v1/forms/1.json").
         to_return(status: 200, body: %({"formid": 1, "title": "Form 1"}), headers: {})
 
-      form = connector.lookup %w(forms 1)
+      form = connector.lookup %w(forms 1), user
       expect(form.reflect(url_proc, user)).to eq({
         properties: {
           "id" => {

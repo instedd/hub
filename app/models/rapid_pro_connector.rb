@@ -94,7 +94,7 @@ class RapidProConnector < Connector
       }
     end
 
-    def actions
+    def actions(user)
       {
         "run" => RunAction.new(self)
       }

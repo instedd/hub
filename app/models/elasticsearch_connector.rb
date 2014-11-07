@@ -108,7 +108,7 @@ class ElasticsearchConnector < Connector
       @name
     end
 
-    def actions
+    def actions(user)
       {
         "insert" => InsertAction.new(self)
       }

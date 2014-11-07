@@ -6,17 +6,17 @@ module Entity
     mod.delegate :connector, to: :parent unless mod.method_defined?(:connector)
   end
 
-  def lookup(path)
+  def lookup(path, user)
     return self if path.empty?
     property_name = path.shift
 
     case property_name
     when "$actions"
-      ActionsNode.new(self).lookup(path)
+      ActionsNode.new(self).lookup(path, user)
     when "$events"
-      EventsNode.new(self).lookup(path)
+      EventsNode.new(self).lookup(path, user)
     else
-      properties[property_name].lookup(path)
+      properties[property_name].lookup(path, user)
     end
   end
 
@@ -31,7 +31,7 @@ module Entity
   def properties
   end
 
-  def actions
+  def actions(user)
   end
 
   def events
@@ -63,7 +63,7 @@ module Entity
         [k, h]
       end]
     end
-    if a = actions
+    if a = actions(user)
       reflection[:actions] = Hash[a.map do |k, v|
         [k, {label: v.label, path: v.path, reflect_url: reflect_url_proc.call(v.path)}]
       end]
