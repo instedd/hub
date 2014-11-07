@@ -57,8 +57,7 @@ namespace :foreman do
         %w(PATH GEM_HOME GEM_PATH).each do |var|
           execute :rvm, %(#{fetch(:rvm_ruby_version)} do ruby -e 'puts "#{var}=\#{ENV["#{var}"]}"' >> .env)
         end
-        execute "export rvmsudo_secure_path=1"
-        execute :bundle, "exec rvmsudo foreman export upstart /etc/init -f Procfile -a #{fetch(:application)} -u `whoami` -p #{fetch(:port)} --concurrency=\"resque=1,resque-scheduler=1\""
+        execute :bundle, "exec rvmsudo foreman export upstart /etc/init -f Procfile -a #{fetch(:application)} -u `whoami` --concurrency=\"resque=1,resque-scheduler=1\""
       end
     end
   end
