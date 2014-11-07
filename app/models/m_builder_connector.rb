@@ -106,7 +106,7 @@ class MBuilderConnector < Connector
     end
 
     def invoke(options, user)
-      uri = URI("#{connector.url}/external/application/#{parent.id}/trigger/asd")
+      uri = URI(@trigger['url'])
       uri.query= args.keys.map do |arg|
           "#{arg}=#{options[arg]}"
         end.join '&'
