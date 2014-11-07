@@ -47,3 +47,42 @@ namespace :deploy do
   end
 
 end
+
+namespace :foreman do
+  desc 'Export the Procfile to Ubuntu upstart scripts'
+  task :export do
+    on roles(:app) do
+      within current_path do
+        execute :echo, "RAILS_ENV=production > .env"
+        %w(PATH GEM_HOME GEM_PATH).each do |var|
+          execute :rvm, %(#{fetch(:rvm_ruby_version)} do ruby -e 'puts "#{var}=\#{ENV["#{var}"]}"' >> .env)
+        end
+        execute :bundle, "exec rvmsudo foreman export upstart /etc/init -f Procfile -a #{fetch(:application)} -u `whoami` -p #{fetch(:port)} --concurrency=\"resque=1,resque-scheduler=1\""
+      end
+    end
+  end
+
+  desc "Start the application services"
+  task :start do
+    on roles(:app) do
+      sudo "start #{fetch(:application)}"
+    end
+  end
+
+  desc "Stop the application services"
+  task :stop do
+    on roles(:app) do
+      sudo "stop #{fetch(:application)}"
+    end
+  end
+
+  desc "Restart the application services"
+  task :restart do
+    on roles(:app) do
+      execute "sudo start #{fetch(:application)} || sudo restart #{fetch(:application)}"
+    end
+  end
+
+  after 'deploy:publishing', 'foreman:export'
+  after 'deploy:restart', 'foreman:restart'
+end
