@@ -1,6 +1,7 @@
 class AddGuidToConnectors < ActiveRecord::Migration
   class MyConnector < ActiveRecord::Base
     self.table_name = "connectors"
+    self.inheritance_column = :_type_disabled
   end
 
   def up
