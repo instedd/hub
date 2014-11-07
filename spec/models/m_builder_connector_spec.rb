@@ -128,10 +128,10 @@ describe MBuilderConnector do
   context "guisso" do
     let(:connector) { MBuilderConnector.new url: "http://example.com", username: 'jdoe', password: '1234', shared: true }
     before(:each) do
-      Guisso.stub(:enabled?) { true }
-      Guisso.stub(:url) { "http://guisso.com" }
-      Guisso.stub(:client_id) { "12345" }
-      Guisso.stub(:client_secret) { "12345" }
+      allow(Guisso).to receive_message_chain(:enabled?).and_return(true)
+      allow(Guisso).to receive_message_chain(:url).and_return("http://guisso.com")
+      allow(Guisso).to receive_message_chain(:client_id).and_return("12345")
+      allow(Guisso).to receive_message_chain(:client_secret).and_return("12345")
 
       stub_request(:post, "http://guisso.com/oauth2/token").
         with(:body => {"grant_type"=>"client_credentials", "scope"=>"app=example.com user=#{user.email}"}).
