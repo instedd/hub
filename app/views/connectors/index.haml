@@ -6,7 +6,7 @@
         .span12.box-list
           = icon_link_to :'icf-arrow', connector.name, edit_connector_path(connector)
 
-    - %w(Elasticsearch ONA RapidPro Verboice).each do |name|
+    - %w(Elasticsearch ONA RapidPro Verboice ACT).each do |name|
       = icon_link_to :'icc-add', "Add #{name} Connector", new_connector_path(type: "#{name}Connector"), class: "add-connector blue"
       %br
       %br

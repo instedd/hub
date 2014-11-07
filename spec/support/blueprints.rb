@@ -15,5 +15,9 @@ ONAConnector.blueprint do
   auth_method { "anonymous" }
 end
 
+ACTConnector.blueprint do
+  url { "http://example.com" }
+end
+
 VerboiceConnector.blueprint do
 end
