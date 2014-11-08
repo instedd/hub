@@ -147,6 +147,7 @@ GEM
       net-ssh (>= 2.6.5)
     net-ssh (2.9.1)
     netrc (0.8.0)
+    newrelic_rpm (3.9.6.257)
     ngannotate-rails (0.10.1)
       execjs
       rails (>= 3.1)
@@ -297,6 +298,7 @@ DEPENDENCIES
   jbuilder (~> 2.0)
   jquery-rails
   machinist
+  newrelic_rpm
   ngannotate-rails
   omniauth
   omniauth-openid

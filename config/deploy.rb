@@ -20,7 +20,7 @@ set :hosts, ENV["HOSTS"] || fail("HOSTS must be specified")
 # Default value for :pty is false
 # set :pty, true
 
-set :linked_files, %w{config/database.yml config/secrets.yml config/guisso.yml}
+set :linked_files, %w{config/database.yml config/secrets.yml config/guisso.yml config/newrelic.yml}
 set :linked_dirs, %w{bin log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}
 
 # Default value for default_env is {}

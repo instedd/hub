@@ -38,6 +38,8 @@ gem 'ngannotate-rails'
 gem 'guid'
 gem 'bower-rails'
 
+gem 'newrelic_rpm'
+
 group :development do
   gem 'spring'
   gem 'spring-commands-rspec'
