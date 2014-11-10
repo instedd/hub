@@ -33,6 +33,14 @@ angular
       # of if the schema specified it is open
       $scope.model.open?[key] == 'struct' || $scope.schema?[key]?.type?.open || false
 
+    $scope.can_delete = (key) ->
+      $scope.model.open?[key]?
+
+    $scope.remove_member = (key) ->
+      return if !$scope.can_delete(key)
+      delete $scope.model.members[key]
+      delete $scope.model.open[key]
+
     $scope.new_field = {type: null, name: null}
 
     $scope.add_field = (type) ->
