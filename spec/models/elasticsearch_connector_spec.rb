@@ -108,6 +108,7 @@ describe ElasticsearchConnector do
                 "age" => {type: "integer"},
                 "name" => {type: "string"},
               },
+              open: true,
             },
           },
         }
@@ -128,6 +129,7 @@ describe ElasticsearchConnector do
                 "age" => {type: "integer"},
                 "name" => {type: "string"},
               },
+              open: true,
             },
           },
         }
@@ -137,7 +139,7 @@ describe ElasticsearchConnector do
 
   it "executes insert action" do
     action = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/insert", user)
-    action.invoke({"properties" => {"name" => "john", "age" => 30}}, user)
+    action.invoke({"properties" => {"name" => "john", "age" => 30, "extra" => "hello"}}, user)
     refresh_index
 
     response = JSON.parse RestClient.get "#{INDEX_URL}/_search"
@@ -147,6 +149,7 @@ describe ElasticsearchConnector do
     source = hits[0]["_source"]
     expect(source["name"]).to eq("john")
     expect(source["age"]).to eq(30)
+    expect(source["extra"]).to eq("hello")
   end
 
   it "executes update action" do
@@ -159,7 +162,7 @@ describe ElasticsearchConnector do
       {
         "primary_key_name" => "name",
         "primary_key_value" => "john",
-        "properties" => {"name" => "john", "age" => 10},
+        "properties" => {"name" => "john", "age" => 10, "extra" => "hello"},
       },
       user
     )
@@ -173,8 +176,10 @@ describe ElasticsearchConnector do
 
     john = sources.find { |source| source["name"] == "john" }
     expect(john["age"]).to eq(10)
+    expect(john["extra"]).to eq("hello")
 
     peter = sources.find { |source| source["name"] == "peter" }
     expect(peter["age"]).to eq(40)
+    expect(peter["extra"]).to be_nil
   end
 end

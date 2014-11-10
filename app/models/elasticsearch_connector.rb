@@ -140,6 +140,7 @@ class ElasticsearchConnector < Connector
           type: {
             kind: :struct,
             members: elasticsearch_properties(properties),
+            open: true,
           },
         },
       }
@@ -188,6 +189,7 @@ class ElasticsearchConnector < Connector
           type: {
             kind: :struct,
             members: elasticsearch_properties(properties),
+            open: true,
           },
         },
       }
