@@ -118,7 +118,7 @@ class RapidProConnector < Connector
       "#{@parent.path}/$events/new_run"
     end
 
-    def args
+    def args(user)
       headers = connector.auth_headers
       results = JSON.parse(RestClient.get("#{connector.url}/api/v1/flows.json?flow=#{@parent.id}", headers))
       flow = results["results"].first
@@ -183,7 +183,7 @@ class RapidProConnector < Connector
       "#{@parent.path}/$actions/run"
     end
 
-    def args
+    def args(user)
       {
         phone: {type: {kind: :array, item_type: :string}},
         extra: {type: {kind: :struct, members: [], open: true}},

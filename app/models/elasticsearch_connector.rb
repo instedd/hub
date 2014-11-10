@@ -132,7 +132,7 @@ class ElasticsearchConnector < Connector
       "insert"
     end
 
-    def args
+    def args(user)
       response = JSON.parse RestClient.get("#{connector.url}/#{index_name}/_mapping")
       properties = response[index_name]["mappings"][type_name]["properties"]
       {
@@ -179,7 +179,7 @@ class ElasticsearchConnector < Connector
       "update"
     end
 
-    def args
+    def args(user)
       response = JSON.parse RestClient.get("#{connector.url}/#{index_name}/_mapping")
       properties = response[index_name]["mappings"][type_name]["properties"]
       {

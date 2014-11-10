@@ -158,7 +158,7 @@ class ONAConnector < Connector
       output
     end
 
-    def args
+    def args(user)
       form = connector.get_json "forms/#{parent.id}/form.json"
       args = type_children(form, form["children"])
       args["_id"] = {type: :integer}

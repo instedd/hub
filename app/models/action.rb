@@ -2,14 +2,14 @@ module Action
   attr_reader :parent
   delegate :connector, to: :parent
 
-  def args
+  def args(user)
     {}
   end
 
-  def reflect(*)
+  def reflect(user)
     {
       label: label,
-      args: args,
+      args: args(user),
     }
   end
 

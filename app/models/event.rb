@@ -4,14 +4,14 @@ module Event
   attr_reader :parent
   delegate :connector, to: :parent
 
-  def args
+  def args(user)
     {}
   end
 
   def reflect(proc, user)
     {
       label: label,
-      args: args,
+      args: args(user),
     }
   end
 

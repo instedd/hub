@@ -3,7 +3,7 @@ class ACTConnector < Connector
   store_accessor :settings, :url
 
   validates_presence_of :url
-  
+
   def properties
     {"cases" => Cases.new(self)}
   end
@@ -64,14 +64,14 @@ class ACTConnector < Connector
       url = "#{connector.url}/api/v1/cases/"
       url += "?since_id=#{since_id}" if since_id.present?
       cases = JSON.parse(RestClient.get(url))
-      
+
       # assumes cases are sorted by date
       save_state(cases.last["id"]) unless cases.empty?
-      
+
       cases
     end
 
-    def args
+    def args(user)
       {
         name: { type: :string },
         phone_number: { type: :string },
@@ -84,8 +84,5 @@ class ACTConnector < Connector
         symptoms: {type: {kind: :array, item_type: :string}},
       }
     end
-
   end
-
-
 end

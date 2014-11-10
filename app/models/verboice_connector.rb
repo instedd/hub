@@ -108,6 +108,8 @@ class VerboiceConnector < Connector
   class CallFlow
     include Entity
 
+    attr_reader :id
+
     def initialize(parent, id, name = nil)
       @parent = parent
       @id = id
@@ -120,6 +122,12 @@ class VerboiceConnector < Connector
 
     def sub_path
       @id
+    end
+
+    def events
+      {
+        "call_finished" => CallFinishedEvent.new(self),
+      }
     end
   end
 
@@ -138,7 +146,7 @@ class VerboiceConnector < Connector
       "call"
     end
 
-    def args
+    def args(user)
       {
         channel: {
           type: "string",
@@ -152,6 +160,27 @@ class VerboiceConnector < Connector
 
     def invoke(args, user)
       GuissoRestClient.new(connector, user).get("#{connector.url}/api/call?channel=#{args["channel"]}&address=#{args["number"]}")
+    end
+  end
+
+  class CallFinishedEvent
+    include Event
+
+    def initialize(parent)
+      @parent = parent
+    end
+
+    def label
+      "Call finished"
+    end
+
+    def sub_path
+      "call_finished"
+    end
+
+    def args(user)
+      project = GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{@parent.id}.json")
+      Hash[project["contact_vars"].map { |arg| [arg, :string] }]
     end
   end
 end

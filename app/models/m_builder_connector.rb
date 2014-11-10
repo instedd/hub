@@ -101,7 +101,7 @@ class MBuilderConnector < Connector
       "trigger_#{@id}"
     end
 
-    def args
+    def args(user)
       @trigger["parameters"]
     end
 

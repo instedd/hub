@@ -105,6 +105,33 @@ describe VerboiceConnector do
         })
       end
 
+      it "reflects on call flow" do
+        call_flow = connector.lookup %w(projects 495 call_flows 740), user
+        expect(call_flow.reflect(url_proc, user)).to eq({
+          events: {
+            "call_finished" => {
+              label: "Call finished",
+              path: "projects/495/call_flows/740/$events/call_finished",
+              reflect_url: "http://server/projects/495/call_flows/740/$events/call_finished"
+            }
+          }
+        })
+      end
+
+      it "reflects on call flow call finished event" do
+        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/740.json").
+          to_return(:status => 200, :body => %({"contact_vars":["name","age"]}), :headers => {})
+
+        event = connector.lookup %w(projects 495 call_flows 740 $events call_finished), user
+        expect(event.reflect(url_proc, user)).to eq({
+          label: "Call finished",
+          args: {
+            "name" => :string,
+            "age" => :string,
+          }
+        })
+      end
+
       it "reflects on call" do
         projects = connector.lookup %w(projects 495 $actions call), user
         expect(projects.reflect(url_proc)).to eq({
