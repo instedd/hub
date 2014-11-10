@@ -32,7 +32,6 @@ describe VerboiceConnector do
       end
 
       it "lists projects" do
-
         stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects.json").
           to_return(status: 200, body: %([
             {
@@ -67,7 +66,13 @@ describe VerboiceConnector do
             "name" => {
               label: "Name",
               type: :string
-            }
+            },
+            "call_flows" => {
+              label: "Call flows",
+              type: :entity_set,
+              path: "projects/495/call_flows",
+              reflect_url: "http://server/projects/495/call_flows",
+            },
           },
           actions: {
             "call"=> {
@@ -76,6 +81,27 @@ describe VerboiceConnector do
               reflect_url: "http://server/projects/495/$actions/call"
             }
           }
+        })
+      end
+
+      it "reflects on project call flows" do
+        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495.json").
+         to_return(:status => 200, :body => %({
+            "id": 495,
+            "name": "my project",
+            "call_flows": [{
+              "id": 740,
+              "name": "my flow"}],
+            "schedules": []
+          }), :headers => {})
+
+        call_flows = connector.lookup %w(projects 495 call_flows), user
+        expect(call_flows.reflect(url_proc, user)).to eq({
+          entities: [{
+            label: "my flow",
+            path: "projects/495/call_flows/740",
+            reflect_url: "http://server/projects/495/call_flows/740",
+          }],
         })
       end
 
@@ -189,7 +215,13 @@ describe VerboiceConnector do
             "name" => {
               label: "Name",
               type: :string
-            }
+            },
+            "call_flows" => {
+              label: "Call flows",
+              type: :entity_set,
+              path: "projects/495/call_flows",
+              reflect_url: "http://server/projects/495/call_flows",
+            },
           },
           actions: {
             "call"=> {

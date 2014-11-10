@@ -30,10 +30,6 @@ class VerboiceConnector < Connector
       "Projects"
     end
 
-    def type
-      :entity_set
-    end
-
     def entities(user)
       @entities ||= begin
         get_projects(connector, user).map { |project| Project.new(self, project["id"], project["name"]) }
@@ -69,11 +65,11 @@ class VerboiceConnector < Connector
       id
     end
 
-
     def properties
       {
         "id" => SimpleProperty.new("Id", :integer, @id),
-        "name" => SimpleProperty.new("Name", :string, @label)
+        "name" => SimpleProperty.new("Name", :string, @label),
+        "call_flows" => CallFlows.new(self),
       }
     end
 
@@ -82,7 +78,49 @@ class VerboiceConnector < Connector
         "call" => CallAction.new(self)
       }
     end
+  end
 
+  class CallFlows
+    include EntitySet
+
+    def initialize(parent)
+      @parent = parent
+    end
+
+    def label
+      "Call flows"
+    end
+
+    def path
+      "#{@parent.path}/call_flows"
+    end
+
+    def entities(user)
+      project = GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{@parent.id}.json")
+      project["call_flows"].map { |cf| CallFlow.new(self, cf["id"], cf["name"]) }
+    end
+
+    def find_entity(id)
+      CallFlow.new(self, id)
+    end
+  end
+
+  class CallFlow
+    include Entity
+
+    def initialize(parent, id, name = nil)
+      @parent = parent
+      @id = id
+      @name = name
+    end
+
+    def label
+      @name
+    end
+
+    def sub_path
+      @id
+    end
   end
 
   class CallAction
@@ -115,6 +153,5 @@ class VerboiceConnector < Connector
     def invoke(args, user)
       GuissoRestClient.new(connector, user).get("#{connector.url}/api/call?channel=#{args["channel"]}&address=#{args["number"]}")
     end
-
   end
 end
