@@ -1,2 +1,2 @@
 host: localhost:3000
-verboice-token: example
+authentication_token: secret
