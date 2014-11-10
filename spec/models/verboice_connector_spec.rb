@@ -279,17 +279,28 @@ describe VerboiceConnector do
 
     describe "call" do
       it "invokes" do
-        stub_request(:get, "https://verboice.instedd.org/api/call?address=&channel=Channel").
+        stub_request(:get, "https://verboice.instedd.org/api/call?address=123&channel=Channel").
           with(:headers => {'Authorization'=>'Bearer This is a guisso auth token!'}).
           to_return(:status => 200, :body => %({"call_id":755961,"state":"queued"}), :headers => {})
 
         projects = connector.lookup %w(projects 495 $actions call), user
 
-        response = projects.invoke({'channel' => 'Channel', 'address' => '123'}, user)
+        response = projects.invoke({'channel' => 'Channel', 'number' => '123'}, user)
         expect(response).to eq({
           "call_id" => 755961,
           "state" => "queued"
         })
+      end
+
+      it "escapes url parameters" do
+        stub_request(:get, "https://verboice.instedd.org/api/call?address=123%20456&channel=Channel%20123").
+          with(:headers => {'Authorization'=>'Bearer This is a guisso auth token!'}).
+          to_return(:status => 200, :body => %({"call_id":755961,"state":"queued"}), :headers => {})
+
+        projects = connector.lookup %w(projects 495 $actions call), user
+
+        response = projects.invoke({'channel' => 'Channel 123', 'number' => '123 456'}, user)
+        expect(response).to be_present
       end
     end
   end

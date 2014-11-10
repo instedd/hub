@@ -159,7 +159,10 @@ class VerboiceConnector < Connector
     end
 
     def invoke(args, user)
-      GuissoRestClient.new(connector, user).get("#{connector.url}/api/call?channel=#{args["channel"]}&address=#{args["number"]}")
+      encoded_channel_name = args.include?("channel") ? URI::encode(args["channel"]) : ""
+      encoded_number = args.include?("number") ? URI::encode(args["number"]) : ""
+      call_url = "#{connector.url}/api/call?channel=#{encoded_channel_name}&address=#{encoded_number}"
+      GuissoRestClient.new(connector, user).get(call_url)
     end
   end
 
