@@ -48,7 +48,7 @@ describe ACTConnector do
 
     it "includes parameters for poirot call in new case event" do
       new_case_event = connector.lookup %w(cases $events new_case), user
-      expect(new_case_event.args(user).keys).to match_array([:name, :phone_number, :age, :gender, :dialect_code, :symptoms])
+      expect(new_case_event.args(user).keys).to match_array([:patient_name, :patient_phone_number, :patient_age, :patient_gender, :dialect_code, :symptoms])
     end
 
   end

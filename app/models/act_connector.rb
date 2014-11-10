@@ -73,10 +73,10 @@ class ACTConnector < Connector
 
     def args(user)
       {
-        name: { type: :string },
-        phone_number: { type: :string },
-        age: { type: :string },
-        gender: { type: {kind: :enum, value_type: :string, members: [
+        patient_name: { type: :string },
+        patient_phone_number: { type: :string },
+        patient_age: { type: :string },
+        patient_gender: { type: {kind: :enum, value_type: :string, members: [
           {value: "M", label: "Male" },
           {value: "F", label: "Male" }
         ]}},
