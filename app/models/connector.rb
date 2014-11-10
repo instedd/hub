@@ -31,9 +31,11 @@ class Connector < ActiveRecord::Base
       end
 
       handlers_by_event.each do |event_user_pair, handlers|
-        event_data = connector.lookup_path(event_user_pair.first, event_user_pair.last).poll
-        handlers.each do |handler|
-          handler.trigger event_data
+        events = connector.lookup_path(event_user_pair.first, event_user_pair.last).poll
+        events.each do |event|
+          handlers.each do |handler|
+            handler.trigger event
+          end
         end
       end
     end

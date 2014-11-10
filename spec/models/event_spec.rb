@@ -9,9 +9,7 @@ describe Event do
     end
 
     def poll
-      {
-        "event1" => "foo"
-      }
+      [ { "event1" => "foo" } ]
     end
 
     def path
