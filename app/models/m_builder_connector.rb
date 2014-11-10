@@ -107,7 +107,7 @@ class MBuilderConnector < Connector
 
     def invoke(options, user)
       uri = URI(@trigger['url'])
-      uri.query= args.keys.map do |arg|
+      uri.query= args(user).keys.map do |arg|
           "#{arg}=#{options[arg]}"
         end.join '&'
 
