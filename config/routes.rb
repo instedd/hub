@@ -19,6 +19,8 @@ Rails.application.routes.draw do
     end
   end
 
+  post 'callback/:connector' => 'callbacks#execute'
+
   resources :event_handlers
 
   mount Resque::Server.new, at: '/_resque', constraints: { ip: '127.0.0.1' }
