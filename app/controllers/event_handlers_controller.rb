@@ -1,5 +1,5 @@
 class EventHandlersController < ApplicationController
-  add_breadcrumb 'Tasks', :connectors_path
+  add_breadcrumb 'Tasks', :event_handlers_path
 
   expose(:event_handlers) { current_user.event_handlers }
   expose(:event_handler)
