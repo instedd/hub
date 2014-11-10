@@ -1,1 +1,25 @@
 %ih-target-box(model='prop' schema='schema[key].type.members')
+
+%ul(ng-if='is_open_struct(key)')
+  %li
+    %div(ng-show='new_field.type != null')
+      %input(type="text" placeholder="field name" ng-model="new_field.name" ng-keypress="new_field_key_press($event)")
+
+      %span.type :: {{new_field.type}}
+
+      .btn-group
+        %button.btn.btn-small(type="button" ng-click="new_field_submit(key)")
+          Ok
+        %button.btn.btn-small(type="button" ng-click="new_field_cancel()")
+          Cancel
+
+    .btn-group(ng-show='new_field.type == null')
+      %button.btn.btn-small.dropdown-toggle(data-toggle="dropdown")
+        Add field
+        %span.caret
+      %ul.dropdown-menu
+        %li
+          %a(href='javascript:' ng-click='add_field("string")') Add string
+          %a(href='javascript:' ng-click='add_field("number")') Add number
+          %a(href='javascript:' ng-click='add_field("date")') Add date
+          %a(href='javascript:' ng-click='add_field("struct")') Add struct
