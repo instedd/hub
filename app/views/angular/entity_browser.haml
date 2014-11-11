@@ -2,6 +2,9 @@
   %ul.columns.clearfix
     %li(ng-repeat='column in columns')
       %ul.column(ng-controller="EntityBrowserColumnCtrl")
+        %li(ng-show='$last && loading_new_column')
+          loading...
+
         %li(ng-repeat='item in items' ng-class='{selected: is_selected(item), child_selected: is_child_selected(item)}' ng-switch on="item.__type")
 
           %a.connector(ng-click='open(item)' href='javascript:' ng-switch-when='connector')
@@ -23,4 +26,3 @@
           %a.event(ng-click='select(item)' href='javascript:' ng-switch-when='event')
             %i.icon-bullhorn
             {{item.label}}
-

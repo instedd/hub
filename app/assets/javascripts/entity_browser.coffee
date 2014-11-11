@@ -48,10 +48,17 @@ angular
 .controller 'EntityBrowserCtrl', ($scope, $rootScope, $http) ->
   connectors = []
 
+  $scope.$on 'entitybrowser:loading', ->
+    $scope.loading_new_column = true
+  $scope.$on 'entitybrowser:loaded', ->
+    $scope.loading_new_column = false
+
+  $scope.$emit('entitybrowser:loading')
   $http.get('/connectors.json').success (data) ->
     for c in data
       c['__type'] = 'connector'
       connectors.push(c)
+    $scope.$emit('entitybrowser:loaded')
 
   $scope.columns = [connectors]
   $scope.selection = []
@@ -81,6 +88,8 @@ angular
 
   get_children = (item) ->
     res = []
+
+    $scope.$emit('entitybrowser:loading')
     $http.get(item.reflect_url).success (data) ->
 
       for prop, schema of data.properties
@@ -98,6 +107,8 @@ angular
       for prop, schema of data.events
         schema['__type'] = 'event'
         res.push schema
+
+      $scope.$emit('entitybrowser:loaded')
 
     res
 
