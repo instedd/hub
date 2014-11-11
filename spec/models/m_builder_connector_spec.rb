@@ -3,7 +3,7 @@ describe MBuilderConnector do
   let(:user) { User.make }
 
   context "basic auth" do
-    let(:connector) { MBuilderConnector.new url: "http://example.com", username: 'jdoe', password: '1234' }
+    let(:connector) { MBuilderConnector.new url: "http://example.com", username: 'jdoe', password: '1234', user: user }
 
     describe "lookup" do
       it "finds root" do
@@ -126,7 +126,7 @@ describe MBuilderConnector do
   end
 
   context "guisso" do
-    let(:connector) { MBuilderConnector.new url: "http://example.com", username: 'jdoe', password: '1234', shared: true }
+    let(:connector) { MBuilderConnector.new url: "http://example.com", username: 'jdoe', password: '1234' }
     before(:each) do
       allow(Guisso).to receive_messages(
         enabled?: true,

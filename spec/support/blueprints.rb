@@ -23,5 +23,6 @@ ONAConnector.blueprint do
 end
 
 VerboiceConnector.blueprint do
+  user
 end
 

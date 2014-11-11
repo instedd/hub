@@ -21,7 +21,7 @@ class GuissoRestClient
   end
 
   def use_guisso?
-    @connector.shared and Guisso.enabled?
+    @connector.shared? and Guisso.enabled?
   end
 
   def guisso_resource

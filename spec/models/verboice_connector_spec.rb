@@ -1,15 +1,15 @@
 describe VerboiceConnector do
+  let(:user) { User.make }
   describe "initialization" do
     it "should set defaults for new connector" do
       connector = VerboiceConnector.make
       expect(connector.url).to eq("https://verboice.instedd.org")
-      expect(connector.shared).to eq(false)
+      expect(connector.shared?).to eq(false)
     end
   end
 
   context "basic auth" do
-    let(:connector) { VerboiceConnector.new username: 'jdoe', password: '1234', shared: false }
-    let(:user) { User.make }
+    let(:connector) { VerboiceConnector.new username: 'jdoe', password: '1234', user: user }
 
     describe "lookup" do
       let(:url_proc) { ->(path) { "http://server/#{path}" }}
@@ -166,7 +166,7 @@ describe VerboiceConnector do
   end
 
   context "guisso with shared connectors" do
-    let(:connector) { VerboiceConnector.new shared: true }
+    let(:connector) { VerboiceConnector.new }
     let(:user) { User.make }
 
     before(:each) do

@@ -1,18 +1,21 @@
 class VerboiceConnector < Connector
   include Entity
 
-  store_accessor :settings, :url, :username, :password, :shared
+  store_accessor :settings, :url, :username, :password
   after_initialize :initialize_defaults, :if => :new_record?
 
   def properties
     {"projects" => Projects.new(self)}
   end
 
+  def shared?
+    user.nil?
+  end
+
   private
 
   def initialize_defaults
     self.url = "https://verboice.instedd.org" unless self.url
-    self.shared = false unless self.shared
   end
 
   class Projects

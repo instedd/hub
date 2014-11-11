@@ -1,18 +1,21 @@
 class MBuilderConnector < Connector
   include Entity
 
-  store_accessor :settings, :url, :username, :password, :shared
+  store_accessor :settings, :url, :username, :password
   after_initialize :initialize_defaults, :if => :new_record?
 
   def properties
     {"applications" => Applications.new(self)}
   end
 
+  def shared?
+    user.nil?
+  end
+
   private
 
   def initialize_defaults
     self.url ||= "https://mbuilder.instedd.org"
-    self.shared ||= false
   end
 
   class Applications
