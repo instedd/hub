@@ -89,7 +89,7 @@ describe MBuilderConnector do
             }]), headers: {})
 
         application = connector.lookup %w(applications 1 $actions trigger_2), user
-        expect(application.reflect(url_proc)).to eq({
+        expect(application.reflect(url_proc, user)).to eq({
           label: "Trigger asd",
           args: {
             "foo" => {
@@ -232,7 +232,7 @@ describe MBuilderConnector do
             }]), headers: {})
 
         application = connector.lookup %w(applications 1 $actions trigger_2), user
-        expect(application.reflect(url_proc)).to eq({
+        expect(application.reflect(url_proc, user)).to eq({
           label: "Trigger asd",
           args: {
             "foo" => {

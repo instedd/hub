@@ -45,10 +45,9 @@ class ONAConnector < Connector
     end
 
     def entities(user)
-      @entities ||= begin
-        forms ||= connector.get_json "forms.json"
-        forms.map { |form| Form.new(self, form["formid"], form) }
-      end
+      forms = connector.get_json "forms.json"
+      forms.map! { |form| Form.new(self, form["formid"], form) }
+      forms.sort_by! { |form| form.label.downcase }
     end
 
     def reflect_entities
@@ -71,7 +70,7 @@ class ONAConnector < Connector
     end
 
     def properties
-      @form ||= connector.get_json("forms/#{@id}.json")
+      form ||= connector.get_json("forms/#{@id}.json")
       {
         "id" => SimpleProperty.new("Id", :integer, @id)
       }

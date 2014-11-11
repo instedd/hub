@@ -97,7 +97,7 @@ describe ElasticsearchConnector do
     end
 
     it "insert action" do
-      result = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/insert", user).reflect(user)
+      result = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/insert", user).reflect(url_proc, user)
       expect(result).to eq({
         label: "Insert",
         args: {
@@ -116,7 +116,7 @@ describe ElasticsearchConnector do
     end
 
     it "update action" do
-      result = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/update", user).reflect(user)
+      result = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/update", user).reflect(url_proc, user)
       expect(result).to eq({
         label: "Update",
         args: {

@@ -6,7 +6,7 @@ module Action
     {}
   end
 
-  def reflect(user)
+  def reflect(proc, user)
     {
       label: label,
       args: args(user),

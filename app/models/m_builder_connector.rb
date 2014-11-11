@@ -31,10 +31,8 @@ class MBuilderConnector < Connector
     end
 
     def entities(user)
-      @entities ||= begin
-        GuissoRestClient.new(connector, user).get("#{connector.url}/api/applications").map do |application|
-          Application.new(self, application["id"], application)
-        end
+      GuissoRestClient.new(connector, user).get("#{connector.url}/api/applications").map do |application|
+        Application.new(self, application["id"], application)
       end
     end
 
@@ -73,14 +71,12 @@ class MBuilderConnector < Connector
     end
 
     def actions(user)
-      @triggers ||= begin
-        triggers = GuissoRestClient.new(connector, user).get("#{connector.url}/api/applications/#{@id}/actions")
-        trigger_hash = Hash.new
-        triggers.each do |trigger|
-          trigger_hash["trigger_#{trigger["id"]}"]= TriggerAction.new(self, trigger["id"], trigger)
-        end
-        trigger_hash
+      triggers = GuissoRestClient.new(connector, user).get("#{connector.url}/api/applications/#{@id}/actions")
+      trigger_hash = {}
+      triggers.each do |trigger|
+        trigger_hash["trigger_#{trigger["id"]}"]= TriggerAction.new(self, trigger["id"], trigger)
       end
+      trigger_hash
     end
   end
 

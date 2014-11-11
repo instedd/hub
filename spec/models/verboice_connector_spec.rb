@@ -134,7 +134,7 @@ describe VerboiceConnector do
 
       it "reflects on call" do
         projects = connector.lookup %w(projects 495 $actions call), user
-        expect(projects.reflect(url_proc)).to eq({
+        expect(projects.reflect(url_proc, user)).to eq({
           label:"Call",
           args: {
             channel: {
@@ -262,7 +262,7 @@ describe VerboiceConnector do
 
       it "reflects on call" do
         projects = connector.lookup %w(projects 495 $actions call), user
-        expect(projects.reflect(url_proc)).to eq({
+        expect(projects.reflect(url_proc, user)).to eq({
           label:"Call",
           args: {
             channel: {

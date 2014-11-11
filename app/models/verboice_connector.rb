@@ -31,9 +31,7 @@ class VerboiceConnector < Connector
     end
 
     def entities(user)
-      @entities ||= begin
-        get_projects(connector, user).map { |project| Project.new(self, project["id"], project["name"]) }
-      end
+      get_projects(connector, user).map { |project| Project.new(self, project["id"], project["name"]) }
     end
 
     def reflect_entities
