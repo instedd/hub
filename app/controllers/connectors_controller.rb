@@ -2,6 +2,8 @@ class ConnectorsController < ApplicationController
   add_breadcrumb 'Connectors', :connectors_path
   protect_from_forgery except: :invoke
 
+  # connectors can be edited. accessible_connectors are just listed
+  expose(:accessible_connectors) { Connector.with_optional_user(current_user) }
   expose(:connectors) { current_user.connectors }
   expose(:connector) do
     if params[:id]
@@ -17,7 +19,7 @@ class ConnectorsController < ApplicationController
     respond_to do |format|
       format.html
       format.json do
-        c = connectors.map do |c|
+        c = accessible_connectors.map do |c|
           {
             label: c.name,
             guid: c.guid,
@@ -84,6 +86,6 @@ class ConnectorsController < ApplicationController
   private
 
   def connector_from_guid
-    Connector.with_optional_user(current_user).find_by_guid(params[:id])
+    accessible_connectors.find_by_guid(params[:id])
   end
 end
