@@ -45,6 +45,12 @@ angular
     onSelect: '&'
   templateUrl: '/angular/entity_browser.html'
 
+.directive 'ihScrollRightOn', ->
+  restrict: 'A'
+  link: (scope, element, attrs) ->
+    scope.$on attrs.ihScrollRightOn, ->
+      element.animate({scrollLeft: element[0].scrollWidth}, 100)
+
 .controller 'EntityBrowserCtrl', ($scope, $rootScope, $http) ->
   connectors = []
 

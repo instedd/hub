@@ -1,5 +1,5 @@
 %div.entity-browser(ng-controller="EntityBrowserCtrl")
-  %ul.columns.clearfix
+  %ul.columns.clearfix(ih-scroll-right-on="entitybrowser:loaded")
     %li(ng-repeat='column in columns')
       %ul.column(ng-controller="EntityBrowserColumnCtrl")
         %li(ng-show='$last && loading_new_column')
