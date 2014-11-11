@@ -183,8 +183,13 @@ class ElasticsearchConnector < Connector
       response = JSON.parse RestClient.get("#{connector.url}/#{index_name}/_mapping")
       properties = response[index_name]["mappings"][type_name]["properties"]
       {
-        primary_key_name: "string",
-        primary_key_value: "object",
+        keys: {
+          type: {
+            kind: :struct,
+            members: [],
+            open: true,
+          },
+        },
         properties: {
           type: {
             kind: :struct,
@@ -206,17 +211,14 @@ class ElasticsearchConnector < Connector
     end
 
     def invoke(args, user)
-      primary_key_name = args["primary_key_name"]
-      primary_key_value = args["primary_key_value"]
+      keys = args["keys"]
       properties = args["properties"]
 
       query = {
         query: {
           filtered: {
             filter: {
-              term: {
-                primary_key_name => primary_key_value
-              }
+              and: keys.map { |k, v| {term: {k => v}} }
             }
           }
         }

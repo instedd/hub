@@ -120,8 +120,13 @@ describe ElasticsearchConnector do
       expect(result).to eq({
         label: "Update",
         args: {
-          primary_key_name: "string",
-          primary_key_value: "object",
+          keys: {
+            type: {
+              kind: :struct,
+              members: [],
+              open: true,
+            },
+          },
           properties: {
             type: {
               kind: :struct,
@@ -160,9 +165,51 @@ describe ElasticsearchConnector do
     action = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/update", user)
     action.invoke(
       {
-        "primary_key_name" => "name",
-        "primary_key_value" => "john",
-        "properties" => {"name" => "john", "age" => 10, "extra" => "hello"},
+        "keys" => {
+          "name" => "john",
+        },
+        "properties" => {
+          "name" => "john",
+          "age" => 10,
+          "extra" => "hello"
+        },
+      },
+      user
+    )
+    refresh_index
+
+    response = JSON.parse RestClient.get "#{INDEX_URL}/_search"
+    hits = response["hits"]["hits"]
+    expect(hits.length).to eq(2)
+
+    sources = hits.map { |hit| hit["_source"] }
+
+    john = sources.find { |source| source["name"] == "john" }
+    expect(john["age"]).to eq(10)
+    expect(john["extra"]).to eq("hello")
+
+    peter = sources.find { |source| source["name"] == "peter" }
+    expect(peter["age"]).to eq(40)
+    expect(peter["extra"]).to be_nil
+  end
+
+  it "executes update action with many keys" do
+    RestClient.post("http://localhost:9200/instedd_hub_test/type1", %({"name": "john", "age": 20}))
+    RestClient.post("http://localhost:9200/instedd_hub_test/type1", %({"name": "peter", "age": 40}))
+    refresh_index
+
+    action = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/update", user)
+    action.invoke(
+      {
+        "keys" => {
+          "name" => "john",
+          "age" => 20,
+        },
+        "properties" => {
+          "name" => "john",
+          "age" => 10,
+          "extra" => "hello"
+        },
       },
       user
     )
