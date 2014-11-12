@@ -171,10 +171,12 @@ class VerboiceConnector < Connector
     end
 
     def invoke(args, user)
-      encoded_channel_name = args.include?("channel") ? URI::encode(args["channel"]) : ""
-      encoded_number = args.include?("number") ? URI::encode(args["number"]) : ""
-      call_url = "#{connector.url}/api/call?channel=#{encoded_channel_name}&address=#{encoded_number}"
-      GuissoRestClient.new(connector, user).get(call_url)
+      PoirotRails::Activity.start("Verboice Call", options: args, user_id: user.id) do
+        encoded_channel_name = args.include?("channel") ? URI::encode(args["channel"]) : ""
+        encoded_number = args.include?("number") ? URI::encode(args["number"]) : ""
+        call_url = "#{connector.url}/api/call?channel=#{encoded_channel_name}&address=#{encoded_number}"
+        GuissoRestClient.new(connector, user).get(call_url)
+      end
     end
   end
 

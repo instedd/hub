@@ -191,11 +191,13 @@ class RapidProConnector < Connector
     end
 
     def invoke(args, user)
-      connector.http_post_json "#{connector.url}/api/v1/runs.json", {
-        flow: @parent.id.to_i,
-        phone: args["phone"],
-        extra: args["extra"],
-      }
+      PoirotRails::Activity.start("RapidPro Run", options: args, user_id: user.id) do
+        connector.http_post_json "#{connector.url}/api/v1/runs.json", {
+          flow: @parent.id.to_i,
+          phone: args["phone"],
+          extra: args["extra"],
+        }
+      end
     end
   end
 end

@@ -7,6 +7,8 @@ class Connector < ActiveRecord::Base
 
   before_validation :generate_guid
 
+  abstract :url
+
   def generate_guid
     self.guid ||= Guid.new.to_s
   end
@@ -42,7 +44,9 @@ class Connector < ActiveRecord::Base
         events = connector.lookup_path(event_user_pair.first, event_user_pair.last).poll
         events.each do |event|
           handlers.each do |handler|
-            handler.trigger event
+            PoirotRails::Activity.start("New polling event", event: event, handler_id: handler.id, user_id: handler.user_id, connector_id: connector_id, handled_event: handler.event, url: connector.url) do
+              handler.trigger event
+            end
           end
         end
       end

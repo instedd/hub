@@ -101,12 +101,14 @@ class MBuilderConnector < Connector
     end
 
     def invoke(options, user)
-      uri = URI(@trigger['url'])
-      uri.query= args(user).keys.map do |arg|
-          "#{arg}=#{options[arg]}"
-        end.join '&'
+      PoirotRails::Activity.start("MBuilder Trigger", options: options, user_id: user.id) do
+        uri = URI(@trigger['url'])
+        uri.query= args(user).keys.map do |arg|
+            "#{arg}=#{options[arg]}"
+          end.join '&'
 
-      GuissoRestClient.new(connector, user).post(uri.to_s)
+        GuissoRestClient.new(connector, user).post(uri.to_s)
+      end
     end
   end
 end

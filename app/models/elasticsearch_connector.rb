@@ -157,9 +157,11 @@ class ElasticsearchConnector < Connector
     end
 
     def invoke(args, user)
-      properties = args["properties"]
-      properties.delete "_id"
-      RestClient.post("#{connector.url}/#{index_name}/#{type_name}", properties.to_json)
+      PoirotRails::Activity.start("Elasticsearch Insert", options: args, user_id: user.id) do
+        properties = args["properties"]
+        properties.delete "_id"
+        RestClient.post("#{connector.url}/#{index_name}/#{type_name}", properties.to_json)
+      end
     end
   end
 
@@ -211,28 +213,30 @@ class ElasticsearchConnector < Connector
     end
 
     def invoke(args, user)
-      keys = args["keys"]
-      properties = args["properties"]
+      PoirotRails::Activity.start("Elasticsearch Update", options: args, user_id: user.id) do
+        keys = args["keys"]
+        properties = args["properties"]
 
-      query = {
-        query: {
-          filtered: {
-            filter: {
-              and: keys.map { |k, v| {term: {k => v}} }
+        query = {
+          query: {
+            filtered: {
+              filter: {
+                and: keys.map { |k, v| {term: {k => v}} }
+              }
             }
           }
         }
-      }
 
-      result = JSON.parse RestClient.post("#{connector.url}/#{index_name}/#{type_name}/_search", query.to_json)
-      hits = result["hits"]["hits"]
-      hits.each do |hit|
-        id = hit["_id"]
-        source = hit["_source"]
-        source.merge! properties
-        source.delete "_id"
+        result = JSON.parse RestClient.post("#{connector.url}/#{index_name}/#{type_name}/_search", query.to_json)
+        hits = result["hits"]["hits"]
+        hits.each do |hit|
+          id = hit["_id"]
+          source = hit["_source"]
+          source.merge! properties
+          source.delete "_id"
 
-        response = RestClient.post "#{connector.url}/#{index_name}/#{type_name}/#{id}", source.to_json
+          response = RestClient.post "#{connector.url}/#{index_name}/#{type_name}/#{id}", source.to_json
+        end
       end
     end
   end

@@ -28,7 +28,6 @@ describe Event do
       "mock/$actions/action"
     end
     def invoke(options, user)
-      binding.pry
     end
   end
 
@@ -36,6 +35,9 @@ describe Event do
     include Entity
     def properties
       {"mock" => MockProperty.new(self)}
+    end
+    def url
+      "foo.bar"
     end
   end
 
