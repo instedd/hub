@@ -1,5 +1,4 @@
 describe CallbacksController do
-
   it 'should validate authenticity token' do
     post :execute, {connector: 'verboice', token: 'invalid'}
     expect(response.status).to eq(401)
@@ -7,8 +6,8 @@ describe CallbacksController do
   end
 
   it 'should find verboice connector when calling execute' do
-    verboice_connector = VerboiceConnector.make! shared: true
-    verboice_connector_2 = VerboiceConnector.make! shared: false
+    verboice_connector = VerboiceConnector.make! user: nil
+    verboice_connector_2 = VerboiceConnector.make!
 
     post :execute, {connector: 'verboice', token: Settings.authentication_token}
     assigned_connector = controller.connector

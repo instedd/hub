@@ -23,6 +23,10 @@ class Connector < ActiveRecord::Base
     where('user_id = ? OR user_id is null', user.id)
   end
 
+  def self.shared
+    where('user_id is null')
+  end
+
   def shared?
     user.nil?
   end
