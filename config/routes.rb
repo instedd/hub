@@ -22,6 +22,7 @@ Rails.application.routes.draw do
   post 'callback/:connector/:event' => 'callbacks#enqueue'
 
   resources :event_handlers
+  resources :activities, only: :index
 
   mount Resque::Server.new, at: '/_resque', constraints: { ip: '127.0.0.1' }
 end
