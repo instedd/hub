@@ -1,0 +1,17 @@
+common: &default_settings
+  server: localhost:2120
+  source: instedd-hub
+  debug: false
+
+development:
+  <<: *default_settings
+  enabled: true
+  debug: true
+
+production:
+  <<: *default_settings
+  enabled: true
+
+test:
+  <<: *default_settings
+  enabled: false
