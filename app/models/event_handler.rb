@@ -15,7 +15,9 @@ class EventHandler < ActiveRecord::Base
 
   def trigger(data)
     target_action = target_connector.lookup_path(action, user)
-    target_action.invoke bind_event_data(data), user
+    PoirotRails::Activity.start("Action invoked", target_action: target_action.path, data: data) do
+      target_action.invoke bind_event_data(data), user
+    end
   end
 
   private
