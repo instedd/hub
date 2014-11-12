@@ -19,7 +19,7 @@ Rails.application.routes.draw do
     end
   end
 
-  post 'callback/:connector' => 'callbacks#execute'
+  post 'callback/:connector/:event' => 'callbacks#enqueue'
 
   resources :event_handlers
 

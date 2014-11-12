@@ -8,8 +8,9 @@ class CallbacksController < ApplicationController
     end
   end
 
-  def execute
-    render json: {}, status: :ok
+  def enqueue
+    task_id = connector.enqueue_event(params[:event])
+    render json: {id: task_id}, status: :ok
   end
 
   def verify_access_token!
