@@ -78,7 +78,7 @@ class ACTConnector < Connector
         patient_age: { type: :string },
         patient_gender: { type: {kind: :enum, value_type: :string, members: [
           {value: "M", label: "Male" },
-          {value: "F", label: "Male" }
+          {value: "F", label: "Female" },
         ]}},
         dialect_code: { type: :string },
         symptoms: {type: {kind: :array, item_type: :string}},
