@@ -15,10 +15,6 @@ class Connector < ActiveRecord::Base
     self
   end
 
-  def shared?
-    user.nil?
-  end
-
   def lookup_path(path, current_user)
     lookup path.to_s.split('/'), current_user
   end
