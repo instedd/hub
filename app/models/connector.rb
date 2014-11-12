@@ -23,6 +23,10 @@ class Connector < ActiveRecord::Base
     where('user_id = ? OR user_id is null', user.id)
   end
 
+  def shared?
+    user.nil?
+  end
+
   module PollJob
     def self.perform(connector_id)
       connector = Connector.find(connector_id)

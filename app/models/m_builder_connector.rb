@@ -8,10 +8,6 @@ class MBuilderConnector < Connector
     {"applications" => Applications.new(self)}
   end
 
-  def shared?
-    user.nil?
-  end
-
   private
 
   def initialize_defaults

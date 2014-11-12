@@ -8,10 +8,6 @@ class VerboiceConnector < Connector
     {"projects" => Projects.new(self)}
   end
 
-  def shared?
-    user.nil?
-  end
-
   private
 
   def initialize_defaults
