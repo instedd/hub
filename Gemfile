@@ -6,8 +6,8 @@ gem 'sass-rails', '~> 4.0.3'
 gem 'uglifier', '>= 1.3.0'
 gem 'coffee-rails', '~> 4.0.0'
 gem 'jquery-rails'
-gem 'poirot_rails', github: 'instedd/poirot_rails'
-gem 'hercule', github: 'instedd/poirot'
+gem 'poirot_rails', github: 'instedd/poirot_rails', branch: :master
+gem 'hercule', github: 'instedd/poirot', branch: :master
 
 # Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
 # gem 'turbolinks'
