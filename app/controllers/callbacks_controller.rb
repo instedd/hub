@@ -11,8 +11,8 @@ class CallbacksController < ApplicationController
 
   def enqueue
     raw_post = request.raw_post.empty? ? "{}" : request.raw_post
-    task_id = connector.enqueue_event(params[:event], raw_post)
-    render json: {id: task_id}, status: :ok
+    connector.enqueue_event(params[:event], raw_post)
+    render json: {}, status: :ok
   end
 
   def verify_access_token!

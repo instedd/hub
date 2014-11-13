@@ -9,24 +9,16 @@ class VerboiceConnector < Connector
   end
 
   def enqueue_event(task_type, *args)
-    id = Guid.new.to_s
     task_class = "VerboiceConnector::#{"#{task_type}_task".classify}".constantize
-    Resque.enqueue task_class, id, args
-    id
+    Resque.enqueue_to(:hub, task_class, args)
   end
 
   class CallTask
-    @queue = :verboice_call_queue
 
-    def self.count_queued_tasks()
-      Resque.size(@queue)
+    def self.perform(body)
+      data = JSON.parse body
+      data["project_id"]
     end
-
-    def self.pop
-      Resque.pop(@queue)
-    end
-
-
   end
 
   private

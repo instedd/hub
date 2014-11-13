@@ -18,16 +18,11 @@ describe CallbacksController do
     end
 
     it "should enqueue a CallTask" do
-      #Remove all tasks from the queue
-      Resque.dequeue(VerboiceConnector::CallTask)
-
       data = {"project_id"=>2, "call_flow_id"=>2, "address"=>"17772632588", "vars"=>{"age"=>"20"}}.to_json
       request.env["RAW_POST_DATA"] = data
+      Resque.should_receive(:enqueue_to).with(:hub, VerboiceConnector::CallTask, [data])
 
       post :enqueue, { connector: 'verboice', token: Settings.authentication_token, event: 'call'}
-      expect(VerboiceConnector::CallTask.count_queued_tasks).to eq(1)
-      id = JSON.parse(response.body)["id"]
-      expect(VerboiceConnector::CallTask.pop()).to eq({"class"=>"VerboiceConnector::CallTask", "args"=>[id, [data]]})
     end
   end
 end
