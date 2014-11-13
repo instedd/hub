@@ -80,6 +80,7 @@ class ACTConnector < Connector
 
     def args(user)
       {
+        id: { type: :integer },
         patient_name: { type: :string },
         patient_phone_number: { type: :string },
         patient_age: { type: :string },
