@@ -42,6 +42,13 @@ class ACTConnector < Connector
         "new_case" => NewCaseEvent.new(self)
       }
     end
+
+    def actions(user)
+      {
+        "update_case" => UpdateCaseAction.new(self)
+      }
+    end
+
   end
 
   class NewCaseEvent
@@ -85,4 +92,41 @@ class ACTConnector < Connector
       }
     end
   end
+
+  class UpdateCaseAction
+    include Action
+
+    def initialize(parent)
+      @parent = parent
+    end
+
+    def label
+      "Update case"
+    end
+
+    def sub_path
+      "update_case"
+    end
+
+    def args(user)
+      {
+        case_id: {
+          type: "string",
+          label: "Case ID"
+        },
+        is_sick: {
+          type: "boolean",
+          label: "Is patient sick?"
+        }
+      }
+    end
+
+    def invoke(args, user)
+      url = "#{connector.url}/api/v1/cases/#{args['case_id']}/"
+      url += "?sick=#{args['is_sick']}"
+      RestClient.put(url, nil)
+    end
+
+  end
+
 end
