@@ -1,6 +1,7 @@
 class CallbacksController < ApplicationController
   skip_before_action :authenticate_user!
   before_action :verify_access_token!
+  protect_from_forgery except: :enqueue
 
   expose(:connector) do
     if params[:connector]
@@ -9,7 +10,8 @@ class CallbacksController < ApplicationController
   end
 
   def enqueue
-    task_id = connector.enqueue_event(params[:event])
+    raw_post = request.raw_post.empty? ? "{}" : request.raw_post
+    task_id = connector.enqueue_event(params[:event], raw_post)
     render json: {id: task_id}, status: :ok
   end
 

@@ -21,6 +21,12 @@ class VerboiceConnector < Connector
     def self.count_queued_tasks()
       Resque.size(@queue)
     end
+
+    def self.pop
+      Resque.pop(@queue)
+    end
+
+
   end
 
   private
