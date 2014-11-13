@@ -20,7 +20,7 @@ describe CallbacksController do
     it "should enqueue a CallTask" do
       data = {"project_id"=>2, "call_flow_id"=>2, "address"=>"17772632588", "vars"=>{"age"=>"20"}}.to_json
       request.env["RAW_POST_DATA"] = data
-      Resque.should_receive(:enqueue_to).with(:hub, VerboiceConnector::CallTask, [data])
+      expect(Resque).to receive(:enqueue_to).with(:hub, VerboiceConnector::CallTask, data)
 
       post :enqueue, { connector: 'verboice', token: Settings.authentication_token, event: 'call'}
     end

@@ -10,7 +10,7 @@ class VerboiceConnector < Connector
 
   def enqueue_event(task_type, *args)
     task_class = "VerboiceConnector::#{"#{task_type}_task".classify}".constantize
-    Resque.enqueue_to(:hub, task_class, args)
+    Resque.enqueue_to(:hub, task_class, *args)
   end
 
   class CallTask
