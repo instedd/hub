@@ -140,7 +140,7 @@ class ONAConnector < Connector
           value = data[data_path]
           if value
             lat, lon = value.split.map(&:to_f)
-            output[name] = {lat: lat, lon: lon}
+            output[name] = {"lat" => lat, "lon" => lon}
           else
             output[name] = nil
           end
@@ -192,6 +192,7 @@ class ONAConnector < Connector
           members = type_children(form, c["children"])
           {type: {kind: :struct, members: members}} if members.any?
         when "text"
+        when "phonenumber"
           {type: :string}
         when "integer"
           {type: :integer}
@@ -203,6 +204,7 @@ class ONAConnector < Connector
           members = type_children(form, c["children"])
           {type: {kind: :array, item_type: {kind: :struct, members: members}}}
         when "note"
+        when "photo"
           # skip
         else
           raise "Unsupported ONA type: #{c["type"]}"
