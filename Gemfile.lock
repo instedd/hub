@@ -20,10 +20,10 @@ GIT
 
 GIT
   remote: git://github.com/instedd/poirot_rails.git
-  revision: c62b61a87cd7c414bec8e6445033eae73387267b
+  revision: 0870db8fc1ea0eb701f4092f406e4bf6f882d284
   branch: master
   specs:
-    poirot_rails (0.0.1)
+    poirot_rails (0.0.2)
       bertrpc
       ffi-rzmq
       guid
@@ -44,7 +44,7 @@ GIT
 
 GIT
   remote: https://bitbucket.org/instedd/instedd-bootstrap.git
-  revision: 855d92699e8b375e1f57a50af4aa4f70c563f5a5
+  revision: abd90e62cb8eaa922719acc18e3d7570b3b9b106
   branch: master
   specs:
     instedd-bootstrap (0.0.1)
