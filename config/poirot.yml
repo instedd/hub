@@ -7,6 +7,8 @@ development:
   <<: *default_settings
   enabled: true
   debug: true
+  mute:
+   - /assets/
 
 production:
   <<: *default_settings
