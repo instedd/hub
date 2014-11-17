@@ -10,14 +10,18 @@ class VerboiceConnector < Connector
 
   def enqueue_event(task_type, *args)
     task_class = "VerboiceConnector::#{"#{task_type}_task".classify}".constantize
-    Resque.enqueue_to(:hub, task_class, *args)
+    Resque.enqueue_to(:hub, task_class, connector.id, *args)
   end
 
   class CallTask
 
-    def self.perform(body)
-      data = JSON.parse body
-      data["project_id"]
+    def self.perform(connector_id, body)
+      connector = Connector.find(connector_id)
+      body = JSON.parse body
+      subscribed_events = connector.event_handlers.where(event: "projects/#{body["project_id"]}/call_flows/#{body["call_flow_id"]}/$events/call_finished")
+      subscribed_events.each do |event_handler|
+        event_handler.trigger(body)
+      end
     end
   end
 

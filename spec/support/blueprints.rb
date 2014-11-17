@@ -26,3 +26,12 @@ VerboiceConnector.blueprint do
   user
 end
 
+EventHandler.blueprint do
+  connector
+  event { 'info/$events/new_data'}
+  action { 'info/$actions/call' }
+end
+
+
+
+
