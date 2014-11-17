@@ -20,10 +20,10 @@ GIT
 
 GIT
   remote: git://github.com/instedd/poirot_rails.git
-  revision: 0870db8fc1ea0eb701f4092f406e4bf6f882d284
+  revision: c23c1c8c0b23c92328c3329b60abe2832a0fa2a2
   branch: master
   specs:
-    poirot_rails (0.0.2)
+    poirot_rails (0.0.3)
       bertrpc
       ffi-rzmq
       guid
@@ -174,11 +174,11 @@ GEM
       thor (>= 0.14, < 2.0)
     json (1.8.1)
     machinist (2.0)
-    mail (2.6.1)
+    mail (2.6.3)
       mime-types (>= 1.16, < 3)
     method_source (0.8.2)
     mime-types (2.4.3)
-    minitest (5.4.2)
+    minitest (5.4.3)
     mono_logger (1.1.0)
     multi_json (1.10.1)
     multipart-post (2.0.0)
