@@ -305,28 +305,29 @@ describe VerboiceConnector do
     end
   end
 
-  context "perform subscribed events" do
-    let!(:verboice_connector) { VerboiceConnector.make! username: 'jdoe', password: '1234', user: user}
+  describe "perform subscribed events" do
+    let(:verboice_connector) { VerboiceConnector.make! username: 'jdoe', password: '1234', user: user }
 
-    let!(:verboice_to_mbuilder_event_handler) { EventHandler.make!(
-        connector: verboice_connector,
-        event: "projects/2/call_flows/2/$events/call_finished",
+    let!(:event_handler_1) { EventHandler.create!(
+      connector: verboice_connector,
+      event: "projects/2/call_flows/2/$events/call_finished"
     )}
 
-    let!(:verboice_to_ona_event_handler) { EventHandler.make!(
-        connector: verboice_connector,
-        event: "projects/2/call_flows/2/$events/call_finished",
+    let!(:event_handler_2) { EventHandler.create!(
+      connector: verboice_connector,
+      event: "projects/2/call_flows/2/$events/call_finished"
     )}
 
-    pending "should invoke event handlers when processing a queued job" do
+    it "should invoke event handlers when processing a queued job" do
       data = {"project_id"=>2, "call_flow_id"=>2, "address"=>"17772632588", "vars"=>{"age"=>"20"}}.to_json
 
-      #expect(verboice_to_ona_event_handler).to receive(:trigger)
-      #expect(verboice_to_mbuilder_event_handler).to receive(:trigger)
-
-      #expect_any_instance_of(EventHandler).to receive(:trigger).twice
+      trigger_count = 0
+      allow_any_instance_of(EventHandler).to receive(:trigger) do |data|
+        trigger_count+=1
+      end
 
       VerboiceConnector::CallTask.perform(verboice_connector.id, data)
+      expect(trigger_count).to eq(2)
     end
   end
 
