@@ -7,7 +7,7 @@ set :deploy_to, '/u/apps/hub'
 set :bundle_jobs, 8
 
 set :rvm_type, :system
-set :rvm_ruby_version, '2.1.3'
+set :rvm_ruby_version, '2.1.4'
 
 set :hosts, ENV["HOSTS"] || fail("HOSTS must be specified")
 
