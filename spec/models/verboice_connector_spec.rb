@@ -119,7 +119,7 @@ describe VerboiceConnector do
       end
 
       it "reflects on call flow call finished event" do
-        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/740.json").
+        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495.json").
           to_return(:status => 200, :body => %({"contact_vars":["name","age"]}), :headers => {})
 
         event = connector.lookup %w(projects 495 call_flows 740 $events call_finished), user
@@ -320,13 +320,13 @@ describe VerboiceConnector do
 
     it "should invoke event handlers when processing a queued job" do
       data = {"project_id"=>2, "call_flow_id"=>2, "address"=>"17772632588", "vars"=>{"age"=>"20"}}.to_json
-
       trigger_count = 0
       allow_any_instance_of(EventHandler).to receive(:trigger) do |data|
         trigger_count+=1
       end
 
       VerboiceConnector::CallTask.perform(verboice_connector.id, data)
+
       expect(trigger_count).to eq(2)
     end
   end

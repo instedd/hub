@@ -92,10 +92,16 @@ class VerboiceConnector < Connector
         "call" => CallAction.new(self)
       }
     end
+
+    def project_id
+      @id
+    end
   end
 
   class CallFlows
     include EntitySet
+    delegate :project_id, to: :@parent
+
 
     def initialize(parent)
       @parent = parent
@@ -117,12 +123,14 @@ class VerboiceConnector < Connector
     def find_entity(id)
       CallFlow.new(self, id)
     end
+
   end
 
   class CallFlow
     include Entity
 
     attr_reader :id
+    delegate :project_id, to: :@parent
 
     def initialize(parent, id, name = nil)
       @parent = parent
@@ -183,6 +191,8 @@ class VerboiceConnector < Connector
   class CallFinishedEvent
     include Event
 
+    delegate :project_id, to: :@parent
+
     def initialize(parent)
       @parent = parent
     end
@@ -196,7 +206,7 @@ class VerboiceConnector < Connector
     end
 
     def args(user)
-      project = GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{@parent.id}.json")
+      project = GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{project_id}.json")
       Hash[project["contact_vars"].map { |arg| [arg, :string] }]
     end
   end
