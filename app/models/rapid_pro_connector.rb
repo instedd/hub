@@ -185,7 +185,7 @@ class RapidProConnector < Connector
 
     def args(user)
       {
-        phone: {type: {kind: :array, item_type: :string}},
+        phone: {type: :string},
         extra: {type: {kind: :struct, members: [], open: true}},
       }
     end
@@ -193,7 +193,7 @@ class RapidProConnector < Connector
     def invoke(args, user)
       connector.http_post_json "#{connector.url}/api/v1/runs.json", {
         flow: @parent.id.to_i,
-        phone: args["phone"],
+        phone: [args["phone"]],
         extra: args["extra"],
       }
     end
