@@ -20,12 +20,12 @@ GIT
 
 GIT
   remote: git://github.com/instedd/poirot_rails.git
-  revision: c23c1c8c0b23c92328c3329b60abe2832a0fa2a2
+  revision: 880f8e78dfd5c642694d43529230c1ffb31e926f
   branch: master
   specs:
-    poirot_rails (0.0.3)
+    poirot_rails (0.0.4)
       bertrpc
-      ffi-rzmq
+      ffi-rzmq (~> 2.0.1)
       guid
       json
       rails (>= 3.2)
