@@ -128,6 +128,7 @@ describe VerboiceConnector do
           args: {
             "name" => :string,
             "age" => :string,
+            "address" => :string
           }
         })
       end

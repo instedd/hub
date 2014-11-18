@@ -66,4 +66,20 @@ describe JsonMapper do
     })
     expect(mapper.map(nil)).to eq([1, 2, 3])
   end
+
+  it "maps verboice data" do
+    mapper = JsonMapper.new({
+      "type"=>"struct",
+      "members"=>{
+        "channel"=>
+          {"type"=>"literal", "value"=>"callcentric"},
+        "number"=>
+          ["address"]
+        }
+    })
+
+    source = {"project_id"=>1, "call_flow_id"=>4, "address"=>"17772632588", "vars"=>{"age"=>"20"}}
+    expect(mapper.map(source)).to eq({"channel"=>"callcentric", "number"=> "17772632588"})
+
+  end
 end

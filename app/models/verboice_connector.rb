@@ -207,7 +207,9 @@ class VerboiceConnector < Connector
 
     def args(user)
       project = GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{project_id}.json")
-      Hash[project["contact_vars"].map { |arg| [arg, :string] }]
+      args = Hash[project["contact_vars"].map { |arg| [arg, :string] }]
+      args["address"] = :string
+      args
     end
   end
 end
