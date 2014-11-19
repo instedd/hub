@@ -16,6 +16,7 @@ Rails.application.routes.draw do
       get 'data/*path' => 'connectors#query', as: 'query_with_path'
 
       post 'invoke/*path' => 'connectors#invoke'
+      put 'poll'
     end
   end
 

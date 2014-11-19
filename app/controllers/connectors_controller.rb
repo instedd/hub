@@ -83,6 +83,12 @@ class ConnectorsController < ApplicationController
     render json: response
   end
 
+  def poll
+    connector = connector_from_guid()
+    Connector::PollJob.perform(connector.id)
+    redirect_to connectors_path, notice: "Connector #{connector.name} successfully polled."
+  end
+
   private
 
   def connector_from_guid

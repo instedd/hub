@@ -33,6 +33,10 @@ class Connector < ActiveRecord::Base
     user.nil?
   end
 
+  def pollable?
+    !self.event_handlers.where(poll: true).empty?
+  end
+
   module PollJob
     def self.perform(connector_id)
       PoirotRails::Activity.start("Poll", connector_id: connector_id) do
