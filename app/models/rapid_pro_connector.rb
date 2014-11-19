@@ -145,7 +145,6 @@ class RapidProConnector < Connector
       connector.http_get_json_paginated(url) do |results|
         all_results.concat results["results"]
       end
-      binding.pry
       if max_created_on
         all_results = all_results.select { |r| r["created_on"] > max_created_on }
       end
