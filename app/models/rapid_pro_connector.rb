@@ -137,13 +137,17 @@ class RapidProConnector < Connector
       max_created_on = load_state
 
       url = "#{connector.url}/api/v1/runs.json?flow=#{@parent.id}"
-      if max_created_on
-        url << "&after=#{CGI.escape max_created_on}"
-      end
+      # if max_created_on
+      #   url << "&after=#{CGI.escape max_created_on}"
+      # end
 
       all_results = []
       connector.http_get_json_paginated(url) do |results|
         all_results.concat results["results"]
+      end
+      binding.pry
+      if max_created_on
+        all_results = all_results.select { |r| r["created_on"] > max_created_on }
       end
 
       events = all_results.map do |result|
