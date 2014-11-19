@@ -166,7 +166,7 @@ class RapidProConnector < Connector
 
       max_created_on = all_results.max_by { |result| result["created_on"] }["created_on"]
       save_state(max_created_on)
-      events
+      events.reverse # return oldest event first
     end
   end
 
