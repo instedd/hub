@@ -39,6 +39,7 @@ gem 'foreman'
 gem 'ngannotate-rails'
 gem 'guid'
 gem 'bower-rails'
+gem 'google_drive'
 
 gem 'newrelic_rpm'
 

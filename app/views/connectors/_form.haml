@@ -15,7 +15,10 @@
   .actions
     %hr
       - if connector.new_record?
-        %button.btn{:type => "submit"} Save
+        - if connector.needs_authorization?
+          %button.btn{:type => "submit"}= connector.authorization_text
+        - else
+          %button.btn{:type => "submit"} Save
       - else
         %button.btn{:type => "submit"} Update
         = icon_link_to :'icf-delete', 'Delete this connector', connector_path(connector), method: :delete, :'data-confirm' => "Are you sure you want to delete this connector?", class: "pull-right"

@@ -39,6 +39,10 @@ class Connector < ActiveRecord::Base
     !self.event_handlers.where(poll: true).empty?
   end
 
+  def needs_authorization?
+    false
+  end
+
   module PollJob
     def self.perform(connector_id)
       PoirotRails::Activity.start("Poll", connector_id: connector_id) do

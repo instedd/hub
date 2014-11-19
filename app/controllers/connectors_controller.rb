@@ -40,11 +40,17 @@ class ConnectorsController < ApplicationController
   end
 
   def create
-    connector.update_attributes params.require(:connector).permit!
-    if connector.save
-      redirect_to connectors_path, notice: "Connector #{connector.name} successfully created."
+    if connector.needs_authorization?
+      session[:connector_class_name] = connector.class.name.to_s
+      session[:connector_params] = params.require(:connector).permit!
+      redirect_to connector.authorization_uri(authorization_callback_connectors_url)
     else
-      render action: "new"
+      connector.update_attributes params.require(:connector).permit!
+      if connector.save
+        redirect_to connectors_path, notice: "Connector #{connector.name} successfully created."
+      else
+        render action: "new"
+      end
     end
   end
 
@@ -60,6 +66,24 @@ class ConnectorsController < ApplicationController
   def destroy
     connector.destroy
     redirect_to connectors_path, notice: "Connector #{connector.name} successfully deleted."
+  end
+
+  def authorization_callback
+    # These two lines so we can reuse decent_exposure's logic
+    params[:type] = session[:connector_class_name]
+    connector = self.connector
+
+    connector.update_attributes session[:connector_params]
+
+    session.delete :connector_class_name
+    session.delete :connector_params
+
+    connector.finish_authorization(params, authorization_callback_connectors_url)
+    if connector.save
+      redirect_to connectors_path, notice: "Connector #{connector.name} successfully created."
+    else
+      render action: "new"
+    end
   end
 
   def reflect

@@ -18,6 +18,10 @@ Rails.application.routes.draw do
       post 'invoke/*path' => 'connectors#invoke'
       put 'poll'
     end
+
+    collection do
+      get 'authorization_callback'
+    end
   end
 
   post 'callback/:connector/:event' => 'callbacks#enqueue'
