@@ -29,17 +29,13 @@ class MBuilderConnector < Connector
       "Applications"
     end
 
-    def entities(user)
+    def entities(user, filters={})
       GuissoRestClient.new(connector, user).get("#{connector.url}/api/applications").map do |application|
         Application.new(self, application["id"], application)
       end
     end
 
-    def reflect_entities
-      entities
-    end
-
-    def find_entity(id)
+    def find_entity(id, user)
       Application.new(self, id)
     end
   end
@@ -64,8 +60,8 @@ class MBuilderConnector < Connector
 
     def properties
       {
-        "id" => SimpleProperty.new("Id", :integer, @id),
-        "name" => SimpleProperty.new("Name", :string, '')
+        "id" => SimpleProperty.id(@id),
+        "name" => SimpleProperty.name('')
       }
     end
 

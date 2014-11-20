@@ -46,22 +46,24 @@ class VerboiceConnector < Connector
       "Projects"
     end
 
-    def entities(user)
-      get_projects(connector, user).map { |project| Project.new(self, project["id"], project["name"]) }
+    def entities(user, filters={})
+      projects(user).map { |project| entity(project) }
     end
 
-    def reflect_entities
-      entities
+    def find_entity(id, user)
+      entity(project(id, user))
     end
 
-    def find_entity(id)
-      Project.new(self, id)
-    end
-
-    private
-
-    def get_projects(connector, user)
+    def projects(user)
       GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects.json")
+    end
+
+    def project(id, user)
+      GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{id}.json")
+    end
+
+    def entity(project)
+      Project.new(self, project["id"], project["name"])
     end
   end
 
@@ -81,9 +83,10 @@ class VerboiceConnector < Connector
 
     def properties
       {
-        "id" => SimpleProperty.new("Id", :integer, @id),
-        "name" => SimpleProperty.new("Name", :string, @label),
+        "id" => SimpleProperty.id(@id),
+        "name" => SimpleProperty.name(@label),
         "call_flows" => CallFlows.new(self),
+        "phone_book" => PhoneBook.new(self)
       }
     end
 
@@ -97,6 +100,79 @@ class VerboiceConnector < Connector
       @id
     end
   end
+
+  class PhoneBook
+    include EntitySet
+
+    def initialize(parent)
+      @parent = parent
+    end
+
+    def label
+      "Phone Book"
+    end
+
+    def path
+      "#{@parent.path}/phone_book"
+    end
+
+    def entity_properties
+      {
+
+      }
+    end
+
+    def reflect_entities(user, filters={})
+      contacts = GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{@parent.id}/contacts.json")
+        contacts.inject Array.new do |contacts, contact|
+          contact["addresses"].inject contacts do |contacts, address|
+            contacts.push Contact.new(self, address, contact)
+          end
+        end
+    end
+
+    def entities(user, filters={})
+      contacts = GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{@parent.id}/contacts.json")
+      contacts.inject Array.new do |contacts, contact|
+        contact["addresses"].inject contacts do |contacts, address|
+          contacts.push Contact.new(self, address, contact)
+        end
+      end
+    end
+
+    def find_entity(address, user)
+      Contact.new(self, address)
+    end
+  end
+
+  class Contact
+    include Entity
+
+    attr_reader :address
+    alias_method :id, :address
+
+
+    def initialize(parent, address, contact = nil)
+      @parent = parent
+      @address = address
+      @contact = contact
+    end
+
+    def label
+      address
+    end
+
+    def sub_path
+      id
+    end
+
+    def properties
+      {
+        address: SimpleProperty.integer("Address", address)
+      }
+    end
+  end
+
 
   class CallFlows
     include EntitySet
@@ -115,15 +191,18 @@ class VerboiceConnector < Connector
       "#{@parent.path}/call_flows"
     end
 
-    def entities(user)
+    def entities(user, filters={})
       project = GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{@parent.id}.json")
       project["call_flows"].map { |cf| CallFlow.new(self, cf["id"], cf["name"]) }
     end
 
-    def find_entity(id)
-      CallFlow.new(self, id)
+    def find_entity(id, user)
+      CallFlow.new(self, id, call_flow(id, user)["name"])
     end
 
+    def call_flow(id, user)
+      GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{@parent.id}/call_flows/#{id}.json")
+    end
   end
 
   class CallFlow
@@ -143,7 +222,14 @@ class VerboiceConnector < Connector
     end
 
     def sub_path
-      @id
+      id
+    end
+
+    def properties
+      {
+        id: SimpleProperty.id(id),
+        name: SimpleProperty.name(@name)
+      }
     end
 
     def events

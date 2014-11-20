@@ -117,7 +117,7 @@ class ConnectorsController < ApplicationController
     connector = connector_from_guid()
     target = connector.lookup_path(params[:path], current_user)
     query_url_proc = ->(path) { query_with_path_connector_url(params[:id], path) }
-    render json: target.query(query_url_proc, current_user)
+    render json: target.query(query_url_proc, current_user, params)
   end
 
   def invoke

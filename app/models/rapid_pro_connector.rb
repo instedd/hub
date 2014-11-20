@@ -49,7 +49,7 @@ class RapidProConnector < Connector
       "Flows"
     end
 
-    def entities(user)
+    def entities(user, filters={})
       url = "#{connector.url}/api/v1/flows.json"
       all_flows = []
 
@@ -62,7 +62,7 @@ class RapidProConnector < Connector
       all_flows
     end
 
-    def find_entity(id)
+    def find_entity(id, user)
       Flow.new(self, id)
     end
   end

@@ -68,6 +68,7 @@ describe ElasticsearchConnector do
     it "types" do
       result = connector.lookup_path("indices/instedd_hub_test/types", user).reflect(url_proc, user)
       expect(result).to eq({
+        entity_definition: {},
         entities: [
           {
             label: "type1",

@@ -16,4 +16,20 @@ class SimpleProperty
   def reflect_path
     nil
   end
+
+  def self.id(value)
+    integer("Id", value)
+  end
+
+  def self.integer(label, value)
+    new(label, :integer, value)
+  end
+
+  def self.name(value)
+    string("Name", value)
+  end
+
+  def self.string(label, value)
+    new(label, :string, value)
+  end
 end

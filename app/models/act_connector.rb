@@ -25,15 +25,11 @@ class ACTConnector < Connector
       "Cases"
     end
 
-    def entities(user)
+    def entities(user, filters={})
       []
     end
 
-    def reflect_entities
-      entities
-    end
-
-    def find_entity(id)
+    def find_entity(id, user)
       raise "Individual cases cannot be accessed through the connector"
     end
 

@@ -25,12 +25,12 @@ class ElasticsearchConnector < Connector
       "Indices"
     end
 
-    def entities(user)
+    def entities(user, filters={})
       response = JSON.parse RestClient.get("#{connector.url}/_stats/indices")
       response["indices"].map { |name, index| Index.new(self, name) }
     end
 
-    def find_entity(id)
+    def find_entity(id, user)
       Index.new(self, id)
     end
   end
@@ -77,12 +77,12 @@ class ElasticsearchConnector < Connector
       "Types"
     end
 
-    def entities(user)
+    def entities(user, filters={})
       response = JSON.parse RestClient.get("#{connector.url}/#{index_name}/_mapping")
       response[@parent.name]["mappings"].keys.map { |type| Type.new(self, type) }
     end
 
-    def find_entity(id)
+    def find_entity(id, user)
       Type.new(self, id)
     end
   end

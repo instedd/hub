@@ -32,6 +32,7 @@ describe ONAConnector do
 
       forms = connector.lookup %w(forms), user
       expect(forms.reflect(url_proc, user)).to eq({
+        :entity_definition => {},
         entities: [
           {
             label: "Form 1",

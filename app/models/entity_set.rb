@@ -6,6 +6,9 @@ module EntitySet
     mod.delegate :connector, to: :parent unless mod.method_defined?(:connector)
   end
 
+  abstract def entities(user, filters={})
+  end
+
   def lookup(path, user)
     return self if path.empty?
     entity_id = path.shift
@@ -16,7 +19,7 @@ module EntitySet
     when "$events"
       EventsNode.new(self).lookup(path, user)
     else
-      find_entity(entity_id).lookup(path, user)
+      find_entity(entity_id, user).lookup(path, user)
     end
   end
 
@@ -30,13 +33,31 @@ module EntitySet
   def events
   end
 
-  def query(query_url_proc)
-    entities.map { |e| e.query(query_url_proc) }
+  def query(query_url_proc, current_user, filters)
+    entities(current_user, filters).map { |e| e.query(query_url_proc, current_user, filters) }
+  end
+
+  def insert(insert_url_proc)
+  end
+
+  def update(update_url_proc)
+  end
+
+  def delete(delete_url_proc)
+  end
+
+  def reflect_entities(user)
+    entities(user)
+  end
+
+  def entity_properties
   end
 
   def reflect(reflect_url_proc, user)
     reflection = {}
-    reflection[:entities] = entities(user).map do |entity|
+    reflection[:entity_definition] = {}
+    reflection[:entity_definition][:properties] = entity_properties if entity_properties
+    reflection[:entities] = reflect_entities(user).map do |entity|
       {label: entity.label, path: entity.path, reflect_url: reflect_url_proc.call(entity.path)}
     end
     if a = actions(user)

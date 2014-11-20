@@ -37,7 +37,7 @@ module Entity
   def events
   end
 
-  def query(query_url_proc)
+  def query(query_url_proc, current_user, filters)
     if p = properties
       Hash[p.map do |k, v|
         if v.is_a?(EntitySet)

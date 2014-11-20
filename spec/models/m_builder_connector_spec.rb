@@ -29,6 +29,7 @@ describe MBuilderConnector do
 
         applications = connector.lookup %w(applications), user
         expect(applications.reflect(url_proc, user)).to eq({
+          entity_definition: {},
           entities: [
             {
               label: "Application 1",
@@ -170,6 +171,7 @@ describe MBuilderConnector do
 
         applications = connector.lookup %w(applications), user
         expect(applications.reflect(url_proc, user)).to eq({
+          entity_definition: {},
           entities: [
             {
               label: "Application 1",
