@@ -7,6 +7,8 @@ class Connector < ActiveRecord::Base
 
   before_validation :generate_guid
 
+  default_scope { order('user_id desc, name') } # order first shared connectors and then by name
+
   abstract :url
 
   def generate_guid
