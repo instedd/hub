@@ -1,19 +1,19 @@
 %ih-target-box(model='prop' schema='schema[key].type.members')
 
 %ul(ng-if='is_open_struct(key)')
-  %li
-    %div(ng-show='new_field.type != null')
-      %input(type="text" placeholder="field name" ng-model="new_field.name" ng-keypress="new_field_key_press($event)")
+  %li(ng-controller='NewFieldController')
+    %div(ng-show='type != null')
+      %input(type="text" placeholder="field name" ng-model="name" ng-keypress="field_name_key_press($event)")
 
-      %span.type :: {{new_field.type}}
+      %span.type :: {{type}}
 
       .btn-group
-        %button.btn.btn-small(type="button" ng-click="new_field_submit(key)")
+        %button.btn.btn-small(type="button" ng-click="submit()")
           Ok
-        %button.btn.btn-small(type="button" ng-click="new_field_cancel()")
+        %button.btn.btn-small(type="button" ng-click="cancel()")
           Cancel
 
-    .btn-group(ng-show='new_field.type == null')
+    .btn-group(ng-show='type == null')
       %button.btn.btn-small.dropdown-toggle(data-toggle="dropdown")
         Add field
         %span.caret

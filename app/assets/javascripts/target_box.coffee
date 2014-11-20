@@ -41,28 +41,14 @@ angular
       delete $scope.model.members[key]
       delete $scope.model.open[key]
 
-    $scope.new_field = {type: null, name: null}
-
-    $scope.add_field = (type) ->
-      $scope.new_field.type = type
-      $scope.new_field.name = null
-
-    $scope.new_field_submit = (key) ->
-      $scope.model.members[key].members[$scope.new_field.name] = if $scope.new_field.type == 'struct'
-          default_binding {type: {kind: 'struct'} }
-        else
-          default_binding {type: $scope.new_field.type}
+    $scope.add_open_struct_field = (key, name, type) ->
+      $scope.model.members[key].members[name] = if type == 'struct'
+        default_binding {type: {kind: 'struct'} }
+      else
+        default_binding {type: type}
 
       $scope.model.members[key].open ||= {}
-      $scope.model.members[key].open[$scope.new_field.name] = $scope.new_field.type
-
-      $scope.new_field_cancel()
-
-    $scope.new_field_key_press = ($event) ->
-      $scope.new_field_submit() if ($event.which == 13)
-
-    $scope.new_field_cancel = () ->
-      $scope.new_field = {type: null, name: null}
+      $scope.model.members[key].open[name] = type
 
     $scope.is_mapped = (prop) ->
       Object.prototype.toString.call(prop) == '[object Array]'
@@ -89,3 +75,22 @@ angular
           type: "literal"
           value: null
         }
+
+.controller 'NewFieldController', ($scope) ->
+  $scope.type = null
+  $scope.name = null
+
+  $scope.add_field = (type) ->
+    $scope.type = type
+    $scope.name = null
+
+  $scope.submit = () ->
+    $scope.add_open_struct_field($scope.key, $scope.name, $scope.type)
+    $scope.cancel()
+
+  $scope.field_name_key_press = ($event) ->
+    $scope.submit() if ($event.which == 13)
+
+  $scope.cancel = () ->
+    $scope.type = null
+    $scope.name = null
