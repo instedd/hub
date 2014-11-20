@@ -146,12 +146,13 @@ class RapidProConnector < Connector
     end
 
     def process_runs_response(all_results)
-      last_date_per_run = load_state || {}
+      last_date_per_run = JSON.parse(load_state) rescue {}
 
       all_results = all_results.select do |r|
-        last_date = last_date_per_run[r["run"]]
+        run_id = r["run"].to_s
+        last_date = last_date_per_run[run_id]
         max_time = r["values"].max_by { |v| v["time"] }["time"] rescue r["created_on"]
-        last_date_per_run[r["run"]] = max_time
+        last_date_per_run[run_id] = max_time
 
         last_date.nil? || max_time > last_date
       end
@@ -170,7 +171,7 @@ class RapidProConnector < Connector
         return []
       end
 
-      save_state(last_date_per_run)
+      save_state(last_date_per_run.to_json)
       events.reverse # return oldest event first
     end
   end

@@ -106,7 +106,7 @@ describe RapidProConnector do
     it "run with no variables only once" do
       data = [
         {
-          "run" => 1,
+          "run" => 1534678,
           "phone" => "+12345678",
           "contact" => "contact-1-guid",
           "values" => [],
@@ -122,6 +122,12 @@ describe RapidProConnector do
       }])
 
       events = event.process_runs_response data
+      expect(events).to eq([])
+
+      # try it by reloading from the database
+      connector2 = Connector.find(connector.id)
+      event2 = connector2.lookup_path event.path, nil
+      events = event2.process_runs_response data
       expect(events).to eq([])
     end
 
