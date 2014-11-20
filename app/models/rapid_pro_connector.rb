@@ -90,7 +90,7 @@ class RapidProConnector < Connector
 
     def events
       {
-        "new_run" => NewRunEvent.new(self)
+        "run_update" => RunUpdateEvent.new(self)
       }
     end
 
@@ -101,7 +101,8 @@ class RapidProConnector < Connector
     end
   end
 
-  class NewRunEvent
+  # This event runs when a run is started or updated thru a new variable asignment
+  class RunUpdateEvent
     include Event
 
     delegate :connector, to: :@parent
@@ -111,11 +112,11 @@ class RapidProConnector < Connector
     end
 
     def label
-      "New run"
+      "Run update"
     end
 
     def path
-      "#{@parent.path}/$events/new_run"
+      "#{@parent.path}/$events/run_update"
     end
 
     def args(user)
@@ -134,23 +135,29 @@ class RapidProConnector < Connector
     end
 
     def poll
-      max_created_on = load_state
-
       url = "#{connector.url}/api/v1/runs.json?flow=#{@parent.id}"
-      # if max_created_on
-      #   url << "&after=#{CGI.escape max_created_on}"
-      # end
 
       all_results = []
       connector.http_get_json_paginated(url) do |results|
         all_results.concat results["results"]
       end
-      if max_created_on
-        all_results = all_results.select { |r| r["created_on"] > max_created_on }
+
+      process_runs_response all_results
+    end
+
+    def process_runs_response(all_results)
+      last_date_per_run = load_state || {}
+
+      all_results = all_results.select do |r|
+        last_date = last_date_per_run[r["run"]]
+        max_time = r["values"].max_by { |v| v["time"] }["time"] rescue r["created_on"]
+        last_date_per_run[r["run"]] = max_time
+
+        last_date.nil? || max_time > last_date
       end
 
       events = all_results.map do |result|
-        values =         {
+        {
           "contact" => result["contact"],
           "phone" => result["phone"],
           "values" => Hash[result["values"].map do |value|
@@ -163,8 +170,7 @@ class RapidProConnector < Connector
         return []
       end
 
-      max_created_on = all_results.max_by { |result| result["created_on"] }["created_on"]
-      save_state(max_created_on)
+      save_state(last_date_per_run)
       events.reverse # return oldest event first
     end
   end

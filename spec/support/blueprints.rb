@@ -26,6 +26,11 @@ VerboiceConnector.blueprint do
   user
 end
 
+RapidProConnector.blueprint do
+  url { "https://rapidpro.io" }
+  token { "token" }
+end
+
 EventHandler.blueprint do
   connector
   event { 'info/$events/new_data'}
