@@ -144,6 +144,13 @@ class GoogleSpreadsheetsConnector < Connector
       }
     end
 
+    def invoke(args, user)
+      worksheet = self.worksheet
+      list = worksheet.list
+      list.push args["properties"]
+      worksheet.save
+    end
+
     def after_create(binding)
       define_columns_for binding
     end
