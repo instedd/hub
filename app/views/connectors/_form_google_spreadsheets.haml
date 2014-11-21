@@ -1,0 +1,36 @@
+- if connector.persisted?
+  :javascript
+    var pickerApiLoaded = false;
+
+    function onApiLoad() {
+      gapi.load('picker', {'callback': function() { pickerApiLoaded = true }});
+    }
+
+    function createPicker() {
+      if (pickerApiLoaded) {
+        var picker = new google.picker.PickerBuilder().
+            addView(new google.picker.DocsView().
+              setMode(google.picker.DocsViewMode.LIST)).
+            setAppId('#{Settings.google.app_id}').
+            setDeveloperKey("#{Settings.google.browser_key}").
+            setOAuthToken("#{connector.access_token}").
+            setCallback(pickerCallback).
+            build();
+        picker.setVisible(true);
+      }
+    }
+
+    function pickerCallback(data) {
+      if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
+        var doc = data[google.picker.Response.DOCUMENTS][0];
+        $('#connector_spreadsheet_key').val(doc.id);
+        $('#connector_spreadsheet_name').val(doc.name);
+      }
+    }
+
+  .field
+    = f.label :spreadsheet_name, "File"
+    = f.text_field :spreadsheet_name, value: connector.spreadsheet_name, readonly: true, style: 'background-color: white'
+    %button.btn{onclick: "javascript:createPicker(); return false;"} Choose
+    = f.hidden_field :spreadsheet_key, value: connector.spreadsheet_key
+  <script type="text/javascript" src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>

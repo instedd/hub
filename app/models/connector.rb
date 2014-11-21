@@ -11,6 +11,8 @@ class Connector < ActiveRecord::Base
 
   abstract :url
 
+  store :settings
+
   def generate_guid
     self.guid ||= Guid.new.to_s
   end

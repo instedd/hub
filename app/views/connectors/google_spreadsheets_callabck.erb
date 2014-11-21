@@ -1,0 +1,67 @@
+<script type="text/javascript">
+  var developerKey = '<%= Settings.google.browser_key %>';
+  var clientId = '<%= Settings.google.client_id %>';
+  var scope = ['https://www.googleapis.com/auth/drive.file'];
+
+  var pickerApiLoaded = false;
+  var oauthToken;
+
+  // Use the API Loader script to load google.picker and gapi.auth.
+  function onApiLoad() {
+    gapi.load('auth');
+    gapi.load('picker', {'callback': onPickerApiLoad});
+  }
+
+  function onAuthApiLoad() {
+    window.gapi.auth.authorize(
+        {
+          'client_id': clientId,
+          'scope': scope,
+          'immediate': false
+        },
+        handleAuthResult);
+  }
+
+  function onPickerApiLoad() {
+    pickerApiLoaded = true;
+    // createPicker();
+  }
+
+  function handleAuthResult(authResult) {
+    if (authResult && !authResult.error) {
+      // console.log(authResult);
+      // oauthToken = authResult.access_token;
+      oauthToken = "ya29.xAAefCuJICbH4NrDTDimG0N6FhTVo7cWrPnpS0CVcj89NLGgGivGblx5wpOeYIDb-Kr3cyO2YWyo1w";
+      createPicker();
+    }
+  }
+
+  // Create and render a Picker object for picking user Photos.
+  function createPicker() {
+    if (pickerApiLoaded) {
+      var picker = new google.picker.PickerBuilder().
+          addView(google.picker.ViewId.SPREADSHEETS).
+          setOAuthToken("ya29.xAAefCuJICbH4NrDTDimG0N6FhTVo7cWrPnpS0CVcj89NLGgGivGblx5wpOeYIDb-Kr3cyO2YWyo1w").
+          setDeveloperKey(developerKey).
+          setCallback(pickerCallback).
+          setAppId('813633885570').
+          build();
+      picker.setVisible(true);
+    }
+  }
+
+  // A simple callback implementation.
+  function pickerCallback(data) {
+    var url = 'nothing';
+    if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
+      debugger;
+      var doc = data[google.picker.Response.DOCUMENTS][0];
+      url = doc[google.picker.Document.URL];
+    }
+    var message = 'You picked: ' + url;
+    document.getElementById('result').innerHTML = message;
+  }
+</script>
+<div id="result"></div>
+<a href="javascript:createPicker()">CLICK</a>
+<script type="text/javascript" src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>

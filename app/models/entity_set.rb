@@ -1,7 +1,10 @@
 module EntitySet
   abstract :path, :label
   attr_reader :parent
-  delegate :connector, to: :parent
+
+  def self.included(mod)
+    mod.delegate :connector, to: :parent unless mod.method_defined?(:connector)
+  end
 
   def lookup(path, user)
     return self if path.empty?

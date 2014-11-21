@@ -3,5 +3,7 @@ authentication_token: secret
 poirot:
   elasticsearch_url: localhost:9200
 google:
+  app_id:
   client_id:
   client_secret:
+  browser_key:

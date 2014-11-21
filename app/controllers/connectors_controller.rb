@@ -41,9 +41,8 @@ class ConnectorsController < ApplicationController
 
   def create
     if connector.needs_authorization?
-      session[:connector_class_name] = connector.class.name.to_s
-      session[:connector_params] = params.require(:connector).permit!
-      redirect_to connector.authorization_uri(authorization_callback_connectors_url)
+      state = params.require(:connector).permit!.to_json
+      redirect_to connector.authorization_uri(url_for(controller: 'connectors', action: connector.callback_action), state)
     else
       connector.update_attributes params.require(:connector).permit!
       if connector.save
@@ -68,8 +67,29 @@ class ConnectorsController < ApplicationController
     redirect_to connectors_path, notice: "Connector #{connector.name} successfully deleted."
   end
 
-  def authorization_callback
+  def google_spreadsheets_callback
     # These two lines so we can reuse decent_exposure's logic
+    params[:type] = "GoogleSpreadsheetsConnector"
+    connector = self.connector
+
+    api = GoogleSpreadsheetsConnector.api_client
+    api.authorization.code = params[:code]
+    api.authorization.redirect_uri = url_for(controller: 'connectors', action: connector.callback_action)
+    access_token = api.authorization.fetch_access_token!
+
+    connector.update_attributes JSON.parse(params[:state])
+    connector.access_token = access_token["access_token"]
+    connector.refresh_token = access_token["refresh_token"]
+    connector.expires_at = access_token["expires_in"].seconds.from_now
+
+    if connector.save
+      redirect_to edit_connector_path(connector), notice: "Connector #{connector.name} successfully created."
+    else
+      render action: "new"
+    end
+  end
+
+  def authorization_callback
     params[:type] = session[:connector_class_name]
     connector = self.connector
 

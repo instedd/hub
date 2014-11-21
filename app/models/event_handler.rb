@@ -4,6 +4,9 @@ class EventHandler < ActiveRecord::Base
   belongs_to :target_connector, class_name: 'Connector', foreign_key: 'target_connector_id'
   serialize :binding
 
+  after_create :notify_action_created
+  after_update :notify_action_updated
+
   module QueuePollJob
     def self.perform
       connector_ids = EventHandler.where(poll: true).distinct.pluck(:connector_id)
@@ -25,5 +28,19 @@ class EventHandler < ActiveRecord::Base
   def bind_event_data(data)
     @mapper ||= JsonMapper.new(binding || [])
     @mapper.map data
+  end
+
+  def notify_action_created
+    target_action = target_connector.lookup_path(action, user)
+    if target_action.respond_to?(:after_create)
+      target_action.after_create(self.binding)
+    end
+  end
+
+  def notify_action_updated
+    target_action = target_connector.lookup_path(action, user)
+    if target_action.respond_to?(:after_update)
+      target_action.after_update(self.binding)
+    end
   end
 end

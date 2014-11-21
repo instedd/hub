@@ -20,7 +20,7 @@ Rails.application.routes.draw do
     end
 
     collection do
-      get 'authorization_callback'
+      get 'google_spreadsheets_callback'
     end
   end
 
