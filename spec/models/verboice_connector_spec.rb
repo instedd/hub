@@ -311,12 +311,16 @@ describe VerboiceConnector do
 
     let!(:event_handler_1) { EventHandler.create!(
       connector: verboice_connector,
-      event: "projects/2/call_flows/2/$events/call_finished"
+      event: "projects/2/call_flows/2/$events/call_finished",
+      target_connector: verboice_connector,
+      action: "projects/2/call_flows/2/$events/call_finished",
     )}
 
     let!(:event_handler_2) { EventHandler.create!(
       connector: verboice_connector,
-      event: "projects/2/call_flows/2/$events/call_finished"
+      event: "projects/2/call_flows/2/$events/call_finished",
+      target_connector: verboice_connector,
+      action: "projects/2/call_flows/2/$events/call_finished",
     )}
 
     it "should invoke event handlers when processing a queued job" do
