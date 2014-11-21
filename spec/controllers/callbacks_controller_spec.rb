@@ -8,6 +8,8 @@ describe CallbacksController do
     let!(:verboice_connector) { VerboiceConnector.make! user: nil }
 
     it 'should find verboice shared connector when calling enqueue' do
+      expect(Resque).to receive(:enqueue_to)
+
       verboice_connector_2 = verboice_connector_2 = VerboiceConnector.make!
 
       post :enqueue, { connector: 'verboice', token: Settings.authentication_token, event: 'call' }
@@ -24,6 +26,5 @@ describe CallbacksController do
 
       post :enqueue, { connector: 'verboice', token: Settings.authentication_token, event: 'call'}
     end
-
   end
 end
