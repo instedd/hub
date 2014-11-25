@@ -18,3 +18,7 @@
       = icon_link_to :'icc-add', "Add #{name} Connector", new_connector_path(type: "#{name}Connector"), class: "add-connector blue"
       %br
       %br
+  - if OAuth2::Client.service_configured?(:google)
+    = icon_link_to :'icc-add', "Add Fusion Tables Connector", new_connector_path(type: "FusionTablesConnector"), class: "add-connector blue"
+
+
