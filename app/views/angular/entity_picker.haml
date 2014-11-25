@@ -10,7 +10,7 @@
       %button(type="button" class="close" data-dismiss="modal") &times;
       %h3 Choose {{type}}
     .modal-body
-      %ih-entity-browser(on-select='eventSelected' connectors='connectors')
+      %ih-entity-browser(on-select='eventSelected' connectors='connectors' filter-type='type')
     .modal-footer
       %a(href='javascript:' class='btn' ng-click='closeEventDialog()') Cancel
       %a(href='javascript:' class='btn btn-primary' ng-click='acceptEventDialog()' ng-disabled='!is_selection_valid()') Select

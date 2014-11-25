@@ -43,6 +43,7 @@ angular
   restrict: 'E'
   scope:
     onSelect: '&'
+    filterType: '='
   templateUrl: '/angular/entity_browser.html'
 
 .directive 'ihScrollRightOn', ->
@@ -106,13 +107,15 @@ angular
         schema['__type'] = 'entity'
         res.push schema
 
-      for prop, schema of data.actions
-        schema['__type'] = 'action'
-        res.push schema
+      if $scope.filterType == 'action'
+        for prop, schema of data.actions
+          schema['__type'] = 'action'
+          res.push schema
 
-      for prop, schema of data.events
-        schema['__type'] = 'event'
-        res.push schema
+      if $scope.filterType == 'event'
+        for prop, schema of data.events
+          schema['__type'] = 'event'
+          res.push schema
 
       $scope.$emit('entitybrowser:loaded')
 
