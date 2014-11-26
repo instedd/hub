@@ -9,7 +9,7 @@
     function createPicker() {
       if (pickerApiLoaded) {
         var picker = new google.picker.PickerBuilder().
-            addView(new google.picker.DocsView().
+            addView(new google.picker.DocsView(google.picker.ViewId.SPREADSHEETS).
               setMode(google.picker.DocsViewMode.LIST)).
             setAppId('#{Settings.google.app_id}').
             setDeveloperKey("#{Settings.google.browser_key}").
