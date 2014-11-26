@@ -4,7 +4,7 @@ module EntitySet
   attr_reader :parent
 
   abstract :path, :label
-  def entities(user)
+  def reflect_entities(user)
     select({}, user, page: 1, page_size: 1000)
   end
 
@@ -82,7 +82,7 @@ module EntitySet
 
   def reflect(reflect_url_proc, user)
     reflection = reflect_property reflect_url_proc, user
-    if e = entities(user)
+    if e = reflect_entities(user)
       reflection[:entities] = e.map { |entity| entity.reflect_property(reflect_url_proc, user) }
     end
     if a = actions(user)

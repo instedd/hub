@@ -44,7 +44,7 @@ class ONAConnector < Connector
       "Forms"
     end
 
-    def entities(user)
+    def select(filters, user, options)
       forms = connector.get_json "forms.json"
       forms.map! { |form| Form.new(self, form["formid"], form) }
       forms.sort_by! { |form| form.label.downcase }

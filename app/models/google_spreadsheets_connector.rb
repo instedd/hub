@@ -11,7 +11,7 @@ class GoogleSpreadsheetsConnector < Connector
     ""
   end
 
-  def entities(user)
+  def select(filters, user, options)
     [Spreadsheet.new(self, spreadsheet_key, spreadsheet_name)]
   end
 

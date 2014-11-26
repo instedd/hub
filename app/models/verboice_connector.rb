@@ -46,7 +46,7 @@ class VerboiceConnector < Connector
       "Projects"
     end
 
-    def entities(user)
+    def select(filters, user, options)
       projects(user).map { |project| entity(project) }
     end
 
@@ -139,7 +139,7 @@ class VerboiceConnector < Connector
       end
     end
 
-    def entities(user)
+    def reflect_entities(user)
     end
 
     def find_entity(address, user)
@@ -197,7 +197,7 @@ class VerboiceConnector < Connector
       "#{@parent.path}/call_flows"
     end
 
-    def entities(user)
+    def select(filters, user, options)
       project = GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{@parent.id}.json")
       project["call_flows"].map { |cf| CallFlow.new(self, cf["id"], cf["name"]) }
     end

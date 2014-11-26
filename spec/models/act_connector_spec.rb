@@ -35,7 +35,7 @@ describe ACTConnector do
       # empty entity list should be returned without needing to contact the API
       cases = connector.lookup %w(cases), user
       listed_entities = cases.reflect(url_proc, user)[:entities]
-      expect(listed_entities).to be_empty
+      expect(listed_entities).to be(nil)
     end
 
     describe "new case event" do

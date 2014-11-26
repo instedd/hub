@@ -29,7 +29,7 @@ class MBuilderConnector < Connector
       "Applications"
     end
 
-    def entities(user)
+    def select(filters, user, options)
       GuissoRestClient.new(connector, user).get("#{connector.url}/api/applications").map do |application|
         Application.new(self, application["id"], application)
       end

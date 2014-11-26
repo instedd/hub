@@ -25,7 +25,10 @@ class ACTConnector < Connector
       "Cases"
     end
 
-    def entities(user)
+    def reflect_entities(user)
+    end
+
+    def select(filters, user, options)
       []
     end
 
