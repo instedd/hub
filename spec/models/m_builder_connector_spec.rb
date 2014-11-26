@@ -12,6 +12,10 @@ describe MBuilderConnector do
 
       it "reflects on root" do
         expect(connector.reflect(url_proc, user)).to eq({
+          label: nil,
+          path: "",
+          reflect_url: "http://server/",
+          type: :entity,
           properties: {
             "applications" => {
               label: "Applications",
@@ -37,6 +41,7 @@ describe MBuilderConnector do
             {
               label: "Application 1",
               path: "applications/1",
+              type: :entity,
               reflect_url: "http://server/applications/1"
             }
           ]
@@ -59,6 +64,10 @@ describe MBuilderConnector do
         application = connector.lookup %w(applications 1), user
 
         expect(application.reflect(url_proc, user)).to eq({
+          label: nil,
+          path: "applications/1",
+          reflect_url: "http://server/applications/1",
+          type: :entity,
           properties: {
             "id" => {
               label: "Id",
@@ -156,6 +165,10 @@ describe MBuilderConnector do
 
       it "reflects on root" do
         expect(connector.reflect(url_proc, user)).to eq({
+          label: nil,
+          path: "",
+          reflect_url: "http://server/",
+          type: :entity,
           properties: {
             "applications" => {
               label: "Applications",
@@ -182,6 +195,7 @@ describe MBuilderConnector do
             {
               label: "Application 1",
               path: "applications/1",
+              type: :entity,
               reflect_url: "http://server/applications/1"
             }
           ]
@@ -205,6 +219,10 @@ describe MBuilderConnector do
         application = connector.lookup %w(applications 1), user
 
         expect(application.reflect(url_proc, user)).to eq({
+          label: nil,
+          path: "applications/1",
+          reflect_url: "http://server/applications/1",
+          type: :entity,
           properties: {
             "id" => {
               label: "Id",

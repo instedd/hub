@@ -11,22 +11,31 @@ Connector.blueprint do
 end
 
 ACTConnector.blueprint do
+  name { "Connector #{sn}" }
   url { "http://example.com" }
 end
 
 ElasticsearchConnector.blueprint do
+  name { "Connector #{sn}" }
 end
 
 ONAConnector.blueprint do
+  name { "Connector #{sn}" }
   url { "http://example.com" }
   auth_method { "anonymous" }
 end
 
+MBuilderConnector.blueprint do
+  name { "Connector #{sn}" }
+end
+
 VerboiceConnector.blueprint do
+  name { "Connector #{sn}" }
   user
 end
 
 RapidProConnector.blueprint do
+  name { "Connector #{sn}" }
   url { "https://rapidpro.io" }
   token { "token" }
 end

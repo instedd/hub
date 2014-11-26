@@ -1,6 +1,10 @@
 module Entity
   attr_reader :parent
-  abstract :label, :sub_path
+  abstract :sub_path
+
+  def node_type
+    :entity
+  end
 
   def self.included(mod)
     mod.delegate :connector, to: :parent unless mod.method_defined?(:connector)
@@ -25,7 +29,11 @@ module Entity
   end
 
   def path
-    "#{parent.path}/#{sub_path}"
+    if is_a? Connector
+      ""
+    else
+      "#{parent.path}/#{sub_path}"
+    end
   end
 
   def properties
@@ -49,26 +57,23 @@ module Entity
     end
   end
 
-  def reflect_property(reflect_url_proc)
+  def reflect_property(reflect_url_proc, user)
     {
       label: label,
       path: path,
+      type: node_type,
       reflect_url: reflect_url_proc.call(path)
     }
   end
 
   def reflect(reflect_url_proc, user)
-    reflection = {}
+    reflection = reflect_property(reflect_url_proc, user)
     reflection[:properties] = SimpleProperty.reflect reflect_url_proc, properties, user if properties
     if a = actions(user)
-      reflection[:actions] = Hash[a.map do |k, v|
-        [k, v.reflect_property(reflect_url_proc)]
-      end]
+      reflection[:actions] = SimpleProperty.reflect reflect_url_proc, a, user
     end
     if e = events
-      reflection[:events] = Hash[e.map do |k, v|
-        [k, v.reflect_property(reflect_url_proc)]
-      end]
+      reflection[:events] = SimpleProperty.reflect reflect_url_proc, e, user
     end
     reflection
   end

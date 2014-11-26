@@ -44,7 +44,7 @@ class ONAConnector < Connector
       "Forms"
     end
 
-    def entities(user, filters={})
+    def entities(user)
       forms = connector.get_json "forms.json"
       forms.map! { |form| Form.new(self, form["formid"], form) }
       forms.sort_by! { |form| form.label.downcase }
@@ -65,15 +65,18 @@ class ONAConnector < Connector
       @form = form
     end
 
+    def form
+      @form ||= connector.get_json("forms/#{@id}.json")
+    end
+
     def properties
-      form ||= connector.get_json("forms/#{@id}.json")
       {
         "id" => SimpleProperty.id(@id)
       }
     end
 
     def label
-      @form["title"]
+      form["title"]
     end
 
     def sub_path

@@ -46,7 +46,7 @@ class VerboiceConnector < Connector
       "Projects"
     end
 
-    def entities(user, filters={})
+    def entities(user)
       projects(user).map { |project| entity(project) }
     end
 
@@ -105,6 +105,7 @@ class VerboiceConnector < Connector
     include EntitySet
 
     protocol :insert, :select, :update, :delete
+    filter_by :address
 
     def initialize(parent)
       @parent = parent
@@ -120,8 +121,8 @@ class VerboiceConnector < Connector
 
     def entity_properties
       {
-        id: SimpleProperty.id(nil),
-        address: SimpleProperty.integer("Address", nil)
+        id: SimpleProperty.id,
+        address: SimpleProperty.integer("Address")
       }
     end
 
@@ -196,7 +197,7 @@ class VerboiceConnector < Connector
       "#{@parent.path}/call_flows"
     end
 
-    def entities(user, filters={})
+    def entities(user)
       project = GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{@parent.id}.json")
       project["call_flows"].map { |cf| CallFlow.new(self, cf["id"], cf["name"]) }
     end

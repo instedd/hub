@@ -34,6 +34,10 @@ describe ElasticsearchConnector do
     it "connector" do
       result = connector.reflect(url_proc, user)
       expect(result).to eq({
+        label: connector.name,
+        path: "",
+        reflect_url: "http://server/",
+        type: :entity,
         properties: {
           "indices" => {
             label: "Indices",
@@ -54,6 +58,10 @@ describe ElasticsearchConnector do
     it "index" do
       result = connector.lookup_path("indices/instedd_hub_test", user).reflect(url_proc, user)
       expect(result).to eq({
+        label: "instedd_hub_test",
+        path: "indices/instedd_hub_test",
+        reflect_url: "http://server/indices/instedd_hub_test",
+        type: :entity,
         properties: {
           "types" => {
             label: "Types",
@@ -76,6 +84,7 @@ describe ElasticsearchConnector do
           {
             label: "type1",
             path: "indices/instedd_hub_test/types/type1",
+            type: :entity,
             reflect_url: "http://server/indices/instedd_hub_test/types/type1"
           }
         ]
@@ -85,6 +94,10 @@ describe ElasticsearchConnector do
     it "type" do
       result = connector.lookup_path("indices/instedd_hub_test/types/type1", user).reflect(url_proc, user)
       expect(result).to eq({
+        label: "type1",
+        path: "indices/instedd_hub_test/types/type1",
+        reflect_url: "http://server/indices/instedd_hub_test/types/type1",
+        type: :entity,
         actions: {
           "insert" => {
             label: "Insert",

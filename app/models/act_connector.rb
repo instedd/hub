@@ -25,7 +25,7 @@ class ACTConnector < Connector
       "Cases"
     end
 
-    def entities(user, filters={})
+    def entities(user)
       []
     end
 

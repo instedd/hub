@@ -25,7 +25,7 @@ class ElasticsearchConnector < Connector
       "Indices"
     end
 
-    def entities(user, filters={})
+    def entities(user)
       response = JSON.parse RestClient.get("#{connector.url}/_stats/indices")
       response["indices"].map { |name, index| Index.new(self, name) }
     end

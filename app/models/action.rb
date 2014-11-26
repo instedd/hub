@@ -7,7 +7,7 @@ module Action
     {}
   end
 
-  def reflect_property(reflect_url_proc)
+  def reflect_property(reflect_url_proc, user)
     {
       label: label,
       path: path,

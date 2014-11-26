@@ -29,7 +29,7 @@ class MBuilderConnector < Connector
       "Applications"
     end
 
-    def entities(user, filters={})
+    def entities(user)
       GuissoRestClient.new(connector, user).get("#{connector.url}/api/applications").map do |application|
         Application.new(self, application["id"], application)
       end
@@ -44,7 +44,7 @@ class MBuilderConnector < Connector
     include Entity
     attr_reader :id
 
-    def initialize(parent, id, application=nil)
+    def initialize(parent, id, application={})
       @parent = parent
       @id = id
       @application = application

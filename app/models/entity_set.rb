@@ -43,10 +43,21 @@ module EntitySet
     def protocols
       @protocols ||= Array.new
     end
+
+    def filter_by(*methods)
+      filters.concat methods
+    end
+    def filters
+      @filters ||= Array.new
+    end
   end
 
   def protocols
     self.class.protocols
+  end
+
+  def filters
+    self.class.filters
   end
 
   abstract def select(filters, current_user, options)
@@ -58,7 +69,7 @@ module EntitySet
   def reflect_property reflect_url_proc, user
     reflection = {}
     reflection[:label] = label
-    reflection[:type] = type
+    reflection[:type] = node_type
     reflection[:path] = path
     reflection[:reflect_url] = reflect_url_proc.call(reflect_path) if reflect_path
     if entity_properties
@@ -72,23 +83,19 @@ module EntitySet
   def reflect(reflect_url_proc, user)
     reflection = reflect_property reflect_url_proc, user
     if e = entities(user)
-      reflection[:entities] = e.map { |entity| entity.reflect_property(reflect_url_proc) }
+      reflection[:entities] = e.map { |entity| entity.reflect_property(reflect_url_proc, user) }
     end
     if a = actions(user)
-      reflection[:actions] = Hash[a.map do |k, v|
-        [k, v.reflect_property(reflect_url_proc)]
-      end]
+      reflection[:actions] = SimpleProperty.reflect reflect_url_proc, a, user
     end
     # TODO Add actions from protocol
     if e = events
-      reflection[:events] = Hash[e.map do |k, v|
-        [k, v.reflect_property(reflect_url_proc)]
-      end]
+      reflection[:events] = SimpleProperty.reflect reflect_url_proc, e, user
     end
-    reflection
+      reflection
   end
 
-  def type
+  def node_type
     :entity_set
   end
 end

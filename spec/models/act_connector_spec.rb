@@ -16,6 +16,10 @@ describe ACTConnector do
 
     it "reflects on root" do
       expect(connector.reflect(url_proc, user)).to eq({
+        label: connector.name,
+        path: "",
+        reflect_url: "http://server/",
+        type: :entity,
         properties: {
           "cases" => {
             label: "Cases",
@@ -78,7 +82,7 @@ describe ACTConnector do
       it "contacts ACT API when performed" do
         case_id = 123
         update_url = "http://act.instedd.org/api/v1/cases/#{case_id}/?sick=true"
-        
+
         expect(RestClient).to receive(:put).with(update_url, nil)
 
         action = connector.lookup %w(cases $actions update_case), user

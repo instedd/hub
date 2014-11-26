@@ -15,6 +15,10 @@ describe ONAConnector do
 
     it "reflects on root" do
       expect(connector.reflect(url_proc, user)).to eq({
+        label: connector.name,
+        path: "",
+        reflect_url: "http://server/",
+        type: :entity,
         properties: {
           "forms" => {
             label: "Forms",
@@ -40,6 +44,7 @@ describe ONAConnector do
           {
             label: "Form 1",
             path: "forms/1",
+            type: :entity,
             reflect_url: "http://server/forms/1"
           }
         ]
@@ -52,6 +57,10 @@ describe ONAConnector do
 
       form = connector.lookup %w(forms 1), user
       expect(form.reflect(url_proc, user)).to eq({
+        label: "Form 1",
+        path: "forms/1",
+        reflect_url: "http://server/forms/1",
+        type: :entity,
         properties: {
           "id" => {
             label: "Id",

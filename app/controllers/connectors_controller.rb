@@ -124,7 +124,7 @@ class ConnectorsController < ApplicationController
       case request.method
       when "GET"
         if target.protocols.include? :select
-          render json: target.select(params[:filter] || {}, current_user, options).map { |e| e.raw(data_url_proc, current_user) }
+          render json: target.select((params[:filter] || {}).permit(target.filters), current_user, options).map { |e| e.raw(data_url_proc, current_user) }
         else
           render json: target.entities(current_user).map { |e| e.raw(data_url_proc, current_user) }
         end
