@@ -109,7 +109,7 @@ class ConnectorsController < ApplicationController
   def reflect
     connector = connector_from_guid()
     target = connector.lookup_path(params[:path], current_user)
-    reflect_url_proc = ->(path) { reflect_with_path_connector_url(params[:id], path) }
+    reflect_url_proc = ->(path) { path.blank? ? reflect_connector_url(params[:id]) : reflect_with_path_connector_url(params[:id], path) }
     render json: target.reflect(reflect_url_proc, current_user)
   end
 
