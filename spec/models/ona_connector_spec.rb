@@ -32,7 +32,10 @@ describe ONAConnector do
 
       forms = connector.lookup %w(forms), user
       expect(forms.reflect(url_proc, user)).to eq({
-        :entity_definition => {},
+        label: "Forms",
+        path: "forms",
+        reflect_url: "http://server/forms",
+        type: :entity_set,
         entities: [
           {
             label: "Form 1",

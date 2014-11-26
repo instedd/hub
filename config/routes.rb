@@ -8,12 +8,12 @@ Rails.application.routes.draw do
 
   get 'angular/*path' => 'home#angular_template'
 
-  resources :connectors do
+  resources :connectors, except: [:show] do
     member do
       get 'reflect'
       get 'reflect/*path' => 'connectors#reflect', as: 'reflect_with_path'
-      get 'data' => 'connectors#query'
-      get 'data/*path' => 'connectors#query', as: 'query_with_path'
+      get 'data' => 'connectors#data'
+      get 'data/*path' => 'connectors#data', as: 'data_with_path'
 
       post 'invoke/*path' => 'connectors#invoke'
       put 'poll'

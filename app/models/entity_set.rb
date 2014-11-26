@@ -1,12 +1,15 @@
 module EntitySet
-  abstract :path, :label
+  extend ActiveSupport::Concern
+
   attr_reader :parent
+
+  abstract :path, :label
+  def entities(user)
+    select({}, user, page: 1, page_size: 1000)
+  end
 
   def self.included(mod)
     mod.delegate :connector, to: :parent unless mod.method_defined?(:connector)
-  end
-
-  abstract def entities(user, filters={})
   end
 
   def lookup(path, user)
@@ -33,41 +36,53 @@ module EntitySet
   def events
   end
 
-  def query(query_url_proc, current_user, filters)
-    entities(current_user, filters).map { |e| e.query(query_url_proc, current_user, filters) }
+  module ClassMethods
+    def protocol(*methods)
+      protocols.concat methods
+    end
+    def protocols
+      @protocols ||= Array.new
+    end
   end
 
-  def insert(insert_url_proc)
+  def protocols
+    self.class.protocols
   end
 
-  def update(update_url_proc)
-  end
-
-  def delete(delete_url_proc)
-  end
-
-  def reflect_entities(user)
-    entities(user)
+  abstract def select(filters, current_user, options)
   end
 
   def entity_properties
   end
 
-  def reflect(reflect_url_proc, user)
+  def reflect_property reflect_url_proc, user
     reflection = {}
-    reflection[:entity_definition] = {}
-    reflection[:entity_definition][:properties] = entity_properties if entity_properties
-    reflection[:entities] = reflect_entities(user).map do |entity|
-      {label: entity.label, path: entity.path, reflect_url: reflect_url_proc.call(entity.path)}
+    reflection[:label] = label
+    reflection[:type] = type
+    reflection[:path] = path
+    reflection[:reflect_url] = reflect_url_proc.call(reflect_path) if reflect_path
+    if entity_properties
+      reflection[:entity_definition] = {}
+      reflection[:entity_definition][:properties] = SimpleProperty.reflect reflect_url_proc, entity_properties, user
+    end
+    reflection[:protocol] = protocols unless protocols.empty?
+    reflection
+  end
+
+  def reflect(reflect_url_proc, user)
+    reflection = reflect_property reflect_url_proc, user
+    if e = entities(user)
+      reflection[:entities] = e.map { |entity| entity.reflect_property(reflect_url_proc) }
     end
     if a = actions(user)
       reflection[:actions] = Hash[a.map do |k, v|
-        [k, {label: v.label, path: v.path, reflect_url: reflect_url_proc.call(v.path)}]
+        [k, v.reflect_property(reflect_url_proc)]
       end]
     end
+    # TODO Add actions from protocol
     if e = events
       reflection[:events] = Hash[e.map do |k, v|
-        [k, {label: v.label, path: v.path, reflect_url: reflect_url_proc.call(v.path)}]
+        [k, v.reflect_property(reflect_url_proc)]
       end]
     end
     reflection

@@ -11,6 +11,9 @@ class Connector < ActiveRecord::Base
 
   abstract :url
 
+  abstract def lookup(path, user)
+  end
+
   store :settings
 
   def generate_guid

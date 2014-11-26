@@ -113,11 +113,25 @@ class ConnectorsController < ApplicationController
     render json: target.reflect(reflect_url_proc, current_user)
   end
 
-  def query
-    connector = connector_from_guid()
-    target = connector.lookup_path(params[:path], current_user)
-    query_url_proc = ->(path) { query_with_path_connector_url(params[:id], path) }
-    render json: target.query(query_url_proc, current_user, params)
+  def data
+    target = connector_from_guid.lookup_path(params[:path], current_user)
+    options = {page: 1, page_size: 20}.merge(params.slice(:page, :page_size))
+    data_url_proc = ->(path) { data_with_path_connector_url(params[:id], path) }
+
+    if target.is_a? Entity
+      render json: target.raw(data_url_proc, current_user)
+    else
+      case request.method
+      when "GET"
+        if target.protocols.include? :select
+          render json: target.select(params[:filter] || {}, current_user, options).map { |e| e.raw(data_url_proc, current_user) }
+        else
+          render json: target.entities(current_user).map { |e| e.raw(data_url_proc, current_user) }
+        end
+      else
+        head :not_found
+      end
+    end
   end
 
   def invoke

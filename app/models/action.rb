@@ -6,6 +6,14 @@ module Action
     {}
   end
 
+  def reflect_property(reflect_url_proc)
+    {
+      label: label,
+      path: path,
+      reflect_url: reflect_url_proc.call(path)
+    }
+  end
+
   def reflect(proc, user)
     {
       label: label,

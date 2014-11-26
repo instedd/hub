@@ -1,6 +1,6 @@
 module Entity
-  abstract :label, :sub_path
   attr_reader :parent
+  abstract :label, :sub_path
 
   def self.included(mod)
     mod.delegate :connector, to: :parent unless mod.method_defined?(:connector)
@@ -37,11 +37,11 @@ module Entity
   def events
   end
 
-  def query(query_url_proc, current_user, filters)
+  def raw(data_url_proc, current_user)
     if p = properties
       Hash[p.map do |k, v|
         if v.is_a?(EntitySet)
-          [k, query_url_proc.call(v.path)]
+          [k, data_url_proc.call(v.path)]
         else
           [k, v.value]
         end
@@ -49,28 +49,25 @@ module Entity
     end
   end
 
+  def reflect_property(reflect_url_proc)
+    {
+      label: label,
+      path: path,
+      reflect_url: reflect_url_proc.call(path)
+    }
+  end
+
   def reflect(reflect_url_proc, user)
     reflection = {}
-    if p = properties
-      reflection[:properties] = Hash[p.map do |k, v|
-        h = {label: v.label, type: v.type}
-        if v.path
-          h[:path] = v.path
-          if reflect_path = v.reflect_path
-            h[:reflect_url] = reflect_url_proc.call(reflect_path)
-          end
-        end
-        [k, h]
-      end]
-    end
+    reflection[:properties] = SimpleProperty.reflect reflect_url_proc, properties, user if properties
     if a = actions(user)
       reflection[:actions] = Hash[a.map do |k, v|
-        [k, {label: v.label, path: v.path, reflect_url: reflect_url_proc.call(v.path)}]
+        [k, v.reflect_property(reflect_url_proc)]
       end]
     end
     if e = events
       reflection[:events] = Hash[e.map do |k, v|
-        [k, {label: v.label, path: v.path, reflect_url: reflect_url_proc.call(v.path)}]
+        [k, v.reflect_property(reflect_url_proc)]
       end]
     end
     reflection

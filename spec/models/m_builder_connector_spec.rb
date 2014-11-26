@@ -29,7 +29,10 @@ describe MBuilderConnector do
 
         applications = connector.lookup %w(applications), user
         expect(applications.reflect(url_proc, user)).to eq({
-          entity_definition: {},
+          label: "Applications",
+          path: "applications",
+          reflect_url: "http://server/applications",
+          type: :entity_set,
           entities: [
             {
               label: "Application 1",
@@ -171,7 +174,10 @@ describe MBuilderConnector do
 
         applications = connector.lookup %w(applications), user
         expect(applications.reflect(url_proc, user)).to eq({
-          entity_definition: {},
+          label: "Applications",
+          path: "applications",
+          reflect_url: "http://server/applications",
+          type: :entity_set,
           entities: [
             {
               label: "Application 1",

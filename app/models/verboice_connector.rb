@@ -104,6 +104,8 @@ class VerboiceConnector < Connector
   class PhoneBook
     include EntitySet
 
+    protocol :insert, :select, :update, :delete
+
     def initialize(parent)
       @parent = parent
     end
@@ -118,21 +120,17 @@ class VerboiceConnector < Connector
 
     def entity_properties
       {
-
+        id: SimpleProperty.id(nil),
+        address: SimpleProperty.integer("Address", nil)
       }
     end
 
-    def reflect_entities(user, filters={})
-      contacts = GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{@parent.id}/contacts.json")
-        contacts.inject Array.new do |contacts, contact|
-          contact["addresses"].inject contacts do |contacts, address|
-            contacts.push Contact.new(self, address, contact)
-          end
-        end
-    end
-
-    def entities(user, filters={})
-      contacts = GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{@parent.id}/contacts.json")
+    def select(filters, user, options)
+      contacts = if filters[:address]
+        [contact(filters[:address], user)]
+      else
+        GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{@parent.id}/contacts.json")
+      end
       contacts.inject Array.new do |contacts, contact|
         contact["addresses"].inject contacts do |contacts, address|
           contacts.push Contact.new(self, address, contact)
@@ -140,8 +138,15 @@ class VerboiceConnector < Connector
       end
     end
 
+    def entities(user)
+    end
+
     def find_entity(address, user)
-      Contact.new(self, address)
+      Contact.new(self, address, contact(address, user))
+    end
+
+    def contact(address, user)
+      GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{@parent.id}/contacts/by_address/#{address}.json")
     end
   end
 
@@ -152,7 +157,7 @@ class VerboiceConnector < Connector
     alias_method :id, :address
 
 
-    def initialize(parent, address, contact = nil)
+    def initialize(parent, address, contact)
       @parent = parent
       @address = address
       @contact = contact
@@ -168,6 +173,7 @@ class VerboiceConnector < Connector
 
     def properties
       {
+        id: SimpleProperty.id(@contact["id"]),
         address: SimpleProperty.integer("Address", address)
       }
     end
@@ -177,7 +183,6 @@ class VerboiceConnector < Connector
   class CallFlows
     include EntitySet
     delegate :project_id, to: :@parent
-
 
     def initialize(parent)
       @parent = parent

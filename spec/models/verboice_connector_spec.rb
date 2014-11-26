@@ -1,5 +1,6 @@
 describe VerboiceConnector do
   let(:user) { User.make }
+  let(:url_proc) { ->(path) { "http://server/#{path}" }}
   describe "initialization" do
     it "should set defaults for new connector" do
       connector = VerboiceConnector.make
@@ -12,7 +13,6 @@ describe VerboiceConnector do
     let(:connector) { VerboiceConnector.new username: 'jdoe', password: '1234', user: user }
 
     describe "lookup" do
-      let(:url_proc) { ->(path) { "http://server/#{path}" }}
 
       it "finds root" do
         expect(connector.lookup [], user).to be(connector)
@@ -46,7 +46,10 @@ describe VerboiceConnector do
         projects = connector.lookup(%w(projects), user)
 
         expect(projects.reflect(url_proc, user)).to eq({
-          entity_definition: {},
+          label: "Projects",
+          path: "projects",
+          reflect_url: "http://server/projects",
+          type: :entity_set,
           entities: [
             {
               label: "my project",
@@ -89,7 +92,20 @@ describe VerboiceConnector do
               label: "Phone Book",
               type: :entity_set,
               path: "projects/495/phone_book",
-              reflect_url: "http://server/projects/495/phone_book"
+              reflect_url: "http://server/projects/495/phone_book",
+              entity_definition: {
+                properties: {
+                  id: {
+                    label: "Id",
+                    type: :integer
+                  },
+                  address: {
+                    label: "Address",
+                    type: :integer
+                  }
+                }
+              },
+              protocol: [ :insert, :select, :update, :delete ]
             }
           },
           actions: {
@@ -117,7 +133,10 @@ describe VerboiceConnector do
         call_flows = connector.lookup %w(projects 495 call_flows), user
 
         expect(call_flows.reflect(url_proc, user)).to eq({
-          entity_definition: {},
+          label: "Call flows",
+          path: "projects/495/call_flows",
+          reflect_url: "http://server/projects/495/call_flows",
+          type: :entity_set,
           entities: [{
             label: "my flow",
             path: "projects/495/call_flows/740",
@@ -252,7 +271,6 @@ describe VerboiceConnector do
     end
 
     describe "lookup" do
-      let(:url_proc) { ->(path) { "http://server/#{path}" }}
 
       it "finds root" do
         expect(connector.lookup [], user).to be(connector)
@@ -286,7 +304,10 @@ describe VerboiceConnector do
         projects = connector.lookup(%w(projects), user)
 
         expect(projects.reflect(url_proc, user)).to eq({
-          :entity_definition => {},
+          label: "Projects",
+          path: "projects",
+          reflect_url: "http://server/projects",
+          type: :entity_set,
           entities: [
             {
               label: "my project",
@@ -330,7 +351,20 @@ describe VerboiceConnector do
               label: "Phone Book",
               type: :entity_set,
               path: "projects/495/phone_book",
-              reflect_url: "http://server/projects/495/phone_book"
+              reflect_url: "http://server/projects/495/phone_book",
+              entity_definition: {
+                properties: {
+                  id: {
+                    label: "Id",
+                    type: :integer
+                  },
+                  address: {
+                    label: "Address",
+                    type: :integer
+                  }
+                }
+              },
+              protocol: [ :insert, :select, :update, :delete ]
             }
           },
           actions: {
@@ -451,7 +485,6 @@ describe VerboiceConnector do
     end
 
     it "should invoke event handlers when processing a queued job" do
-
       data = {"project_id"=>2, "call_flow_id"=>2, "address"=>"17772632588", "vars"=>{"age"=>"20"}}.to_json
       trigger_count = 0
       allow_any_instance_of(EventHandler).to receive(:trigger) do |data|
@@ -463,6 +496,4 @@ describe VerboiceConnector do
       expect(trigger_count).to eq(2)
     end
   end
-
-
 end
