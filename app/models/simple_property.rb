@@ -9,19 +9,19 @@ class SimpleProperty
     @value = value
   end
 
-  def self.id(value)
+  def self.id(value=nil)
     integer("Id", value)
   end
 
-  def self.integer(label, value)
+  def self.integer(label, value=nil)
     new(label, :integer, value)
   end
 
-  def self.name(value)
+  def self.name(value=nil)
     string("Name", value)
   end
 
-  def self.string(label, value)
+  def self.string(label, value=nil)
     new(label, :string, value)
   end
 
