@@ -114,7 +114,7 @@ describe VerboiceConnector do
                   }
                 }
               },
-              protocol: [ :insert, :select, :update, :delete ]
+              protocol: [ :insert, :query, :update, :delete ]
             }
           },
           actions: {
@@ -408,7 +408,7 @@ describe VerboiceConnector do
                   }
                 }
               },
-              protocol: [ :insert, :select, :update, :delete ]
+              protocol: [ :insert, :query, :update, :delete ]
             }
           },
           actions: {

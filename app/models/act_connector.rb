@@ -28,7 +28,7 @@ class ACTConnector < Connector
     def reflect_entities(user)
     end
 
-    def select(filters, user, options)
+    def query(filters, user, options)
       []
     end
 

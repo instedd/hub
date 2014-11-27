@@ -46,7 +46,7 @@ class VerboiceConnector < Connector
       "Projects"
     end
 
-    def select(filters, user, options)
+    def query(filters, user, options)
       projects(user).map { |project| entity(project) }
     end
 
@@ -104,7 +104,7 @@ class VerboiceConnector < Connector
   class PhoneBook
     include EntitySet
 
-    protocol :insert, :select, :update, :delete
+    protocol :insert, :query, :update, :delete
     filter_by :address
 
     def initialize(parent)
@@ -126,7 +126,7 @@ class VerboiceConnector < Connector
       }
     end
 
-    def select(filters, user, options)
+    def query(filters, user, options)
       contacts = if filters[:address]
         [contact(filters[:address], user)]
       else
@@ -197,7 +197,7 @@ class VerboiceConnector < Connector
       "#{@parent.path}/call_flows"
     end
 
-    def select(filters, user, options)
+    def query(filters, user, options)
       project = GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{@parent.id}.json")
       project["call_flows"].map { |cf| CallFlow.new(self, cf["id"], cf["name"]) }
     end

@@ -5,7 +5,7 @@ module EntitySet
 
   abstract :path, :label
   def reflect_entities(user)
-    select({}, user, page: 1, page_size: 1000)
+    query({}, user, page: 1, page_size: 1000)
   end
 
   def self.included(mod)
@@ -32,8 +32,8 @@ module EntitySet
 
   def actions(user)
     actions = Hash.new
-    if protocols.include? :select
-      actions["select"] = SelectAction.new(self)
+    if protocols.include? :query
+      actions["query"] = QueryAction.new(self)
     end
     actions.presence
   end
@@ -65,7 +65,7 @@ module EntitySet
     self.class.filters
   end
 
-  abstract def select(filters, current_user, options)
+  abstract def query(filters, current_user, options)
   end
 
   def entity_properties
@@ -103,7 +103,7 @@ module EntitySet
     :entity_set
   end
 
-  class SelectAction
+  class QueryAction
     include Action
 
     def initialize(parent)
@@ -111,11 +111,11 @@ module EntitySet
     end
 
     def label
-      "Select"
+      "Query"
     end
 
     def sub_path
-      "select"
+      "query"
     end
 
     def args(user)
@@ -126,7 +126,7 @@ module EntitySet
 
     def invoke(args, user)
       filter = args.delete(:filter)
-      @parent.select filter, current_user, args
+      @parent.query filter, current_user, args
     end
   end
 end

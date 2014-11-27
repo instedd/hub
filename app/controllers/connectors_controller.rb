@@ -123,11 +123,7 @@ class ConnectorsController < ApplicationController
     else
       case request.method
       when "GET"
-        if target.protocols.include? :select
-          render json: target.select((params[:filter] || {}).permit(target.filters), current_user, options).map { |e| e.raw(data_url_proc, current_user) }
-        else
-          render json: target.entities(current_user).map { |e| e.raw(data_url_proc, current_user) }
-        end
+        render json: target.query((params[:filter] || {}).slice(target.filters), current_user, options).map { |e| e.raw(data_url_proc, current_user) }
       else
         head :not_found
       end

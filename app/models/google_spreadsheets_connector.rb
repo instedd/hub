@@ -11,7 +11,7 @@ class GoogleSpreadsheetsConnector < Connector
     ""
   end
 
-  def select(filters, user, options)
+  def query(filters, user, options)
     [Spreadsheet.new(self, spreadsheet_key, spreadsheet_name)]
   end
 
