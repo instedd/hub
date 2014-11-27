@@ -106,8 +106,8 @@ module EntitySet
   class SelectAction
     include Action
 
-    def initialize(entity_set)
-      @entity_set = entity_set
+    def initialize(parent)
+      @parent = parent
     end
 
     def label
@@ -119,14 +119,14 @@ module EntitySet
     end
 
     def args(user)
-      SimpleProperty.reflect(entity_set.entity_properties.select do |key, property|
-        entity_set.filters.include? key
+      SimpleProperty.reflect(@parent.entity_properties.select do |key, property|
+        @parent.filters.include? key
       end)
     end
 
     def invoke(args, user)
       filter = args.delete(:filter)
-      @entity_set.select filter, current_user, args
+      @parent.select filter, current_user, args
     end
   end
 end
