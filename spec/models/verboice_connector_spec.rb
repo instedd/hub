@@ -267,22 +267,35 @@ describe VerboiceConnector do
 
     describe "query" do
       it "should filter by address" do
-        # stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495.json").
-        #   to_return(status: 200, body: %({
-        #       "id": 495,
-        #       "name": "my project",
-        #       "call_flows": [],
-        #       "schedules": [],
-        #       "phone_book": [ ... ]
-        #     }), headers: {})
+        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495.json").
+          to_return(status: 200, body: %({
+              "id": 495,
+              "name": "my project"
+            }), headers: {})
 
-        # projects = connector.lookup %w(projects 495 phone_book), user
+        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495/contacts/by_address/12345.json").
+          to_return(:status => 200, :body => %(
+                {
+                  "id": 1,
+                  "addresses": ["12345", "67890"],
+                  "vars": []
+                }
+              ), :headers => {})
 
-        # response = projects.query(...)
-        # expect(response).to eq({
-        #   "id" => 2,
-        #   "address" => "123456"
-        # })
+        phone_book = connector.lookup %w(projects 495 phone_book), user
+
+        response = phone_book.query({address: "12345"}, user, {})
+        response = response.map {|contact| contact.raw(url_proc, user) }
+        expect(response).to eq([
+          {
+            id: 1,
+            address: "12345"
+          },
+          {
+            id: 1,
+            address: "67890"
+          }
+        ])
       end
     end
   end
