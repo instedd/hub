@@ -104,7 +104,7 @@ class VerboiceConnector < Connector
   class PhoneBook
     include EntitySet
 
-    protocol :insert, :query, :update, :delete
+    protocol :insert, :update, :delete
     filter_by :address
 
     def initialize(parent)

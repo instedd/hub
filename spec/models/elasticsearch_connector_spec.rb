@@ -80,6 +80,14 @@ describe ElasticsearchConnector do
         path: "indices/instedd_hub_test/types",
         reflect_url: "http://server/indices/instedd_hub_test/types",
         type: :entity_set,
+        actions: {
+          "query" => {
+            label: "Query",
+            path: "indices/instedd_hub_test/types/$actions/query",
+            reflect_url: "http://server/indices/instedd_hub_test/types/$actions/query"
+          }
+        },
+        protocol: [:query],
         entities: [
           {
             label: "type1",

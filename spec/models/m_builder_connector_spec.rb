@@ -37,6 +37,14 @@ describe MBuilderConnector do
           path: "applications",
           reflect_url: "http://server/applications",
           type: :entity_set,
+          actions: {
+            "query" => {
+              label: "Query",
+              path: "applications/$actions/query",
+              reflect_url: "http://server/applications/$actions/query"
+            }
+          },
+          protocol: [:query],
           entities: [
             {
               label: "Application 1",
@@ -191,6 +199,14 @@ describe MBuilderConnector do
           path: "applications",
           reflect_url: "http://server/applications",
           type: :entity_set,
+          protocol: [:query],
+          actions: {
+            "query" => {
+              label: "Query",
+              path: "applications/$actions/query",
+              reflect_url: "http://server/applications/$actions/query"
+            }
+          },
           entities: [
             {
               label: "Application 1",

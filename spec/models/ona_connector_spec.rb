@@ -40,6 +40,14 @@ describe ONAConnector do
         path: "forms",
         reflect_url: "http://server/forms",
         type: :entity_set,
+        protocol: [:query],
+        actions: {
+          "query" => {
+            label: "Query",
+            path: "forms/$actions/query",
+            reflect_url: "http://server/forms/$actions/query"
+          }
+        },
         entities: [
           {
             label: "Form 1",

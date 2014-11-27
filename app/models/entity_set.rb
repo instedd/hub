@@ -46,7 +46,7 @@ module EntitySet
       protocols.concat methods
     end
     def protocols
-      @protocols ||= Array.new
+      @protocols ||= [:query]
     end
 
     def filter_by(*methods)
@@ -77,16 +77,16 @@ module EntitySet
     reflection[:type] = node_type
     reflection[:path] = path
     reflection[:reflect_url] = reflect_url_proc.call(reflect_path) if reflect_path
-    if entity_properties
-      reflection[:entity_definition] = {}
-      reflection[:entity_definition][:properties] = SimpleProperty.reflect reflect_url_proc, entity_properties, user
-    end
-    reflection[:protocol] = protocols unless protocols.empty?
     reflection
   end
 
   def reflect(reflect_url_proc, user)
     reflection = reflect_property reflect_url_proc, user
+    if entity_properties
+      reflection[:entity_definition] = {}
+      reflection[:entity_definition][:properties] = SimpleProperty.reflect reflect_url_proc, entity_properties, user
+    end
+    reflection[:protocol] = protocols unless protocols.empty?
     if e = reflect_entities(user)
       reflection[:entities] = e.map { |entity| entity.reflect_property(reflect_url_proc, user) }
     end
@@ -96,7 +96,7 @@ module EntitySet
     if e = events
       reflection[:events] = SimpleProperty.reflect reflect_url_proc, e, user
     end
-      reflection
+    reflection
   end
 
   def node_type

@@ -54,6 +54,14 @@ describe VerboiceConnector do
           path: "projects",
           reflect_url: "http://server/projects",
           type: :entity_set,
+          protocol: [:query],
+          actions: {
+            "query" => {
+              label: "Query",
+              path: "projects/$actions/query",
+              reflect_url: "http://server/projects/$actions/query"
+            }
+          },
           entities: [
             {
               label: "my project",
@@ -102,26 +110,13 @@ describe VerboiceConnector do
               type: :entity_set,
               path: "projects/495/phone_book",
               reflect_url: "http://server/projects/495/phone_book",
-              entity_definition: {
-                properties: {
-                  id: {
-                    label: "Id",
-                    type: :integer
-                  },
-                  address: {
-                    label: "Address",
-                    type: :integer
-                  }
-                }
-              },
-              protocol: [ :insert, :query, :update, :delete ]
             }
           },
           actions: {
             "call"=> {
               label: "Call",
               path: "projects/495/$actions/call",
-              reflect_url: "http://server/projects/495/$actions/call"
+              reflect_url: "http://server/projects/495/$actions/call",
             }
           }
         })
@@ -146,6 +141,14 @@ describe VerboiceConnector do
           path: "projects/495/call_flows",
           reflect_url: "http://server/projects/495/call_flows",
           type: :entity_set,
+          protocol: [:query],
+          actions: {
+            "query" => {
+              label: "Query",
+              path: "projects/495/call_flows/$actions/query",
+              reflect_url: "http://server/projects/495/call_flows/$actions/query"
+            }
+          },
           entities: [{
             label: "my flow",
             path: "projects/495/call_flows/740",
@@ -322,7 +325,7 @@ describe VerboiceConnector do
               label: "Projects",
               type: :entity_set,
               path: "projects",
-              reflect_url: "http://server/projects"
+              reflect_url: "http://server/projects",
             }
           }
         })
@@ -347,6 +350,14 @@ describe VerboiceConnector do
           path: "projects",
           reflect_url: "http://server/projects",
           type: :entity_set,
+          protocol: [:query],
+          actions: {
+            "query" => {
+              label: "Query",
+              path: "projects/$actions/query",
+              reflect_url: "http://server/projects/$actions/query"
+            }
+          },
           entities: [
             {
               label: "my project",
@@ -396,19 +407,6 @@ describe VerboiceConnector do
               type: :entity_set,
               path: "projects/495/phone_book",
               reflect_url: "http://server/projects/495/phone_book",
-              entity_definition: {
-                properties: {
-                  id: {
-                    label: "Id",
-                    type: :integer
-                  },
-                  address: {
-                    label: "Address",
-                    type: :integer
-                  }
-                }
-              },
-              protocol: [ :insert, :query, :update, :delete ]
             }
           },
           actions: {
