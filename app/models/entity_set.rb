@@ -31,6 +31,11 @@ module EntitySet
   end
 
   def actions(user)
+    actions = Hash.new
+    if protocols.include? :select
+      actions[:select] = SelectAction.new(self)
+    end
+    actions.presence
   end
 
   def events
@@ -88,7 +93,6 @@ module EntitySet
     if a = actions(user)
       reflection[:actions] = SimpleProperty.reflect reflect_url_proc, a, user
     end
-    # TODO Add actions from protocol
     if e = events
       reflection[:events] = SimpleProperty.reflect reflect_url_proc, e, user
     end
@@ -97,5 +101,32 @@ module EntitySet
 
   def node_type
     :entity_set
+  end
+
+  class SelectAction
+    include Action
+
+    def initialize(entity_set)
+      @entity_set = entity_set
+    end
+
+    def label
+      "Select"
+    end
+
+    def sub_path
+      "select"
+    end
+
+    def args(user)
+      SimpleProperty.reflect(entity_set.entity_properties.select do |key, property|
+        entity_set.filters.include? key
+      end)
+    end
+
+    def invoke(args, user)
+      filter = args.delete(:filter)
+      @entity_set.select filter, current_user, args
+    end
   end
 end
