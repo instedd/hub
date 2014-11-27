@@ -30,7 +30,7 @@ class SimpleProperty
   end
 
   def self.reflect reflect_url_proc, properties, user
-    Hash[properties.map do |k, v|
+    Hash[(properties || {}).map do |k, v|
       [k, v.reflect_property(reflect_url_proc, user)]
     end]
   end

@@ -33,7 +33,7 @@ module EntitySet
   def actions(user)
     actions = Hash.new
     if protocols.include? :select
-      actions[:select] = SelectAction.new(self)
+      actions["select"] = SelectAction.new(self)
     end
     actions.presence
   end
@@ -119,9 +119,9 @@ module EntitySet
     end
 
     def args(user)
-      SimpleProperty.reflect(@parent.entity_properties.select do |key, property|
+      SimpleProperty.reflect nil, (@parent.entity_properties.select do |key, property|
         @parent.filters.include? key
-      end)
+      end), user
     end
 
     def invoke(args, user)

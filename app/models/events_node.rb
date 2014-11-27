@@ -10,9 +10,7 @@ class EventsNode
     @parent.events[event_name]
   end
 
-  def reflect
-    Hash[@parent.events.map do |k, v|
-        [k, {label: v.label, path: v.path}]
-    end]
+  def reflect(proc, user)
+    SimpleProperty.reflect proc, @parent.events, user
   end
 end

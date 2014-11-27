@@ -11,8 +11,6 @@ class ActionsNode
   end
 
   def reflect(proc, user)
-    Hash[@parent.actions(user).map do |k, v|
-        [k, {label: v.label, path: v.path}]
-    end]
+    SimpleProperty.reflect proc, @parent.actions(user), user
   end
 end
