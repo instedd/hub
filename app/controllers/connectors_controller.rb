@@ -123,7 +123,7 @@ class ConnectorsController < ApplicationController
     else
       case request.method
       when "GET"
-        render json: target.query((params[:filter] || {}).slice(target.filters), current_user, options).map { |e| e.raw(data_url_proc, current_user) }
+        render json: target.query((params[:filter] || {}).slice(*target.filters), current_user, options).map { |e| e.raw(data_url_proc, current_user) }
       else
         head :not_found
       end
