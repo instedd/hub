@@ -25,7 +25,7 @@ angular
   , true
 
   reflect_url = (model) ->
-    "/connectors/#{model.connector}/reflect/#{model.path}"
+    "/api/reflect/connectors/#{model.connector}/#{model.path}"
 
   $scope.$watch 'event', (event) ->
     unless event? && event.connector && event.path

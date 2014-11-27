@@ -16,19 +16,6 @@ class ConnectorsController < ApplicationController
   end
 
   def index
-    respond_to do |format|
-      format.html
-      format.json do
-        c = accessible_connectors.map do |c|
-          {
-            label: c.name,
-            guid: c.guid,
-            reflect_url: reflect_connector_url(c.guid),
-          }
-        end
-        render json: c
-      end
-    end
   end
 
   def new
@@ -103,30 +90,6 @@ class ConnectorsController < ApplicationController
       redirect_to connectors_path, notice: "Connector #{connector.name} successfully created."
     else
       render action: "new"
-    end
-  end
-
-  def reflect
-    connector = connector_from_guid()
-    target = connector.lookup_path(params[:path], current_user)
-    reflect_url_proc = ->(path) { path.blank? ? reflect_connector_url(params[:id]) : reflect_with_path_connector_url(params[:id], path) }
-    render json: target.reflect(reflect_url_proc, current_user)
-  end
-
-  def data
-    target = connector_from_guid.lookup_path(params[:path], current_user)
-    options = {page: 1, page_size: 20}.merge(params.slice(:page, :page_size))
-    data_url_proc = ->(path) { data_with_path_connector_url(params[:id], path) }
-
-    if target.is_a? Entity
-      render json: target.raw(data_url_proc, current_user)
-    else
-      case request.method
-      when "GET"
-        render json: target.query((params[:filter] || {}).slice(*target.filters), current_user, options).map { |e| e.raw(data_url_proc, current_user) }
-      else
-        head :not_found
-      end
     end
   end
 

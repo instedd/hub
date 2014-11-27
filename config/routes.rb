@@ -10,11 +10,6 @@ Rails.application.routes.draw do
 
   resources :connectors, except: [:show] do
     member do
-      get 'reflect'
-      get 'reflect/*path' => 'connectors#reflect', as: 'reflect_with_path'
-      get 'data' => 'connectors#data'
-      get 'data/*path' => 'connectors#data', as: 'data_with_path'
-
       post 'invoke/*path' => 'connectors#invoke'
       put 'poll'
     end
@@ -25,6 +20,12 @@ Rails.application.routes.draw do
   end
 
   post 'callback/:connector/:event' => 'callbacks#enqueue'
+
+  get 'api/connectors' => 'api#connectors'
+  get 'api/reflect/connectors/:id' => 'api#reflect', as: 'reflect_api'
+  get 'api/reflect/connectors/:id/*path' => 'api#reflect', as: 'reflect_with_path_api'
+  get 'api/data/connectors/:id'=> 'api#data', as: 'data_api'
+  get 'api/data/connectors/:id/*path'=> 'api#data', as: 'data_with_path_api'
 
   resources :event_handlers
   resources :activities, only: :index
