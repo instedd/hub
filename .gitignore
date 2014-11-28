@@ -15,5 +15,6 @@ config/guisso.yml
 
 # Ignore all logfiles and tempfiles.
 /log/*.log
+/log/*.log.*
 /tmp
-poirot_development.log.0
+settings.local.yml
