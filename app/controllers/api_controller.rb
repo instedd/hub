@@ -32,7 +32,9 @@ class ApiController < ApplicationController
     else
       case request.method
       when "GET"
-        render json: target.query((params[:filter] || {}).slice(*target.filters), current_user, options).map { |e| e.raw(data_url_proc, current_user) }
+        filters = (params[:filter] || {}).slice(*target.filters)
+        items = target.query(filters, current_user, options)
+        render json: items.map { |e| e.raw(data_url_proc, current_user) }
       else
         head :not_found
       end

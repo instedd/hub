@@ -29,6 +29,15 @@ class SimpleProperty
     {label: label, type: type}
   end
 
+  def self.struct members
+    {
+      type: {
+        kind: :struct,
+        members: members
+      }
+    }
+  end
+
   def self.reflect reflect_url_proc, properties, user
     Hash[(properties || {}).map do |k, v|
       [k, v.reflect_property(reflect_url_proc, user)]

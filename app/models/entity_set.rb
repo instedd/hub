@@ -33,7 +33,16 @@ module EntitySet
   def actions(user)
     actions = Hash.new
     if protocols.include? :query
-      actions["query"] = QueryAction.new(self)
+      actions["query"] = self.class::QueryAction.new(self)
+    end
+    if protocols.include? :insert
+      actions["insert"] = self.class::InsertAction.new(self)
+    end
+    if protocols.include? :update
+      actions["update"] = self.class::UpdateAction.new(self)
+    end
+    if protocols.include? :delete
+      actions["delete"] = self.class::DeleteAction.new(self)
     end
     actions.presence
   end
@@ -99,6 +108,14 @@ module EntitySet
     reflection
   end
 
+  def raw(data_url_proc, current_user)
+    {
+      label: label,
+      path: path,
+      data_url: data_url_proc.call(path)
+    }
+  end
+
   def node_type
     :entity_set
   end
@@ -119,7 +136,7 @@ module EntitySet
     end
 
     def args(user)
-      SimpleProperty.reflect nil, (@parent.entity_properties.select do |key, property|
+      SimpleProperty.reflect nil, (@parent.entity_properties.select do |key|
         @parent.filters.include? key
       end), user
     end
@@ -127,6 +144,89 @@ module EntitySet
     def invoke(args, user)
       filter = args.delete(:filter)
       @parent.query filter, current_user, args
+    end
+  end
+
+  class InsertAction
+    include Action
+
+    def initialize(parent)
+      @parent = parent
+    end
+
+    def label
+      "Insert"
+    end
+
+    def sub_path
+      "insert"
+    end
+
+    def args(user)
+      {
+        properties: SimpleProperty.struct(SimpleProperty.reflect(nil, @parent.entity_properties, user))
+      }
+    end
+
+    def invoke(args, user)
+      @parent.insert args["properties"], user
+    end
+  end
+
+  class UpdateAction
+    include Action
+
+    def initialize(parent)
+      @parent = parent
+    end
+
+    def label
+      "Update"
+    end
+
+    def sub_path
+      "update"
+    end
+
+    def args(user)
+      {
+        keys: SimpleProperty.struct(SimpleProperty.reflect nil, (@parent.entity_properties.select do |key|
+          @parent.filters.include? key
+        end), user),
+        properties: SimpleProperty.struct(SimpleProperty.reflect(nil, @parent.entity_properties, user))
+      }
+    end
+
+    def invoke(args, user)
+      @parent.update args["keys"], args["properties"], user
+    end
+  end
+
+  class DeleteAction
+    include Action
+
+    def initialize(parent)
+      @parent = parent
+    end
+
+    def label
+      "Delete"
+    end
+
+    def sub_path
+      "delete"
+    end
+
+    def args(user)
+      {
+        keys: SimpleProperty.struct(SimpleProperty.reflect nil, (@parent.entity_properties.select do |key|
+          @parent.filters.include? key
+        end), user)
+      }
+    end
+
+    def invoke(args, user)
+      @parent.delete args["keys"], user
     end
   end
 end
