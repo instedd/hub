@@ -129,7 +129,7 @@ class GoogleSpreadsheetsConnector < Connector
 
   class Worksheet
     include EntitySet
-    protocol :update, :insert, :delete
+    protocol :update, :insert
 
     class InsertAction < EntitySet::InsertAction
       def args(user)
@@ -203,10 +203,6 @@ class GoogleSpreadsheetsConnector < Connector
         end
       end
       worksheet.save
-    end
-
-    def delete(keys, user)
-      raise "not implemented"
     end
 
     def row_matches_filters?(row, filters)
