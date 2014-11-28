@@ -6,4 +6,4 @@
 
 %ul
   %li GUID: #{connector.guid}
-  %li= link_to "Reflect", "/connectors/#{connector.guid}/reflect"
+  %li= link_to "Reflect", reflect_api_path(connector.guid)
