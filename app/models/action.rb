@@ -23,7 +23,11 @@ module Action
   end
 
   def path
-    "#{parent.path}/$actions/#{sub_path}"
+    if parent.path.present?
+      "#{parent.path}/$actions/#{sub_path}"
+    else
+      "$actions/#{sub_path}"
+    end
   end
 
   abstract def invoke(args, user)
