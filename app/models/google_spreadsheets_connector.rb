@@ -185,25 +185,32 @@ class GoogleSpreadsheetsConnector < Connector
 
     def query(filters, current_user, options)
       worksheet.list.select do |row|
-        filters.all? do |key, value|
-          row[key] == value
-        end
+        row_matches_filters?(row, filters)
       end.map { |row| Row.new(self, row) }
     end
 
     def insert(properties, user)
-      worksheet = self.worksheet
       list = worksheet.list
       list.push properties
       worksheet.save
     end
 
-    def update(keys, properties, user)
-      raise "not implemented"
+    def update(filters, properties, user)
+      list = worksheet.list
+      list.each do |row|
+        if row_matches_filters?(row, filters)
+          row.merge!(properties)
+        end
+      end
+      worksheet.save
     end
 
     def delete(keys, user)
       raise "not implemented"
+    end
+
+    def row_matches_filters?(row, filters)
+      filters.all? { |key, value| row[key] == value }
     end
 
     def find_entity(id, user)
@@ -211,9 +218,7 @@ class GoogleSpreadsheetsConnector < Connector
     end
 
     def worksheet
-      @worksheet ||= begin
-        parent.spreadsheet.worksheet_by_title(@label)
-      end
+      @worksheet ||= parent.spreadsheet.worksheet_by_title(@label)
     end
 
     def headers

@@ -190,7 +190,7 @@ module EntitySet
 
     def args(user)
       {
-        keys: SimpleProperty.struct(SimpleProperty.reflect nil, (@parent.entity_properties.select do |key|
+        filters: SimpleProperty.struct(SimpleProperty.reflect nil, (@parent.entity_properties.select do |key|
           @parent.filters.include? key
         end), user),
         properties: SimpleProperty.struct(SimpleProperty.reflect(nil, @parent.entity_properties, user))
@@ -198,7 +198,7 @@ module EntitySet
     end
 
     def invoke(args, user)
-      @parent.update args["keys"], args["properties"], user
+      @parent.update args["filters"], args["properties"], user
     end
   end
 
@@ -219,14 +219,14 @@ module EntitySet
 
     def args(user)
       {
-        keys: SimpleProperty.struct(SimpleProperty.reflect nil, (@parent.entity_properties.select do |key|
+        filters: SimpleProperty.struct(SimpleProperty.reflect nil, (@parent.entity_properties.select do |key|
           @parent.filters.include? key
         end), user)
       }
     end
 
     def invoke(args, user)
-      @parent.delete args["keys"], user
+      @parent.delete args["filters"], user
     end
   end
 end
