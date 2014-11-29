@@ -1,5 +1,6 @@
 class ApiController < ApplicationController
   skip_before_action :verify_authenticity_token
+  skip_before_action :authenticate_user!
   before_filter :authenticate_api_user!
 
   expose(:accessible_connectors) { Connector.with_optional_user(current_user) }
