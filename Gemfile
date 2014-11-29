@@ -28,7 +28,6 @@ gem 'haml-rails'
 
 gem 'rails_config'
 gem 'devise'
-gem 'rack-oauth2'
 gem 'alto_guisso', github: "instedd/alto_guisso", branch: 'master'
 gem 'alto_guisso_rails', github: "instedd/alto_guisso_rails", branch: 'master'
 gem 'rack-cors', :require => 'rack/cors'

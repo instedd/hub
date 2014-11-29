@@ -8,7 +8,7 @@ GIT
 
 GIT
   remote: git://github.com/instedd/alto_guisso_rails.git
-  revision: 20c177f028557c4c79e2f7303dee8c2e3143a166
+  revision: a9bb41430e636e3dec1a85a2be2af0fc27358a9c
   branch: master
   specs:
     alto_guisso_rails (0.0.1)
@@ -391,7 +391,6 @@ DEPENDENCIES
   poirot_rails!
   pry-byebug
   rack-cors
-  rack-oauth2
   rails (= 4.1.6)
   rails_config
   resque
