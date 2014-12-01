@@ -88,7 +88,7 @@ class ElasticsearchConnector < Connector
   end
 
   class Type
-    include Entity
+    include EntitySet
     delegate :index_name, to: :parent
 
     def initialize(parent, name = nil)
@@ -96,8 +96,8 @@ class ElasticsearchConnector < Connector
       @name = name
     end
 
-    def sub_path
-      @name
+    def path
+      "#{@parent.path}/#{@name}"
     end
 
     def label
@@ -108,11 +108,37 @@ class ElasticsearchConnector < Connector
       @name
     end
 
+    def query(filters, current_user, options)
+      response = JSON.parse RestClient.get("#{connector.url}/#{index_name}/_search")
+      # TODO apply filters and options
+      response['hits']['hits'].map { |r| Record.new(self, r['_source']) }
+    end
+
+    def entity_properties
+      mapping = JSON.parse RestClient.get("#{connector.url}/#{index_name}/#{type_name}/_mapping")
+      properties = mapping[index_name]['mappings'][type_name]['properties']
+      #TODO better type mapping using t['type']
+      Hash[properties.map { |p,t| [p, SimpleProperty.string(p, nil)] }]
+    end
+
     def actions(user)
       {
         "insert" => InsertAction.new(self),
         "update" => UpdateAction.new(self),
       }
+    end
+  end
+
+  class Record
+    include Entity
+
+    def initialize(parent, row)
+      @parent = parent
+      @row = row
+    end
+
+    def properties
+      Hash[parent.entity_properties.map { |n,d| [n, SimpleProperty.string(n, @row[n])] }]
     end
   end
 
