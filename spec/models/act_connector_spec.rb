@@ -83,7 +83,11 @@ describe ACTConnector do
         case_id = 123
         update_url = "http://act.instedd.org/api/v1/cases/#{case_id}/?sick=true"
 
-        expect(RestClient).to receive(:put).with(update_url, nil)
+        expect(RestClient).to receive(:put) do |url, body, headers|
+          expect(url).to eq(update_url)
+          expect(body).to be_nil
+          expect(headers["Authorization"]).to eq("Token token=\"#{connector.access_token}\"")
+        end
 
         action = connector.lookup %w(cases $actions update_case), user
         action.invoke({'case_id' => case_id, 'is_sick' => true}, user)

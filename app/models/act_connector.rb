@@ -1,11 +1,15 @@
 class ACTConnector < Connector
   include Entity
-  store_accessor :settings, :url
+  store_accessor :settings, :url, :access_token
 
   validates_presence_of :url
 
   def properties
     {"cases" => Cases.new(self)}
+  end
+
+  def authorization_header
+    "Token token=\"#{access_token}\""
   end
 
   private
@@ -69,7 +73,9 @@ class ACTConnector < Connector
       since_id = load_state
       url = "#{connector.url}/api/v1/cases/"
       url += "?since_id=#{since_id}" if since_id.present?
-      cases = JSON.parse(RestClient.get(url))
+      token = connector.access_token
+      headers = { "Authorization" => connector.authorization_header }
+      cases = JSON.parse(RestClient.get(url, headers))
 
       # assumes cases are sorted by date
       save_state(cases.last["id"]) unless cases.empty?
@@ -124,7 +130,8 @@ class ACTConnector < Connector
     def invoke(args, user)
       url = "#{connector.url}/api/v1/cases/#{args['case_id']}/"
       url += "?sick=#{args['is_sick']}"
-      RestClient.put(url, nil)
+      headers = { "Authorization" => connector.authorization_header }
+      RestClient.put(url, nil, headers)
     end
 
   end

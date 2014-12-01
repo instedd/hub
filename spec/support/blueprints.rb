@@ -11,8 +11,9 @@ Connector.blueprint do
 end
 
 ACTConnector.blueprint do
-  name { "Connector #{sn}" }
-  url { "http://example.com" }
+  name         { "Connector #{sn}" }
+  url          { "http://example.com" }
+  access_token { SecureRandom.hex(16).upcase }
 end
 
 ElasticsearchConnector.blueprint do
