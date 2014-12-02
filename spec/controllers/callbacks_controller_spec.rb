@@ -12,6 +12,8 @@ describe CallbacksController do
 
       verboice_connector_2 = verboice_connector_2 = VerboiceConnector.make!
 
+      request.env["RAW_POST_DATA"] = "{}"
+
       post :enqueue, { connector: 'verboice', token: Settings.authentication_token, event: 'call' }
       assigned_connector = controller.connector
 
@@ -24,6 +26,12 @@ describe CallbacksController do
       request.env["RAW_POST_DATA"] = data
       expect(Resque).to receive(:enqueue_to).with(:hub, VerboiceConnector::CallTask, verboice_connector.id, data)
 
+      post :enqueue, { connector: 'verboice', token: Settings.authentication_token, event: 'call'}
+    end
+
+    it "should not fail if raw post data is empty" do
+      request.env["RAW_POST_DATA"] = nil
+      expect(Resque).to receive(:enqueue_to).with(:hub, VerboiceConnector::CallTask, verboice_connector.id, "{}")
       post :enqueue, { connector: 'verboice', token: Settings.authentication_token, event: 'call'}
     end
   end

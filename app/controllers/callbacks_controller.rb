@@ -10,7 +10,7 @@ class CallbacksController < ApplicationController
   end
 
   def enqueue
-    raw_post = request.raw_post.empty? ? "{}" : request.raw_post
+    raw_post = request.raw_post || "{}"
 
     # This will raise an exception if the json is invalid
     JSON.parse raw_post
