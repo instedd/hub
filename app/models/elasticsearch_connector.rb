@@ -114,6 +114,10 @@ class ElasticsearchConnector < Connector
       response['hits']['hits'].map { |r| Record.new(self, r['_source']) }
     end
 
+    def reflect_entities(user)
+      # Rows are not displayed during reflection
+    end
+
     def entity_properties(user)
       mapping = JSON.parse RestClient.get("#{connector.url}/#{index_name}/#{type_name}/_mapping")
       properties = mapping[index_name]['mappings'][type_name]['properties']
