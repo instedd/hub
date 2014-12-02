@@ -77,7 +77,7 @@ module EntitySet
   abstract def query(filters, current_user, options)
   end
 
-  def entity_properties
+  def entity_properties(user)
   end
 
   def reflect_property reflect_url_proc, user
@@ -91,9 +91,9 @@ module EntitySet
 
   def reflect(reflect_url_proc, user)
     reflection = reflect_property reflect_url_proc, user
-    if entity_properties
+    if properties = entity_properties(user)
       reflection[:entity_definition] = {}
-      reflection[:entity_definition][:properties] = SimpleProperty.reflect reflect_url_proc, entity_properties, user
+      reflection[:entity_definition][:properties] = SimpleProperty.reflect reflect_url_proc, properties, user
     end
     reflection[:protocol] = protocols unless protocols.empty?
     if e = reflect_entities(user)
@@ -136,7 +136,7 @@ module EntitySet
     end
 
     def args(user)
-      SimpleProperty.reflect nil, (@parent.entity_properties.select do |key|
+      SimpleProperty.reflect nil, (@parent.entity_properties(user).select do |key|
         @parent.filters.include? key
       end), user
     end
@@ -164,7 +164,7 @@ module EntitySet
 
     def args(user)
       {
-        properties: SimpleProperty.struct(SimpleProperty.reflect(nil, @parent.entity_properties, user))
+        properties: SimpleProperty.struct(SimpleProperty.reflect(nil, @parent.entity_properties(user), user))
       }
     end
 
@@ -190,10 +190,10 @@ module EntitySet
 
     def args(user)
       {
-        filters: SimpleProperty.struct(SimpleProperty.reflect nil, (@parent.entity_properties.select do |key|
+        filters: SimpleProperty.struct(SimpleProperty.reflect nil, (@parent.entity_properties(user).select do |key|
           @parent.filters.include? key
         end), user),
-        properties: SimpleProperty.struct(SimpleProperty.reflect(nil, @parent.entity_properties, user))
+        properties: SimpleProperty.struct(SimpleProperty.reflect(nil, @parent.entity_properties(user), user))
       }
     end
 
@@ -219,7 +219,7 @@ module EntitySet
 
     def args(user)
       {
-        filters: SimpleProperty.struct(SimpleProperty.reflect nil, (@parent.entity_properties.select do |key|
+        filters: SimpleProperty.struct(SimpleProperty.reflect nil, (@parent.entity_properties(user).select do |key|
           @parent.filters.include? key
         end), user)
       }

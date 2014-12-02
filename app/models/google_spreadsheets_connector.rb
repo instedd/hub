@@ -179,7 +179,7 @@ class GoogleSpreadsheetsConnector < Connector
       headers
     end
 
-    def entity_properties
+    def entity_properties(user)
       Hash[headers.map { |h| [h, SimpleProperty.string(h, nil)] }]
     end
 

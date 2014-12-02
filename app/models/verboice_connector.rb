@@ -119,11 +119,16 @@ class VerboiceConnector < Connector
       "#{@parent.path}/phone_book"
     end
 
-    def entity_properties
-      {
+    def entity_properties(user)
+      vars = GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{@parent.id}/project_variables.json")
+      properties = {
         id: SimpleProperty.id,
         address: SimpleProperty.integer("Address")
       }
+      vars.each do |variable|
+        properties[variable["name"].to_sym] = SimpleProperty.string(variable["name"])
+      end
+      properties
     end
 
     def query(filters, user, options)
