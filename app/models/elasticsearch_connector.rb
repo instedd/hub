@@ -114,7 +114,7 @@ class ElasticsearchConnector < Connector
       response['hits']['hits'].map { |r| Record.new(self, r['_source']) }
     end
 
-    def entity_properties
+    def entity_properties(user)
       mapping = JSON.parse RestClient.get("#{connector.url}/#{index_name}/#{type_name}/_mapping")
       properties = mapping[index_name]['mappings'][type_name]['properties']
       #TODO better type mapping using t['type']
