@@ -43,12 +43,10 @@ describe ACTConnector do
       it "reflects event" do
         cases = connector.lookup %w(cases), user
         listed_events = cases.reflect(url_proc, user)[:events]
-        expect(listed_events).to eq({
-          "new_case" => {
+        expect(listed_events["new_case"]).to eq({
             :label => "New case",
             :path => "cases/$events/new_case",
             :reflect_url => "http://server/cases/$events/new_case"
-          }
         })
       end
 
@@ -56,6 +54,20 @@ describe ACTConnector do
         new_case_event = connector.lookup %w(cases $events new_case), user
         expected_args = [:id, :patient_name, :patient_phone_number, :patient_age, :patient_gender, :dialect_code, :symptoms]
         expect(new_case_event.args(user).keys).to match_array(expected_args)
+      end
+
+    end
+
+    describe "case confirmed sick event" do
+
+      it "reflects event" do
+        cases = connector.lookup %w(cases), user
+        listed_events = cases.reflect(url_proc, user)[:events]
+        expect(listed_events["case_confirmed_sick"]).to eq({
+            :label => "Case confirmed sick",
+            :path => "cases/$events/case_confirmed_sick",
+            :reflect_url => "http://server/cases/$events/case_confirmed_sick"
+        })
       end
 
     end

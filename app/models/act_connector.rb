@@ -42,7 +42,8 @@ class ACTConnector < Connector
 
     def events
       {
-        "new_case" => NewCaseEvent.new(self)
+        "new_case" => NewCaseEvent.new(self),
+        "case_confirmed_sick" => CaseConfirmedSickEvent.new(self)
       }
     end
 
@@ -97,6 +98,50 @@ class ACTConnector < Connector
         symptoms: {type: {kind: :array, item_type: :string}},
       }
     end
+  end
+
+  class CaseConfirmedSickEvent
+    include Event
+
+    def initialize(parent)
+      @parent = parent
+    end
+
+    def label
+      "Case confirmed sick"
+    end
+
+    def sub_path
+      "case_confirmed_sick"
+    end
+
+    def poll
+      since_id = load_state
+      url = "#{connector.url}/api/v1/notifications/?notification_type=case_confirmed_sick"
+      url += "&since_id=#{since_id}" if since_id.present?
+      token = connector.access_token
+      headers = { "Authorization" => connector.authorization_header }
+      notifications = JSON.parse(RestClient.get(url, headers))
+      # assumes notifications are sorted by date
+      save_state(notifications.last["id"]) unless notifications.empty?
+
+      notifications
+    end
+
+    def args(user)
+      {
+        id: { type: :integer },
+        patient_name: { type: :string },
+        patient_phone_number: { type: :string },
+        patient_age: { type: :string },
+        patient_gender: { type: {kind: :enum, value_type: :string, members: [
+          {value: "M", label: "Male" },
+          {value: "F", label: "Female" },
+        ]}},
+        dialect_code: { type: :string }
+      }
+    end
+
   end
 
   class UpdateCaseAction
