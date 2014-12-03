@@ -4,7 +4,7 @@ class RapidProConnector < Connector
 
   validates_presence_of :url, :token
 
-  def properties
+  def properties(user)
     {"flows" => Flows.new(self)}
   end
 

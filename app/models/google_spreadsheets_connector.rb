@@ -230,7 +230,7 @@ class GoogleSpreadsheetsConnector < Connector
       @row = row
     end
 
-    def properties
+    def properties(user)
       Hash[parent.headers.map { |h| [h, SimpleProperty.string(h, @row[h])] }]
     end
   end

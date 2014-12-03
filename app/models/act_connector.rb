@@ -4,7 +4,7 @@ class ACTConnector < Connector
 
   validates_presence_of :url
 
-  def properties
+  def properties(user)
     {"cases" => Cases.new(self)}
   end
 

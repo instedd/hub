@@ -4,7 +4,7 @@ class MBuilderConnector < Connector
   store_accessor :settings, :url, :username, :password
   after_initialize :initialize_defaults, :if => :new_record?
 
-  def properties
+  def properties(user)
     {"applications" => Applications.new(self)}
   end
 
@@ -58,7 +58,7 @@ class MBuilderConnector < Connector
       id
     end
 
-    def properties
+    def properties(user)
       {
         "id" => SimpleProperty.id(@id),
         "name" => SimpleProperty.name('')

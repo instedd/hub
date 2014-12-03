@@ -33,7 +33,7 @@ describe Event do
 
   class MockConnector < Connector
     include Entity
-    def properties
+    def properties(user)
       {"mock" => MockProperty.new(self)}
     end
     def url

@@ -20,7 +20,7 @@ module Entity
     when "$events"
       EventsNode.new(self).lookup(path, user)
     else
-      properties[property_name].lookup(path, user)
+      properties(user)[property_name].lookup(path, user)
     end
   end
 
@@ -36,7 +36,7 @@ module Entity
     end
   end
 
-  def properties
+  def properties(user)
   end
 
   def actions(user)
@@ -46,7 +46,7 @@ module Entity
   end
 
   def raw(data_url_proc, current_user)
-    if p = properties
+    if p = properties(current_user)
       Hash[p.map do |k, v|
         if v.is_a?(EntitySet)
           [k, data_url_proc.call(v.path)]
@@ -68,7 +68,7 @@ module Entity
 
   def reflect(reflect_url_proc, user)
     reflection = reflect_property(reflect_url_proc, user)
-    reflection[:properties] = SimpleProperty.reflect reflect_url_proc, properties, user if properties
+    reflection[:properties] = SimpleProperty.reflect reflect_url_proc, properties(user), user if properties(user)
     if a = actions(user)
       reflection[:actions] = SimpleProperty.reflect reflect_url_proc, a, user
     end

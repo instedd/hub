@@ -4,7 +4,7 @@ class ElasticsearchConnector < Connector
 
   validates_presence_of :url
 
-  def properties
+  def properties(user)
     {"indices" => Indices.new(self)}
   end
 
@@ -56,7 +56,7 @@ class ElasticsearchConnector < Connector
       @name
     end
 
-    def properties
+    def properties(user)
       {"types" => Types.new(self)}
     end
   end
@@ -91,7 +91,7 @@ class ElasticsearchConnector < Connector
     include EntitySet
     delegate :index_name, to: :parent
 
-    def initialize(parent, name = nil)
+    def initialize(parent, name)
       @parent = parent
       @name = name
     end
@@ -109,8 +109,8 @@ class ElasticsearchConnector < Connector
     end
 
     def query(filters, current_user, options)
-      response = JSON.parse RestClient.get("#{connector.url}/#{index_name}/_search")
-      # TODO apply filters and options
+      filter = {query:{bool: {must: filters.map { |k, v| {match: {k => v}} } }}}.to_json
+      response = JSON.parse RestClient.post("#{connector.url}/#{index_name}/_search", filter)
       response['hits']['hits'].map { |r| Record.new(self, r['_source']) }
     end
 
@@ -141,8 +141,8 @@ class ElasticsearchConnector < Connector
       @row = row
     end
 
-    def properties
-      Hash[parent.entity_properties(nil).map { |n,d| [n, SimpleProperty.string(n, @row[n])] }]
+    def properties(user)
+      Hash[parent.entity_properties(user).map { |n,d| [n, SimpleProperty.string(n, @row[n])] }]
     end
   end
 

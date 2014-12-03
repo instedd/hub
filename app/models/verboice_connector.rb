@@ -4,7 +4,7 @@ class VerboiceConnector < Connector
   store_accessor :settings, :url, :username, :password
   after_initialize :initialize_defaults, :if => :new_record?
 
-  def properties
+  def properties(user)
     {"projects" => Projects.new(self)}
   end
 
@@ -84,7 +84,7 @@ class VerboiceConnector < Connector
       id
     end
 
-    def properties
+    def properties(user)
       {
         "id" => SimpleProperty.id(@id),
         "name" => SimpleProperty.name(@label),
@@ -180,7 +180,7 @@ class VerboiceConnector < Connector
       id
     end
 
-    def properties
+    def properties(user)
       {
         id: SimpleProperty.id(@contact["id"]),
         address: SimpleProperty.integer("Address", address)
@@ -239,7 +239,7 @@ class VerboiceConnector < Connector
       id
     end
 
-    def properties
+    def properties(user)
       {
         id: SimpleProperty.id(id),
         name: SimpleProperty.name(@name)

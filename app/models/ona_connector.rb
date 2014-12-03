@@ -11,7 +11,7 @@ class ONAConnector < Connector
     self.api_token = nil
   end
 
-  def properties
+  def properties(user)
     {"forms" => Forms.new(self)}
   end
 
@@ -69,7 +69,7 @@ class ONAConnector < Connector
       @form ||= connector.get_json("forms/#{@id}.json")
     end
 
-    def properties
+    def properties(user)
       {
         "id" => SimpleProperty.id(@id)
       }
