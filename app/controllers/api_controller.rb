@@ -33,6 +33,7 @@ class ApiController < ApplicationController
     else
       case request.method
       when "GET"
+        params[:filter] = nil if params[:filter] == ""
         filters = (params[:filter] || {}).slice(*target.filters)
         items = target.query(filters, current_user, options)
         render json: items.map { |e| e.raw(data_url_proc, current_user) }

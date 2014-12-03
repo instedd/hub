@@ -142,7 +142,7 @@ class ElasticsearchConnector < Connector
     end
 
     def properties
-      Hash[parent.entity_properties.map { |n,d| [n, SimpleProperty.string(n, @row[n])] }]
+      Hash[parent.entity_properties(nil).map { |n,d| [n, SimpleProperty.string(n, @row[n])] }]
     end
   end
 

@@ -18,6 +18,8 @@ end
 
 ElasticsearchConnector.blueprint do
   name { "Connector #{sn}" }
+  url { "http://localhost:9200" }
+  user
 end
 
 ONAConnector.blueprint do
