@@ -21,11 +21,13 @@ Rails.application.routes.draw do
 
   post 'callback/:connector/:event' => 'callbacks#enqueue'
 
-  get 'api/connectors' => 'api#connectors'
-  get 'api/reflect/connectors/:id' => 'api#reflect', as: 'reflect_api'
-  get 'api/reflect/connectors/:id/*path' => 'api#reflect', as: 'reflect_with_path_api', format: false
-  get 'api/data/connectors/:id'=> 'api#data', as: 'data_api'
-  get 'api/data/connectors/:id/*path'=> 'api#data', as: 'data_with_path_api', format: false
+  namespace :api do
+    get 'connectors' => 'api#connectors'
+    get 'reflect/connectors/:id' => 'api#reflect', as: 'reflect_api'
+    get 'reflect/connectors/:id/*path' => 'api#reflect', as: 'reflect_with_path_api', format: false
+    get 'data/connectors/:id'=> 'api#data', as: 'data_api'
+    get 'data/connectors/:id/*path'=> 'api#data', as: 'data_with_path_api', format: false
+  end
 
   resources :event_handlers
   resources :activities, only: :index
