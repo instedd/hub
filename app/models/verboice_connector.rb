@@ -102,6 +102,10 @@ class VerboiceConnector < Connector
     def project_id
       @id
     end
+
+    def verboice_project(user)
+      @verboice_project ||= GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{id}.json")
+    end
   end
 
   class PhoneBook
@@ -165,7 +169,6 @@ class VerboiceConnector < Connector
     attr_reader :address
     alias_method :id, :address
 
-
     def initialize(parent, address, contact)
       @parent = parent
       @address = address
@@ -188,10 +191,10 @@ class VerboiceConnector < Connector
     end
   end
 
-
   class CallFlows
     include EntitySet
     delegate :project_id, to: :@parent
+    delegate :verboice_project, to: :@parent
 
     def initialize(parent)
       @parent = parent
@@ -206,8 +209,7 @@ class VerboiceConnector < Connector
     end
 
     def query(filters, user, options)
-      project = GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{@parent.id}.json")
-      project["call_flows"].map { |cf| CallFlow.new(self, cf["id"], cf["name"]) }
+      verboice_project(user)["call_flows"].map { |cf| CallFlow.new(self, cf["id"], cf["name"]) }
     end
 
     def find_entity(id, user)
@@ -224,6 +226,7 @@ class VerboiceConnector < Connector
 
     attr_reader :id
     delegate :project_id, to: :@parent
+    delegate :verboice_project, to: :@parent
 
     def initialize(parent, id, name = nil)
       @parent = parent
@@ -256,6 +259,8 @@ class VerboiceConnector < Connector
   class CallAction
     include Action
 
+    delegate :verboice_project, to: :@parent
+
     def initialize(parent)
       @parent = parent
     end
@@ -277,14 +282,18 @@ class VerboiceConnector < Connector
         number: {
           type: "string",
           label: "Number"
-        }
+        },
+        vars: {
+          type: :struct,
+          members: Hash[verboice_project(user)["contact_vars"].map { |arg| [arg, {type: :string}] }],
+          open: true,
+        },
       }
     end
 
     def invoke(args, user)
-      encoded_channel_name = args.include?("channel") ? URI::encode(args["channel"]) : ""
-      encoded_number = args.include?("number") ? URI::encode(args["number"]) : ""
-      call_url = "#{connector.url}/api/call?channel=#{encoded_channel_name}&address=#{encoded_number}"
+      params = {channel: args["channel"], address: args["number"]}
+      call_url = "#{connector.url}/api/call?#{params.to_query}"
       GuissoRestClient.new(connector, user).get(call_url)
     end
   end
@@ -293,6 +302,7 @@ class VerboiceConnector < Connector
     include Event
 
     delegate :project_id, to: :@parent
+    delegate :verboice_project, to: :@parent
 
     def initialize(parent)
       @parent = parent
@@ -307,8 +317,7 @@ class VerboiceConnector < Connector
     end
 
     def args(user)
-      project = GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{project_id}.json")
-      args = Hash[project["contact_vars"].map { |arg| [arg, {type: :string}] }]
+      args = Hash[verboice_project(user)["contact_vars"].map { |arg| [arg, {type: :string}] }]
       args["address"] = {type: :string}
       args
     end

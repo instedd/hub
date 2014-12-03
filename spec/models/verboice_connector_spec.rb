@@ -222,7 +222,8 @@ describe VerboiceConnector do
             "name": "my project",
             "call_flows": [],
             "addresses": [],
-            "schedules": []
+            "schedules": [],
+            "contact_vars":["name","age"]
           }), :headers => {})
 
         projects = connector.lookup %w(projects 495 $actions call), user
@@ -232,10 +233,23 @@ describe VerboiceConnector do
           args: {
             channel: {
               type: "string",
-              label: "Channel"},
+              label: "Channel"
+            },
             number: {
               type: "string",
               label:"Number"
+            },
+            vars: {
+              type: :struct,
+              members: {
+                "name" => {
+                  type: :string,
+                },
+                "age" => {
+                  type: :string,
+                },
+              },
+              open: true,
             }
           }
         })
@@ -439,7 +453,8 @@ describe VerboiceConnector do
               "id": 495,
               "name": "my project",
               "call_flows": [],
-              "schedules": []
+              "schedules": [],
+              "contact_vars":["name","age"]
             }), headers: {})
 
         projects = connector.lookup %w(projects 495 $actions call), user
@@ -453,6 +468,18 @@ describe VerboiceConnector do
             number: {
               type: "string",
               label:"Number"
+            },
+            vars: {
+              type: :struct,
+              members: {
+                "name" => {
+                  type: :string,
+                },
+                "age" => {
+                  type: :string,
+                },
+              },
+              open: true,
             }
           }
         })
