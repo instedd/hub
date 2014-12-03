@@ -20,7 +20,7 @@ class CallbacksController < ApplicationController
   end
 
   def verify_access_token!
-    unless connector.authenticate_with_secret_token(params[:token])
+    unless connector.authenticate_with_secret_token(request.headers["X-InSTEDD-Hub-Token"])
       render json: {message: "Invalid authentication token"}, status: :unauthorized
     end
    end
