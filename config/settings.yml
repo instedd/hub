@@ -1,5 +1,4 @@
 host: localhost:3000
-authentication_token: secret
 poirot:
   elasticsearch_url: localhost:9200
 google:

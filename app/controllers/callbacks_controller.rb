@@ -20,7 +20,7 @@ class CallbacksController < ApplicationController
   end
 
   def verify_access_token!
-    if !params[:token] || params[:token] != Settings.authentication_token
+    unless connector.authenticate_with_secret_token(params[:token])
       render json: {message: "Invalid authentication token"}, status: :unauthorized
     end
    end
