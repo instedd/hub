@@ -208,9 +208,9 @@ describe VerboiceConnector do
         expect(event.reflect(url_proc, user)).to eq({
           label: "Call finished",
           args: {
-            "name" => :string,
-            "age" => :string,
-            "address" => :string
+            "name" => {type: :string},
+            "age" => {type: :string},
+            "address" => {type: :string},
           }
         })
       end
