@@ -69,6 +69,17 @@ class Connector < ActiveRecord::Base
     BCrypt::Password.new(self.secret_token) == token
   end
 
+  module NotifyJob
+    def self.perform(connector_id, path, body)
+      connector = Connector.find(connector_id)
+      body = JSON.parse body
+      subscribed_events = connector.event_handlers.where(event: path)
+      subscribed_events.each do |event_handler|
+        event_handler.trigger(body)
+      end
+    end
+  end
+
   module PollJob
     def self.perform(connector_id)
       PoirotRails::Activity.start("Poll", connector_id: connector_id) do

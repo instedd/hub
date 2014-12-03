@@ -8,24 +8,8 @@ class VerboiceConnector < Connector
     {"projects" => Projects.new(self)}
   end
 
-  def enqueue_event(task_type, *args)
-    task_class = "VerboiceConnector::#{"#{task_type}_task".classify}".constantize
-    Resque.enqueue_to(:hub, task_class, connector.id, *args)
-  end
-
   def has_notifiable_events?
     true
-  end
-
-  class CallTask
-    def self.perform(connector_id, body)
-      connector = Connector.find(connector_id)
-      body = JSON.parse body
-      subscribed_events = connector.event_handlers.where(event: "projects/#{body["project_id"]}/call_flows/#{body["call_flow_id"]}/$events/call_finished")
-      subscribed_events.each do |event_handler|
-        event_handler.trigger(body)
-      end
-    end
   end
 
   private

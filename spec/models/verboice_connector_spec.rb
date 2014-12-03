@@ -556,23 +556,8 @@ describe VerboiceConnector do
   end
 
   describe "perform subscribed events" do
-    let(:verboice_connector) { VerboiceConnector.make! username: 'jdoe', password: '1234', user: user }
-
-    let(:event_handler_1) { EventHandler.create!(
-      connector: verboice_connector,
-      event: "projects/2/call_flows/2/$events/call_finished",
-      target_connector: verboice_connector,
-      action: "projects/2/call_flows/2/$events/call_finished",
-    )}
-
-    let(:event_handler_2) { EventHandler.create!(
-      connector: verboice_connector,
-      event: "projects/2/call_flows/2/$events/call_finished",
-      target_connector: verboice_connector,
-      action: "projects/2/call_flows/2/$events/call_finished",
-    )}
     before(:each) do
-      stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/2.json").
+      stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/1.json").
         to_return(status: 200, body: %({
             "id": 2,
             "name": "my project",
@@ -582,23 +567,38 @@ describe VerboiceConnector do
             }],
             "schedules": []
           }), headers: {})
-      stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/2/call_flows/2.json").
+      stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/1/call_flows/6.json").
         to_return(status: 200, body: %({
             "id": 740,
             "name": "my flow"
           }), headers: {})
-      event_handler_1
-      event_handler_2
     end
 
+    let(:verboice_connector) { VerboiceConnector.make! username: 'jdoe', password: '1234', user: user }
+
+    let!(:event_handler_1) { EventHandler.create!(
+      connector: verboice_connector,
+      event: "projects/1/call_flows/6/$events/call_finished",
+      target_connector: verboice_connector,
+      action: "projects/1/call_flows/6/$events/call_finished",
+    )}
+
+    let!(:event_handler_2) { EventHandler.create!(
+      connector: verboice_connector,
+      event: "projects/1/call_flows/6/$events/call_finished",
+      target_connector: verboice_connector,
+      action: "projects/1/call_flows/6/$events/call_finished",
+    )}
+
+
     it "should invoke event handlers when processing a queued job" do
-      data = {"project_id"=>2, "call_flow_id"=>2, "address"=>"17772632588", "vars"=>{"age"=>"20"}}.to_json
+      data = {"project_id"=>1, "call_flow_id"=>6, "address"=>"17772632588", "vars"=>{"age"=>"20"}}.to_json
       trigger_count = 0
       allow_any_instance_of(EventHandler).to receive(:trigger) do |data|
         trigger_count+=1
       end
 
-      VerboiceConnector::CallTask.perform(verboice_connector.id, data)
+      Connector::NotifyJob.perform(verboice_connector.id, "projects/1/call_flows/6/$events/call_finished",  data)
 
       expect(trigger_count).to eq(2)
     end
