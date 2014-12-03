@@ -1,4 +1,5 @@
 class ApiController < ApplicationController
+  after_action :allow_iframe, only: :picker
   skip_before_action :verify_authenticity_token
   skip_before_action :authenticate_user!
   before_action :verify_access_token!, only: :notify
@@ -67,4 +68,7 @@ class ApiController < ApplicationController
     end
   end
 
+  def allow_iframe
+    response.headers.except! 'X-Frame-Options'
+  end
 end
