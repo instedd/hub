@@ -4,15 +4,18 @@
     = stylesheet_link_tag "application", :media => "all"
     = javascript_include_tag "application"
     %style
-      body { background: white; }
+      body { background: white; margin: 0 20px; }
+
   %body(ng-app='ApiPickerApp')
     %div(ng-controller='ApiPickerCtrl')
       %br
       %br
       %ih-entity-browser(on-select='entitySetSelected' filter-type='type')
 
+      %br
+
       %span(ng-show='selectedItem.path')
-        %button(type="button" ng-click="closePicker()")
+        %button.btn(type="button" ng-click="closePicker()")
           Select {{selectedItem.path}}
 
       %span(ng-hide='selectedItem.path')
