@@ -103,7 +103,6 @@ describe ElasticsearchConnector do
       result = connector.lookup_path("indices/instedd_hub_test/types/type1", user).reflect(url_proc, user)
       expect(result).to eq({
         label: "type1",
-        entities: [],
         entity_definition: {
           properties: {
             "age"  => {label: "age", type: :string},
