@@ -240,16 +240,18 @@ describe VerboiceConnector do
               label:"Number"
             },
             vars: {
-              type: :struct,
-              members: {
-                "name" => {
-                  type: :string,
+              type: {
+                kind: :struct,
+                members: {
+                  "name" => {
+                    type: :string,
+                  },
+                  "age" => {
+                    type: :string,
+                  },
                 },
-                "age" => {
-                  type: :string,
+                open: true,
                 },
-              },
-              open: true,
             }
           }
         })
@@ -272,6 +274,27 @@ describe VerboiceConnector do
         projects = connector.lookup %w(projects 495 $actions call), user
 
         response = projects.invoke({'channel' => 'Channel', 'address' => '123'}, user)
+        expect(response).to eq({
+          "call_id" => 755961,
+          "state" => "queued"
+        })
+      end
+
+      it "invokes with vars" do
+        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495.json").
+          to_return(:status => 200, :body => %({
+            "id": 495,
+            "name": "my project",
+            "call_flows": [],
+            "addresses": [],
+            "schedules": []
+          }), :headers => {})
+        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/call?address=&channel=Channel&vars[foo]=1&vars[bar]=2").
+         to_return(:status => 200, :body => %({"call_id":755961,"state":"queued"}), :headers => {})
+
+        projects = connector.lookup %w(projects 495 $actions call), user
+
+        response = projects.invoke({'channel' => 'Channel', 'address' => '123', 'vars' => {'foo' => '1', 'bar' => '2'}}, user)
         expect(response).to eq({
           "call_id" => 755961,
           "state" => "queued"
@@ -470,16 +493,18 @@ describe VerboiceConnector do
               label:"Number"
             },
             vars: {
-              type: :struct,
-              members: {
-                "name" => {
-                  type: :string,
+              type: {
+                kind: :struct,
+                members: {
+                  "name" => {
+                    type: :string,
+                  },
+                  "age" => {
+                    type: :string,
+                  },
                 },
-                "age" => {
-                  type: :string,
-                },
+                open: true,
               },
-              open: true,
             }
           }
         })

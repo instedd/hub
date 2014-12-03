@@ -54,7 +54,7 @@ class VerboiceConnector < Connector
     end
 
     def find_entity(id, user)
-      entity(project(id, user))
+      Project.new(self, id, nil, user)
     end
 
     def projects(user)
@@ -72,22 +72,27 @@ class VerboiceConnector < Connector
 
   class Project
     include Entity
-    attr_reader :id, :label
+    attr_reader :id
 
-    def initialize(parent, id, name = nil)
+    def initialize(parent, id, name = nil, user = nil)
       @parent = parent
       @id = id
       @label = name
+      @user = user
     end
 
     def sub_path
       id
     end
 
+    def label(user = nil)
+      @label ||= verboice_project(user || @user)["name"]
+    end
+
     def properties(user)
       {
         "id" => SimpleProperty.id(@id),
-        "name" => SimpleProperty.name(@label),
+        "name" => SimpleProperty.name(label(user)),
         "call_flows" => CallFlows.new(self),
         "phone_book" => PhoneBook.new(self)
       }
@@ -284,15 +289,18 @@ class VerboiceConnector < Connector
           label: "Number"
         },
         vars: {
-          type: :struct,
-          members: Hash[verboice_project(user)["contact_vars"].map { |arg| [arg, {type: :string}] }],
-          open: true,
+          type: {
+            kind: :struct,
+            members: Hash[verboice_project(user)["contact_vars"].map { |arg| [arg, {type: :string}] }],
+            open: true,
+          }
         },
       }
     end
 
     def invoke(args, user)
       params = {channel: args["channel"], address: args["number"]}
+      params[:vars] = args["vars"] if args["vars"].present?
       call_url = "#{connector.url}/api/call?#{params.to_query}"
       GuissoRestClient.new(connector, user).get(call_url)
     end

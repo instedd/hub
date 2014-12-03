@@ -68,7 +68,9 @@ module Entity
 
   def reflect(reflect_url_proc, user)
     reflection = reflect_property(reflect_url_proc, user)
-    reflection[:properties] = SimpleProperty.reflect reflect_url_proc, properties(user), user if properties(user)
+    if p = properties(user)
+      reflection[:properties] = SimpleProperty.reflect reflect_url_proc, p, user
+    end
     if a = actions(user)
       reflection[:actions] = SimpleProperty.reflect reflect_url_proc, a, user
     end

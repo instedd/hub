@@ -27,15 +27,18 @@ describe Event do
     def path
       "mock/$actions/action"
     end
+
     def invoke(options, user)
     end
   end
 
   class MockConnector < Connector
     include Entity
+
     def properties(user)
       {"mock" => MockProperty.new(self)}
     end
+
     def url
       "foo.bar"
     end
@@ -57,6 +60,7 @@ describe Event do
         "action" => MockAction.new(self)
       }
     end
+
     def events
       {
         "event" => MockPollEvent.new(self)
