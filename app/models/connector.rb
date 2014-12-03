@@ -52,6 +52,23 @@ class Connector < ActiveRecord::Base
     false
   end
 
+  def has_notifiable_events?
+    false
+  end
+
+  def generate_secret_token!
+    token = Guid.new.to_s
+    self.secret_token = BCrypt::Password.create(token)
+
+    save!
+
+    token
+  end
+
+  def authenticate_with_secret_token(token)
+    BCrypt::Password.new(self.secret_token) == token
+  end
+
   module PollJob
     def self.perform(connector_id)
       PoirotRails::Activity.start("Poll", connector_id: connector_id) do

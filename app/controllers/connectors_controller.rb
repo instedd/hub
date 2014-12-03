@@ -23,6 +23,10 @@ class ConnectorsController < ApplicationController
   end
 
   def edit
+    if connector.has_notifiable_events? && !connector.secret_token
+      @secret_token = connector.generate_secret_token!
+    end
+
     add_breadcrumb connector.name
   end
 

@@ -551,4 +551,13 @@ describe VerboiceConnector do
       expect(trigger_count).to eq(2)
     end
   end
+
+  it "generates secret token on demand" do
+    connector = VerboiceConnector.make
+    token = connector.generate_secret_token!
+    expect(connector).to be_persisted
+
+    expect(connector.authenticate_with_secret_token(token)).to be_truthy
+    expect(connector.authenticate_with_secret_token("#{token}x")).to be_falsey
+  end
 end

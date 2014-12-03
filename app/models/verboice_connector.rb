@@ -13,8 +13,11 @@ class VerboiceConnector < Connector
     Resque.enqueue_to(:hub, task_class, connector.id, *args)
   end
 
-  class CallTask
+  def has_notifiable_events?
+    true
+  end
 
+  class CallTask
     def self.perform(connector_id, body)
       connector = Connector.find(connector_id)
       body = JSON.parse body
