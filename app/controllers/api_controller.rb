@@ -43,6 +43,10 @@ class ApiController < ApplicationController
     end
   end
 
+  def picker
+    render layout: false
+  end
+
   private
 
   def connector_from_guid

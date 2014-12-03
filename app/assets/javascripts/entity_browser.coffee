@@ -104,7 +104,7 @@ angular
         res.push schema
 
       for prop, schema of data.entities
-        schema['__type'] = 'entity'
+        schema['__type'] = schema.type
         res.push schema
 
       if $scope.filterType == 'action'

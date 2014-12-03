@@ -1,0 +1,18 @@
+!!!
+%html
+  %head
+    = stylesheet_link_tag "application", :media => "all"
+    = javascript_include_tag "application"
+  %body(ng-app='ApiPickerApp')
+    %div(ng-controller='ApiPickerCtrl')
+      %br
+      %br
+      %ih-entity-browser(on-select='entitySetSelected' filter-type='type')
+
+      %span(ng-show='selectedItem.path')
+        %button(type="button" ng-click="closePicker()")
+          Select {{selectedItem.path}}
+
+      %span(ng-hide='selectedItem.path')
+        No item selected
+

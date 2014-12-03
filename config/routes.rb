@@ -27,6 +27,8 @@ Rails.application.routes.draw do
     get 'reflect/connectors/:id/*path' => 'api#reflect', as: 'reflect_with_path_api', format: false
     get 'data/connectors/:id'=> 'api#data', as: 'data_api'
     get 'data/connectors/:id/*path'=> 'api#data', as: 'data_with_path_api', format: false
+
+    get 'picker' => 'api#picker'
   end
 
   resources :event_handlers
