@@ -31,7 +31,7 @@ Rails.application.routes.draw do
     end
 
     get 'picker' => 'api#picker'
-    post 'notify/connectors/:id/*path'=> 'api#notify'
+    post 'notify/connectors/:id/*path'=> 'api#notify', format: false
   end
 
   resources :event_handlers

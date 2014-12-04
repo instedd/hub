@@ -70,7 +70,7 @@ describe ApiController do
       expect(response.status).to eq(401)
     end
 
-    it "should enqueue a CallTask" do
+    it "should enqueue a NotifyJob" do
       data = {"project_id"=>1, "call_flow_id"=>6, "address"=>"17772632588", "vars"=>{"age"=>"20"}}.to_json
       request.env["RAW_POST_DATA"] = data
       request.headers["X-InSTEDD-Hub-Token"] = token
@@ -89,6 +89,19 @@ describe ApiController do
       expect(Resque).to receive(:enqueue_to).with(:hub, Connector::NotifyJob, verboice_connector.id, path, "{}")
 
       post :notify, id: verboice_connector.guid, path: path
+    end
+
+    it "should route fine with paths with periods" do
+      request.env["RAW_POST_DATA"] = nil
+      request.headers["X-InSTEDD-Hub-Token"] = token
+      path = "route/6/$events/call_finished.path"
+
+      expect(:post => "/api/notify/connectors/#{verboice_connector.guid}/#{path}").to route_to(
+        :controller => "api",
+        :action => 'notify',
+        :id => "#{verboice_connector.guid}",
+        :path => "#{path}"
+      )
     end
   end
 
