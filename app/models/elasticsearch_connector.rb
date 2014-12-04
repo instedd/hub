@@ -89,6 +89,7 @@ class ElasticsearchConnector < Connector
 
   class Type
     include EntitySet
+    protocol :insert, :update
     delegate :index_name, to: :parent
 
     def initialize(parent, name)
@@ -114,6 +115,33 @@ class ElasticsearchConnector < Connector
       response['hits']['hits'].map { |r| Record.new(self, r['_source']) }
     end
 
+    def insert(properties, user)
+      properties.delete "_id"
+      RestClient.post("#{connector.url}/#{index_name}/#{type_name}", properties.to_json)
+    end
+
+    def update(filters, properties, user)
+      query = {
+        query: {
+          filtered: {
+            filter: {
+              and: filters.map { |k, v| {term: {k => v}} }
+            }
+          }
+        }
+      }
+
+      result = JSON.parse RestClient.post("#{connector.url}/#{index_name}/#{type_name}/_search", query.to_json)
+      hits = result["hits"]["hits"]
+      hits.each do |hit|
+        id = hit["_id"]
+        source = hit["_source"]
+        source.merge! properties
+        source.delete "_id"
+        RestClient.post "#{connector.url}/#{index_name}/#{type_name}/#{id}", source.to_json
+      end
+    end
+
     def reflect_entities(user)
       # Rows are not displayed during reflection
     end
@@ -121,17 +149,36 @@ class ElasticsearchConnector < Connector
     def entity_properties(user)
       mapping = JSON.parse RestClient.get("#{connector.url}/#{index_name}/#{type_name}/_mapping")
       properties = mapping[index_name]['mappings'][type_name]['properties']
-      #TODO better type mapping using t['type']
-      Hash[properties.map { |p,t| [p, SimpleProperty.string(p, nil)] }]
+      elasticsearch_properties(properties)
     rescue RestClient::ResourceNotFound
       Hash.new
     end
 
-    def actions(user)
-      {
-        "insert" => InsertAction.new(self),
-        "update" => UpdateAction.new(self),
-      }
+    def elasticsearch_properties(hash)
+      Hash[hash.map do |key, value|
+        if props = value["properties"]
+          [key, ComposedProperty.new(elasticsearch_properties(props), true)]
+        else
+          [key, SimpleProperty.new(key, value["type"])]
+        end
+      end]
+    end
+
+    class InsertAction < EntitySet::InsertAction
+      def args(user)
+        super.tap do |args|
+          args[:properties][:type][:open] = true
+        end
+      end
+    end
+
+    class UpdateAction < EntitySet::UpdateAction
+      def args(user)
+        super.tap do |args|
+          args[:properties][:type][:open] = true
+          args[:filters][:type][:open] = true
+        end
+      end
     end
   end
 
@@ -145,127 +192,6 @@ class ElasticsearchConnector < Connector
 
     def properties(user)
       Hash[parent.entity_properties(user).map { |n,d| [n, SimpleProperty.string(n, @row[n])] }]
-    end
-  end
-
-  class InsertAction
-    include Action
-    delegate :index_name, :type_name, to: :parent
-
-    def initialize(parent)
-      @parent = parent
-    end
-
-    def label
-      "Insert"
-    end
-
-    def sub_path
-      "insert"
-    end
-
-    def args(user)
-      response = JSON.parse RestClient.get("#{connector.url}/#{index_name}/_mapping")
-      properties = response[index_name]["mappings"][type_name]["properties"]
-      {
-        properties: {
-          type: {
-            kind: :struct,
-            members: elasticsearch_properties(properties),
-            open: true,
-          },
-        },
-      }
-    end
-
-    def elasticsearch_properties(hash)
-      Hash[hash.map do |key, value|
-        if props = value["properties"]
-          [key, {type: {kind: :struct, members: elasticsearch_properties(props)}}]
-        else
-          [key, {type: value["type"]}]
-        end
-      end]
-    end
-
-    def invoke(args, user)
-      properties = args["properties"]
-      properties.delete "_id"
-      RestClient.post("#{connector.url}/#{index_name}/#{type_name}", properties.to_json)
-    end
-  end
-
-  class UpdateAction
-    include Action
-    delegate :index_name, :type_name, to: :parent
-
-    def initialize(parent)
-      @parent = parent
-    end
-
-    def label
-      "Update"
-    end
-
-    def sub_path
-      "update"
-    end
-
-    def args(user)
-      response = JSON.parse RestClient.get("#{connector.url}/#{index_name}/_mapping")
-      properties = response[index_name]["mappings"][type_name]["properties"]
-      {
-        keys: {
-          type: {
-            kind: :struct,
-            members: [],
-            open: true,
-          },
-        },
-        properties: {
-          type: {
-            kind: :struct,
-            members: elasticsearch_properties(properties),
-            open: true,
-          },
-        },
-      }
-    end
-
-    def elasticsearch_properties(hash)
-      Hash[hash.map do |key, value|
-        if props = value["properties"]
-          [key, {type: {kind: :struct, members: elasticsearch_properties(props)}}]
-        else
-          [key, {type: value["type"]}]
-        end
-      end]
-    end
-
-    def invoke(args, user)
-      keys = args["keys"]
-      properties = args["properties"]
-
-      query = {
-        query: {
-          filtered: {
-            filter: {
-              and: keys.map { |k, v| {term: {k => v}} }
-            }
-          }
-        }
-      }
-
-      result = JSON.parse RestClient.post("#{connector.url}/#{index_name}/#{type_name}/_search", query.to_json)
-      hits = result["hits"]["hits"]
-      hits.each do |hit|
-        id = hit["_id"]
-        source = hit["_source"]
-        source.merge! properties
-        source.delete "_id"
-
-        response = RestClient.post "#{connector.url}/#{index_name}/#{type_name}/#{id}", source.to_json
-      end
     end
   end
 end

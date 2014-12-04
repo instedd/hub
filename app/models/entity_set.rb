@@ -32,9 +32,6 @@ module EntitySet
 
   def actions(user)
     actions = Hash.new
-    if protocols.include? :query
-      actions["query"] = self.class::QueryAction.new(self)
-    end
     if protocols.include? :insert
       actions["insert"] = self.class::InsertAction.new(self)
     end
@@ -113,33 +110,6 @@ module EntitySet
     :entity_set
   end
 
-  class QueryAction
-    include Action
-
-    def initialize(parent)
-      @parent = parent
-    end
-
-    def label
-      "Query"
-    end
-
-    def sub_path
-      "query"
-    end
-
-    def args(user)
-      SimpleProperty.reflect nil, (@parent.entity_properties(user).select do |key|
-        @parent.filters.include? key
-      end), user
-    end
-
-    def invoke(args, user)
-      filter = args.delete(:filter)
-      @parent.query filter, current_user, args
-    end
-  end
-
   class InsertAction
     include Action
 
@@ -157,7 +127,7 @@ module EntitySet
 
     def args(user)
       {
-        properties: SimpleProperty.struct(SimpleProperty.reflect(nil, @parent.entity_properties(user), user))
+        properties: ComposedProperty.new(@parent.entity_properties(user)).reflect_property(nil, user)
       }
     end
 
@@ -183,10 +153,10 @@ module EntitySet
 
     def args(user)
       {
-        filters: SimpleProperty.struct(SimpleProperty.reflect nil, (@parent.entity_properties(user).select do |key|
+        filters: ComposedProperty.new(@parent.entity_properties(user).select do |key|
           @parent.filters(user).include? key
-        end), user),
-        properties: SimpleProperty.struct(SimpleProperty.reflect(nil, @parent.entity_properties(user), user))
+        end).reflect_property(nil, user),
+        properties: ComposedProperty.new(@parent.entity_properties(user)).reflect_property(nil, user)
       }
     end
 
@@ -212,9 +182,9 @@ module EntitySet
 
     def args(user)
       {
-        filters: SimpleProperty.struct(SimpleProperty.reflect nil, (@parent.entity_properties(user).select do |key|
+        filters: ComposedProperty.new(@parent.entity_properties(user).select do |key|
           @parent.filters(user).include? key
-        end), user)
+        end).reflect_property(nil, user)
       }
     end
 

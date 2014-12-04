@@ -3,7 +3,7 @@ class SimpleProperty
   attr_accessor :type
   attr_accessor :value
 
-  def initialize(label, type, value)
+  def initialize(label, type, value=nil)
     @label = label
     @type = type
     @value = value
@@ -27,15 +27,6 @@ class SimpleProperty
 
   def reflect_property reflect_url_proc, user
     {label: label, type: type}
-  end
-
-  def self.struct members
-    {
-      type: {
-        kind: :struct,
-        members: members
-      }
-    }
   end
 
   def self.reflect reflect_url_proc, properties, user

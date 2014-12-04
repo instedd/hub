@@ -55,13 +55,6 @@ describe VerboiceConnector do
           reflect_url: "http://server/projects",
           type: :entity_set,
           protocol: [:query],
-          actions: {
-            "query" => {
-              label: "Query",
-              path: "projects/$actions/query",
-              reflect_url: "http://server/projects/$actions/query"
-            }
-          },
           entities: [
             {
               label: "my project",
@@ -142,13 +135,6 @@ describe VerboiceConnector do
           reflect_url: "http://server/projects/495/call_flows",
           type: :entity_set,
           protocol: [:query],
-          actions: {
-            "query" => {
-              label: "Query",
-              path: "projects/495/call_flows/$actions/query",
-              reflect_url: "http://server/projects/495/call_flows/$actions/query"
-            }
-          },
           entities: [{
             label: "my flow",
             path: "projects/495/call_flows/740",
@@ -401,13 +387,6 @@ describe VerboiceConnector do
           reflect_url: "http://server/projects",
           type: :entity_set,
           protocol: [:query],
-          actions: {
-            "query" => {
-              label: "Query",
-              path: "projects/$actions/query",
-              reflect_url: "http://server/projects/$actions/query"
-            }
-          },
           entities: [
             {
               label: "my project",

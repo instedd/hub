@@ -176,7 +176,7 @@ class GoogleSpreadsheetsConnector < Connector
     end
 
     def entity_properties(user)
-      Hash[headers.map { |h| [h, SimpleProperty.string(h, nil)] }]
+      Hash[headers.map { |h| [h, SimpleProperty.string(h)] }]
     end
 
     def query(filters, current_user, options)

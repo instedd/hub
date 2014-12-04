@@ -80,13 +80,6 @@ describe ElasticsearchConnector do
         path: "indices/instedd_hub_test/types",
         reflect_url: "http://server/indices/instedd_hub_test/types",
         type: :entity_set,
-        actions: {
-          "query" => {
-            label: "Query",
-            path: "indices/instedd_hub_test/types/$actions/query",
-            reflect_url: "http://server/indices/instedd_hub_test/types/$actions/query"
-          }
-        },
         protocol: [:query],
         entities: [
           {
@@ -105,11 +98,11 @@ describe ElasticsearchConnector do
         label: "type1",
         entity_definition: {
           properties: {
-            "age"  => {label: "age", type: :string},
-            "name" => {label: "name", type: :string},
+            "age"  => {label: "age", type: "integer"},
+            "name" => {label: "name", type: "string"},
           }
         },
-        protocol: [:query],
+        protocol: [:query, :insert, :update],
         path: "indices/instedd_hub_test/types/type1",
         reflect_url: "http://server/indices/instedd_hub_test/types/type1",
         type: :entity_set,
@@ -137,8 +130,8 @@ describe ElasticsearchConnector do
             type: {
               kind: :struct,
               members: {
-                "age" => {type: "integer"},
-                "name" => {type: "string"},
+                "age" => {type: "integer", :label=>"age"},
+                "name" => {type: "string", :label=>"name"},
               },
               open: true,
             },
@@ -152,10 +145,13 @@ describe ElasticsearchConnector do
       expect(result).to eq({
         label: "Update",
         args: {
-          keys: {
+          filters: {
             type: {
               kind: :struct,
-              members: [],
+              members: {
+                "age" => {type: "integer", :label=>"age"},
+                "name" => {type: "string", :label=>"name"},
+              },
               open: true,
             },
           },
@@ -163,8 +159,8 @@ describe ElasticsearchConnector do
             type: {
               kind: :struct,
               members: {
-                "age" => {type: "integer"},
-                "name" => {type: "string"},
+                "age" => {type: "integer", :label=>"age"},
+                "name" => {type: "string", :label=>"name"},
               },
               open: true,
             },
@@ -197,7 +193,7 @@ describe ElasticsearchConnector do
     action = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/update", user)
     action.invoke(
       {
-        "keys" => {
+        "filters" => {
           "name" => "john",
         },
         "properties" => {
@@ -233,7 +229,7 @@ describe ElasticsearchConnector do
     action = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/update", user)
     action.invoke(
       {
-        "keys" => {
+        "filters" => {
           "name" => "john",
           "age" => 20,
         },
