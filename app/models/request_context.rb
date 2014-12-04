@@ -5,19 +5,11 @@ class RequestContext
   end
 
   def data_url(path)
-    if path.blank?
-      @controller.data_api_url(connector_id)
-    else
-      @controller.data_with_path_api_url(connector_id, path)
-    end
+    @controller.api_data_url(connector_id, path)
   end
 
   def reflect_url(path)
-    if path.blank?
-      @controller.reflect_api_url(connector_id)
-    else
-      @controller.reflect_with_path_api_url(connector_id, path)
-    end
+    @controller.api_reflect_url(connector_id, path)
   end
 
   def user

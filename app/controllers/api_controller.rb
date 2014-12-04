@@ -7,14 +7,14 @@ class ApiController < ApplicationController
 
   expose(:accessible_connectors) { Connector.with_optional_user(current_user) }
   expose(:connector) { accessible_connectors.find_by_guid(params[:id]) }
-  expose(:target) { connector.lookup_path(params[:path], current_user) }
+  expose(:target) { connector.lookup_path(params[:path], request_context) }
 
   def connectors
     c = accessible_connectors.map do |c|
       {
         label: c.name,
         guid: c.guid,
-        reflect_url: reflect_api_url(c.guid),
+        reflect_url: api_reflect_url(c.guid),
       }
     end
     render json: c
@@ -75,7 +75,7 @@ class ApiController < ApplicationController
 
   def entity_filter
     params[:filter] = nil if params[:filter] == ""
-    (params[:filter] || {}).slice(*target.filters(current_user))
+    (params[:filter] || {}).slice(*target.filters(request_context))
   end
 
   def verify_access_token!

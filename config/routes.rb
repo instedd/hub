@@ -21,11 +21,10 @@ Rails.application.routes.draw do
 
   scope :api do
     get 'connectors' => 'api#connectors'
-    get 'reflect/connectors/:id' => 'api#reflect', as: 'reflect_api'
-    get 'reflect/connectors/:id/*path' => 'api#reflect', as: 'reflect_with_path_api', format: false
-    
+    get 'reflect/connectors/:id(/*path)' => 'api#reflect', as: 'api_reflect', format: false
+
     scope :data do
-      get    'connectors/:id(/*path)'  => 'api#query', as: 'data_with_path_api', format: false
+      get    'connectors/:id(/*path)'  => 'api#query', as: 'api_data', format: false
       post   'connectors/:id(/*path)'  => 'api#insert'
       put    'connectors/:id(/*path)'  => 'api#update'
       delete 'connectors/:id(/*path)'  => 'api#delete'

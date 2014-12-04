@@ -7,7 +7,7 @@
           - if connector.shared?
             = connector.name
             (Shared)
-            = link_to "Reflect", reflect_api_path(connector.guid)
+            = link_to "Reflect", api_reflect_path(connector.guid)
           - else
             = icon_link_to :'icf-arrow', connector.name, edit_connector_path(connector)
 

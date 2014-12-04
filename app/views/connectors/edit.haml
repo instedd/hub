@@ -6,6 +6,6 @@
 
 %ul
   %li GUID: #{connector.guid}
-  %li= link_to "Reflect", reflect_api_path(connector.guid)
+  %li= link_to "Reflect", api_reflect_path(connector.guid)
   - if @secret_token
     %li Secret token: #{@secret_token}

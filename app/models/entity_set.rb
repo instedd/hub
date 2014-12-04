@@ -108,7 +108,7 @@ module EntitySet
     {
       label: label,
       path: path,
-      data_url: context.data_url(path)
+      data_url: context.api_data_url(path)
     }
   end
 
