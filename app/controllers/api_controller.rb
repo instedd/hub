@@ -43,8 +43,7 @@ class ApiController < ApplicationController
   def update
     properties = params[:properties]
     updated_entity_count = target.update(entity_filter, properties, request_context)
-
-    if updated_entity_count == 0 && params[:create_or_update]
+    if updated_entity_count == 0 && params[:create_or_update] == 'true'
       target.insert(properties, request_context)
     end
 

@@ -121,6 +121,7 @@ class ElasticsearchConnector < Connector
     end
 
     def update(filters, properties, context)
+      # TODO update does not work if filters is empty
       query = {
         query: {
           filtered: {
@@ -140,6 +141,8 @@ class ElasticsearchConnector < Connector
         source.delete "_id"
         RestClient.post "#{connector.url}/#{index_name}/#{type_name}/#{id}", source.to_json
       end
+
+      hits.count
     end
 
     def reflect_entities(context)
