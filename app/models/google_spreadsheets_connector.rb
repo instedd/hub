@@ -175,10 +175,6 @@ class GoogleSpreadsheetsConnector < Connector
       # Rows are not displayed during reflection
     end
 
-    def filters
-      headers
-    end
-
     def entity_properties(user)
       Hash[headers.map { |h| [h, SimpleProperty.string(h, nil)] }]
     end

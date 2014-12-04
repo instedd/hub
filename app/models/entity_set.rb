@@ -57,21 +57,14 @@ module EntitySet
     def protocols
       @protocols ||= [:query]
     end
+  end
 
-    def filter_by(*methods)
-      filters.concat methods
-    end
-    def filters
-      @filters ||= Array.new
-    end
+  def filters(user)
+    (entity_properties(user) || {}).keys
   end
 
   def protocols
     self.class.protocols
-  end
-
-  def filters
-    self.class.filters
   end
 
   abstract def query(filters, current_user, options)
@@ -191,7 +184,7 @@ module EntitySet
     def args(user)
       {
         filters: SimpleProperty.struct(SimpleProperty.reflect nil, (@parent.entity_properties(user).select do |key|
-          @parent.filters.include? key
+          @parent.filters(user).include? key
         end), user),
         properties: SimpleProperty.struct(SimpleProperty.reflect(nil, @parent.entity_properties(user), user))
       }
@@ -220,7 +213,7 @@ module EntitySet
     def args(user)
       {
         filters: SimpleProperty.struct(SimpleProperty.reflect nil, (@parent.entity_properties(user).select do |key|
-          @parent.filters.include? key
+          @parent.filters(user).include? key
         end), user)
       }
     end

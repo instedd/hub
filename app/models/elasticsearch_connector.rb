@@ -123,6 +123,8 @@ class ElasticsearchConnector < Connector
       properties = mapping[index_name]['mappings'][type_name]['properties']
       #TODO better type mapping using t['type']
       Hash[properties.map { |p,t| [p, SimpleProperty.string(p, nil)] }]
+    rescue RestClient::ResourceNotFound
+      Hash.new
     end
 
     def actions(user)
