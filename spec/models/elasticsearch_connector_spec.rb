@@ -169,6 +169,19 @@ describe ElasticsearchConnector do
     end
   end
 
+  it "executes query" do
+    RestClient.post("http://localhost:9200/instedd_hub_test/type1", %({"name": "john", "age": 20}))
+    RestClient.post("http://localhost:9200/instedd_hub_test/type1", %({"name": "peter", "age": 40}))
+    refresh_index
+
+    entity_set = connector.lookup_path("indices/instedd_hub_test/types/type1", user)
+    result = entity_set.query({}, context, {})
+    expect(result.count).to eq(2)
+
+    result = entity_set.query({name: 'peter'}, context, {})
+    expect(result.count).to eq(1)
+  end
+
   it "executes insert action" do
     action = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/insert", user)
     action.invoke({"properties" => {"name" => "john", "age" => 30, "extra" => "hello"}}, user)

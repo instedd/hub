@@ -110,7 +110,7 @@ class ElasticsearchConnector < Connector
     end
 
     def query(filters, context, options)
-      filter = {query:{bool: {must: filters.map { |k, v| {match: {k => v}} } }}}.to_json
+      filter = {query:{bool: {must: filters.map { |k, v| {match: {k => v}} } }}}.to_json unless filters.empty?
       response = JSON.parse RestClient.post("#{connector.url}/#{index_name}/_search", filter)
       response['hits']['hits'].map { |r| Record.new(self, r['_source']) }
     end
