@@ -2,7 +2,6 @@ class ApiController < ApplicationController
   after_action :allow_iframe, only: :picker
   skip_before_action :verify_authenticity_token
   skip_before_action :authenticate_user!
-  before_action :verify_access_token!, only: :notify
   before_filter :authenticate_api_user!, except: :notify
 
   expose(:accessible_connectors) { Connector.with_optional_user(current_user) }
@@ -60,14 +59,19 @@ class ApiController < ApplicationController
   end
 
   def notify
-    raw_post = request.raw_post || "{}"
+    notified_connector = Connector.find_by_guid params[:id]
+    if !notified_connector.authenticate_with_secret_token(request.headers["X-InSTEDD-Hub-Token"])
+      render json: {message: "Invalid authentication token"}, status: :unauthorized
+    else
+      raw_post = request.raw_post || "{}"
 
-    # This will raise an exception if the json is invalid
-    JSON.parse raw_post
+      # This will raise an exception if the json is invalid
+      JSON.parse raw_post
 
-    Resque.enqueue_to(:hub, Connector::NotifyJob, connector.id, params[:path], raw_post)
+      Resque.enqueue_to(:hub, Connector::NotifyJob, notified_connector.id, params[:path], raw_post)
 
-    render json: {}, status: :ok
+      render json: {}, status: :ok
+    end
   end
 
   private
@@ -75,12 +79,6 @@ class ApiController < ApplicationController
   def entity_filter
     params[:filter] = nil if params[:filter] == ""
     (params[:filter] || {}).slice(*target.filters(request_context))
-  end
-
-  def verify_access_token!
-    unless connector.authenticate_with_secret_token(request.headers["X-InSTEDD-Hub-Token"])
-      render json: {message: "Invalid authentication token"}, status: :unauthorized
-    end
   end
 
   def allow_iframe
