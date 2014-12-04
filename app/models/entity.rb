@@ -49,7 +49,7 @@ module Entity
     if p = properties(context)
       Hash[p.map do |k, v|
         if v.is_a?(EntitySet)
-          [k, context.api_data_url(v.path)]
+          [k, context.data_url(v.path)]
         else
           [k, v.value]
         end
