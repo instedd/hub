@@ -157,7 +157,7 @@ class ElasticsearchConnector < Connector
     def elasticsearch_properties(hash)
       Hash[hash.map do |key, value|
         if props = value["properties"]
-          [key, ComposedProperty.new(elasticsearch_properties(props), true)]
+          [key, ComposedProperty.new(elasticsearch_properties(props), open: true)]
         else
           [key, SimpleProperty.new(key, value["type"])]
         end

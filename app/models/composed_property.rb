@@ -2,7 +2,7 @@ class ComposedProperty
   attr_accessor :members
   attr_accessor :open
 
-  def initialize(members, open=false)
+  def initialize(members, open: false)
     @members = members
     @open = open
   end
