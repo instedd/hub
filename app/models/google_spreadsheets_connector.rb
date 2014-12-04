@@ -196,13 +196,17 @@ class GoogleSpreadsheetsConnector < Connector
     end
 
     def update(filters, properties, user)
+      updated_rows = 0
       list = worksheet.list
       list.each do |row|
         if row_matches_filters?(row, filters)
           row.merge!(properties)
+          updated_rows += 1
         end
       end
       worksheet.save
+
+      updated_rows
     end
 
     def row_matches_filters?(row, filters)
