@@ -4,25 +4,25 @@ module EntitySet
   attr_reader :parent
 
   abstract :path, :label
-  def reflect_entities(user)
-    query({}, user, page: 1, page_size: 1000)
+  def reflect_entities(context)
+    query({}, context, page: 1, page_size: 1000)
   end
 
   def self.included(mod)
     mod.delegate :connector, to: :parent unless mod.method_defined?(:connector)
   end
 
-  def lookup(path, user)
+  def lookup(path, context)
     return self if path.empty?
     entity_id = path.shift
 
     case entity_id
     when "$actions"
-      ActionsNode.new(self).lookup(path, user)
+      ActionsNode.new(self).lookup(path, context)
     when "$events"
-      EventsNode.new(self).lookup(path, user)
+      EventsNode.new(self).lookup(path, context)
     else
-      find_entity(entity_id, user).lookup(path, user)
+      find_entity(entity_id, context).lookup(path, context)
     end
   end
 
@@ -30,7 +30,7 @@ module EntitySet
     path
   end
 
-  def actions(user)
+  def actions(context)
     actions = Hash.new
     if protocols.include? :insert
       actions["insert"] = self.class::InsertAction.new(self)
@@ -56,15 +56,15 @@ module EntitySet
     end
   end
 
-  def filters(user)
-    (entity_properties(user) || {}).keys
+  def filters(context)
+    (entity_properties(context) || {}).keys
   end
 
   def protocols
     self.class.protocols
   end
 
-  abstract def query(filters, current_user, options)
+  abstract def query(filters, context, options)
   end
   abstract def insert(properties, user)
   end
@@ -73,42 +73,42 @@ module EntitySet
   abstract def delete filters, user
   end
 
-  def entity_properties(user)
+  def entity_properties(context)
   end
 
-  def reflect_property reflect_url_proc, user
+  def reflect_property(context)
     reflection = {}
     reflection[:label] = label
     reflection[:type] = node_type
     reflection[:path] = path
-    reflection[:reflect_url] = reflect_url_proc.call(reflect_path) if reflect_path
+    reflection[:reflect_url] = context.reflect_url(reflect_path) if reflect_path
     reflection
   end
 
-  def reflect(reflect_url_proc, user)
-    reflection = reflect_property reflect_url_proc, user
-    if properties = entity_properties(user)
+  def reflect(context)
+    reflection = reflect_property context
+    if properties = entity_properties(context)
       reflection[:entity_definition] = {}
-      reflection[:entity_definition][:properties] = SimpleProperty.reflect reflect_url_proc, properties, user
+      reflection[:entity_definition][:properties] = SimpleProperty.reflect context, properties
     end
     reflection[:protocol] = protocols unless protocols.empty?
-    if e = reflect_entities(user)
-      reflection[:entities] = e.map { |entity| entity.reflect_property(reflect_url_proc, user) }
+    if e = reflect_entities(context)
+      reflection[:entities] = e.map { |entity| entity.reflect_property(context) }
     end
-    if a = actions(user)
-      reflection[:actions] = SimpleProperty.reflect reflect_url_proc, a, user
+    if a = actions(context)
+      reflection[:actions] = SimpleProperty.reflect context, a
     end
     if e = events
-      reflection[:events] = SimpleProperty.reflect reflect_url_proc, e, user
+      reflection[:events] = SimpleProperty.reflect context, e
     end
     reflection
   end
 
-  def raw(data_url_proc, current_user)
+  def raw(context)
     {
       label: label,
       path: path,
-      data_url: data_url_proc.call(path)
+      data_url: context.data_url(path)
     }
   end
 
@@ -131,14 +131,14 @@ module EntitySet
       "insert"
     end
 
-    def args(user)
+    def args(context)
       {
-        properties: ComposedProperty.new(@parent.entity_properties(user)).reflect_property(nil, user)
+        properties: ComposedProperty.new(@parent.entity_properties(context)).reflect_property(context)
       }
     end
 
-    def invoke(args, user)
-      @parent.insert args["properties"], user
+    def invoke(args, context)
+      @parent.insert args["properties"], context
     end
   end
 
@@ -157,17 +157,17 @@ module EntitySet
       "update"
     end
 
-    def args(user)
+    def args(context)
       {
-        filters: ComposedProperty.new(@parent.entity_properties(user).select do |key|
-          @parent.filters(user).include? key
-        end).reflect_property(nil, user),
-        properties: ComposedProperty.new(@parent.entity_properties(user)).reflect_property(nil, user)
+        filters: ComposedProperty.new(@parent.entity_properties(context).select do |key|
+          @parent.filters(context).include? key
+        end).reflect_property(context),
+        properties: ComposedProperty.new(@parent.entity_properties(context)).reflect_property(context)
       }
     end
 
-    def invoke(args, user)
-      @parent.update args["filters"], args["properties"], user
+    def invoke(args, context)
+      @parent.update args["filters"], args["properties"], context
     end
   end
 
@@ -186,16 +186,16 @@ module EntitySet
       "delete"
     end
 
-    def args(user)
+    def args(context)
       {
-        filters: ComposedProperty.new(@parent.entity_properties(user).select do |key|
-          @parent.filters(user).include? key
-        end).reflect_property(nil, user)
+        filters: ComposedProperty.new(@parent.entity_properties(context).select do |key|
+          @parent.filters(context).include? key
+        end).reflect_property(context)
       }
     end
 
-    def invoke(args, user)
-      @parent.delete args["filters"], user
+    def invoke(args, context)
+      @parent.delete args["filters"], context
     end
   end
 end

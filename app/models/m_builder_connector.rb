@@ -4,7 +4,7 @@ class MBuilderConnector < Connector
   store_accessor :settings, :url, :username, :password
   after_initialize :initialize_defaults, :if => :new_record?
 
-  def properties(user)
+  def properties(context)
     {"applications" => Applications.new(self)}
   end
 
@@ -29,13 +29,13 @@ class MBuilderConnector < Connector
       "Applications"
     end
 
-    def query(filters, user, options)
-      GuissoRestClient.new(connector, user).get("#{connector.url}/api/applications").map do |application|
+    def query(filters, context, options)
+      GuissoRestClient.new(connector, context.user).get("#{connector.url}/api/applications").map do |application|
         Application.new(self, application["id"], application)
       end
     end
 
-    def find_entity(id, user)
+    def find_entity(id, context)
       Application.new(self, id)
     end
   end
@@ -58,15 +58,15 @@ class MBuilderConnector < Connector
       id
     end
 
-    def properties(user)
+    def properties(context)
       {
         "id" => SimpleProperty.id(@id),
         "name" => SimpleProperty.name('')
       }
     end
 
-    def actions(user)
-      triggers = GuissoRestClient.new(connector, user).get("#{connector.url}/api/applications/#{@id}/actions")
+    def actions(context)
+      triggers = GuissoRestClient.new(connector, context.user).get("#{connector.url}/api/applications/#{@id}/actions")
       trigger_hash = {}
       triggers.each do |trigger|
         trigger_hash["trigger_#{trigger["id"]}"]= TriggerAction.new(self, trigger["id"], trigger)
@@ -92,17 +92,17 @@ class MBuilderConnector < Connector
       "trigger_#{@id}"
     end
 
-    def args(user)
+    def args(context)
       @trigger["parameters"]
     end
 
-    def invoke(options, user)
+    def invoke(options, context)
       uri = URI(@trigger['url'])
-      uri.query= args(user).keys.map do |arg|
+      uri.query= args(context).keys.map do |arg|
           "#{arg}=#{options[arg]}"
         end.join '&'
 
-      GuissoRestClient.new(connector, user).post(uri.to_s)
+      GuissoRestClient.new(connector, context.user).post(uri.to_s)
     end
   end
 end

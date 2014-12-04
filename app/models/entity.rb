@@ -10,17 +10,17 @@ module Entity
     mod.delegate :connector, to: :parent unless mod.method_defined?(:connector)
   end
 
-  def lookup(path, user)
+  def lookup(path, context)
     return self if path.empty?
     property_name = path.shift
 
     case property_name
     when "$actions"
-      ActionsNode.new(self).lookup(path, user)
+      ActionsNode.new(self).lookup(path, context)
     when "$events"
-      EventsNode.new(self).lookup(path, user)
+      EventsNode.new(self).lookup(path, context)
     else
-      properties(user)[property_name].lookup(path, user)
+      properties(context)[property_name].lookup(path, context)
     end
   end
 
@@ -36,20 +36,20 @@ module Entity
     end
   end
 
-  def properties(user)
+  def properties(context)
   end
 
-  def actions(user)
+  def actions(context)
   end
 
   def events
   end
 
-  def raw(data_url_proc, current_user)
-    if p = properties(current_user)
+  def raw(context)
+    if p = properties(context)
       Hash[p.map do |k, v|
         if v.is_a?(EntitySet)
-          [k, data_url_proc.call(v.path)]
+          [k, context.data_url(v.path)]
         else
           [k, v.value]
         end
@@ -57,25 +57,25 @@ module Entity
     end
   end
 
-  def reflect_property(reflect_url_proc, user)
+  def reflect_property(context)
     {
       label: label,
       path: path,
       type: node_type,
-      reflect_url: reflect_url_proc.call(path)
+      reflect_url: context.reflect_url(path)
     }
   end
 
-  def reflect(reflect_url_proc, user)
-    reflection = reflect_property(reflect_url_proc, user)
-    if p = properties(user)
-      reflection[:properties] = SimpleProperty.reflect reflect_url_proc, p, user
+  def reflect(context)
+    reflection = reflect_property(context)
+    if p = properties(context)
+      reflection[:properties] = SimpleProperty.reflect context, p
     end
-    if a = actions(user)
-      reflection[:actions] = SimpleProperty.reflect reflect_url_proc, a, user
+    if a = actions(context)
+      reflection[:actions] = SimpleProperty.reflect context, a
     end
     if e = events
-      reflection[:events] = SimpleProperty.reflect reflect_url_proc, e, user
+      reflection[:events] = SimpleProperty.reflect context, e
     end
     reflection
   end

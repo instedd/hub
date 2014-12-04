@@ -4,22 +4,22 @@ module Event
   attr_reader :parent
   delegate :connector, to: :parent
 
-  def args(user)
+  def args(context)
     {}
   end
 
-  def reflect_property(reflect_url_proc, user)
+  def reflect_property(context)
     {
       label: label,
       path: path,
-      reflect_url: reflect_url_proc.call(path)
+      reflect_url: context.reflect_url(path)
     }
   end
 
-  def reflect(proc, user)
+  def reflect(context)
     {
       label: label,
-      args: args(user),
+      args: args(context),
     }
   end
 

@@ -15,7 +15,7 @@ class Connector < ActiveRecord::Base
 
   abstract :url
 
-  abstract def lookup(path, user)
+  abstract def lookup(path, context)
   end
 
   store :settings
@@ -28,8 +28,8 @@ class Connector < ActiveRecord::Base
     self
   end
 
-  def lookup_path(path, current_user)
-    lookup path.to_s.split('/'), current_user
+  def lookup_path(path, context)
+    lookup path.to_s.split('/'), context
   end
 
   def self.with_optional_user(user)
@@ -88,8 +88,8 @@ class Connector < ActiveRecord::Base
           [handler.event, handler.user]
         end
 
-        handlers_by_event.each do |event_user_pair, handlers|
-          events = connector.lookup_path(event_user_pair.first, event_user_pair.last).poll
+        handlers_by_event.each do |(event_path, user), handlers|
+          events = connector.lookup_path(event_path, RequestContext.new(user)).poll
           events.each do |event|
             handlers.each do |handler|
               PoirotRails::Activity.start("polling_event", event: event, handler_id: handler.id, user_id: handler.user_id, connector_id: connector_id, handled_event: handler.event, url: connector.url) do

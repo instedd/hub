@@ -11,7 +11,7 @@ class ONAConnector < Connector
     self.api_token = nil
   end
 
-  def properties(user)
+  def properties(context)
     {"forms" => Forms.new(self)}
   end
 
@@ -44,13 +44,13 @@ class ONAConnector < Connector
       "Forms"
     end
 
-    def query(filters, user, options)
+    def query(filters, context, options)
       forms = connector.get_json "forms.json"
       forms.map! { |form| Form.new(self, form["formid"], form) }
       forms.sort_by! { |form| form.label.downcase }
     end
 
-    def find_entity(id, user)
+    def find_entity(id, context)
       Form.new(self, id)
     end
   end
@@ -69,7 +69,7 @@ class ONAConnector < Connector
       @form ||= connector.get_json("forms/#{@id}.json")
     end
 
-    def properties(user)
+    def properties(context)
       {
         "id" => SimpleProperty.id(@id)
       }
@@ -156,7 +156,7 @@ class ONAConnector < Connector
       output
     end
 
-    def args(user)
+    def args(context)
       form = connector.get_json "forms/#{parent.id}/form.json"
       args = type_children(form, form["children"])
       args["_id"] = {type: :integer}

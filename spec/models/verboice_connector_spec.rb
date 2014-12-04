@@ -1,6 +1,5 @@
 describe VerboiceConnector do
   let(:user) { User.make }
-  let(:url_proc) { ->(path) { "http://server/#{path}" }}
   describe "initialization" do
     it "should set defaults for new connector" do
       connector = VerboiceConnector.make
@@ -19,17 +18,17 @@ describe VerboiceConnector do
       end
 
       it "reflects on root" do
-        expect(connector.reflect(url_proc, user)).to eq({
+        expect(connector.reflect(context)).to eq({
           label: "bar",
           path: "",
-          reflect_url: "http://server/",
+          reflect_url: "http://server/api/reflect/connectors/1",
           type: :entity,
           properties: {
             "projects" => {
               label: "Projects",
               type: :entity_set,
               path: "projects",
-              reflect_url: "http://server/projects"
+              reflect_url: "http://server/api/reflect/connectors/1/projects"
             }
           }
         })
@@ -47,12 +46,12 @@ describe VerboiceConnector do
               "schedules": []
             }]), headers: {})
 
-        projects = connector.lookup(%w(projects), user)
+        projects = connector.lookup(%w(projects), context)
 
-        expect(projects.reflect(url_proc, user)).to eq({
+        expect(projects.reflect(context)).to eq({
           label: "Projects",
           path: "projects",
-          reflect_url: "http://server/projects",
+          reflect_url: "http://server/api/reflect/connectors/1/projects",
           type: :entity_set,
           protocol: [:query],
           entities: [
@@ -60,7 +59,7 @@ describe VerboiceConnector do
               label: "my project",
               path: "projects/495",
               type: :entity,
-              reflect_url: "http://server/projects/495"
+              reflect_url: "http://server/api/reflect/connectors/1/projects/495"
             }
           ]
         })
@@ -76,12 +75,12 @@ describe VerboiceConnector do
             "schedules": []
           }), :headers => {})
 
-        projects = connector.lookup %w(projects 495), user
+        projects = connector.lookup %w(projects 495), context
 
-        expect(projects.reflect(url_proc, user)).to eq({
+        expect(projects.reflect(context)).to eq({
           label: "my project",
           path: "projects/495",
-          reflect_url: "http://server/projects/495",
+          reflect_url: "http://server/api/reflect/connectors/1/projects/495",
           type: :entity,
           properties: {
             "id" => {
@@ -96,20 +95,20 @@ describe VerboiceConnector do
               label: "Call flows",
               type: :entity_set,
               path: "projects/495/call_flows",
-              reflect_url: "http://server/projects/495/call_flows",
+              reflect_url: "http://server/api/reflect/connectors/1/projects/495/call_flows",
             },
             "phone_book" => {
               label: "Phone Book",
               type: :entity_set,
               path: "projects/495/phone_book",
-              reflect_url: "http://server/projects/495/phone_book",
+              reflect_url: "http://server/api/reflect/connectors/1/projects/495/phone_book",
             }
           },
           actions: {
             "call"=> {
               label: "Call",
               path: "projects/495/$actions/call",
-              reflect_url: "http://server/projects/495/$actions/call",
+              reflect_url: "http://server/api/reflect/connectors/1/projects/495/$actions/call",
             }
           }
         })
@@ -127,19 +126,19 @@ describe VerboiceConnector do
             "schedules": []
           }), :headers => {})
 
-        call_flows = connector.lookup %w(projects 495 call_flows), user
+        call_flows = connector.lookup %w(projects 495 call_flows), context
 
-        expect(call_flows.reflect(url_proc, user)).to eq({
+        expect(call_flows.reflect(context)).to eq({
           label: "Call flows",
           path: "projects/495/call_flows",
-          reflect_url: "http://server/projects/495/call_flows",
+          reflect_url: "http://server/api/reflect/connectors/1/projects/495/call_flows",
           type: :entity_set,
           protocol: [:query],
           entities: [{
             label: "my flow",
             path: "projects/495/call_flows/740",
             type: :entity,
-            reflect_url: "http://server/projects/495/call_flows/740",
+            reflect_url: "http://server/api/reflect/connectors/1/projects/495/call_flows/740",
           }],
         })
       end
@@ -159,12 +158,12 @@ describe VerboiceConnector do
             "name": "my flow"
           }), :headers => {})
 
-        call_flow = connector.lookup %w(projects 495 call_flows 740), user
+        call_flow = connector.lookup %w(projects 495 call_flows 740), context
 
-        expect(call_flow.reflect(url_proc, user)).to eq({
+        expect(call_flow.reflect(context)).to eq({
           label: "my flow",
           path: "projects/495/call_flows/740",
-          reflect_url: "http://server/projects/495/call_flows/740",
+          reflect_url: "http://server/api/reflect/connectors/1/projects/495/call_flows/740",
           type: :entity,
           properties: {
             id: { label: "Id", type: :integer },
@@ -174,7 +173,7 @@ describe VerboiceConnector do
             "call_finished" => {
               label: "Call finished",
               path: "projects/495/call_flows/740/$events/call_finished",
-              reflect_url: "http://server/projects/495/call_flows/740/$events/call_finished"
+              reflect_url: "http://server/api/reflect/connectors/1/projects/495/call_flows/740/$events/call_finished"
             }
           }
         })
@@ -189,9 +188,9 @@ describe VerboiceConnector do
             "name": "my flow"
           }), :headers => {})
 
-        event = connector.lookup %w(projects 495 call_flows 740 $events call_finished), user
+        event = connector.lookup %w(projects 495 call_flows 740 $events call_finished), context
 
-        expect(event.reflect(url_proc, user)).to eq({
+        expect(event.reflect(context)).to eq({
           label: "Call finished",
           args: {
             "name" => {type: :string},
@@ -212,9 +211,9 @@ describe VerboiceConnector do
             "contact_vars":["name","age"]
           }), :headers => {})
 
-        projects = connector.lookup %w(projects 495 $actions call), user
+        projects = connector.lookup %w(projects 495 $actions call), context
 
-        expect(projects.reflect(url_proc, user)).to eq({
+        expect(projects.reflect(context)).to eq({
           label:"Call",
           args: {
             channel: {
@@ -257,9 +256,9 @@ describe VerboiceConnector do
         stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/call?address=&channel=Channel").
          to_return(:status => 200, :body => %({"call_id":755961,"state":"queued"}), :headers => {})
 
-        projects = connector.lookup %w(projects 495 $actions call), user
+        projects = connector.lookup %w(projects 495 $actions call), context
 
-        response = projects.invoke({'channel' => 'Channel', 'address' => '123'}, user)
+        response = projects.invoke({'channel' => 'Channel', 'address' => '123'}, context)
         expect(response).to eq({
           "call_id" => 755961,
           "state" => "queued"
@@ -278,9 +277,9 @@ describe VerboiceConnector do
         stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/call?address=&channel=Channel&vars[foo]=1&vars[bar]=2").
          to_return(:status => 200, :body => %({"call_id":755961,"state":"queued"}), :headers => {})
 
-        projects = connector.lookup %w(projects 495 $actions call), user
+        projects = connector.lookup %w(projects 495 $actions call), context
 
-        response = projects.invoke({'channel' => 'Channel', 'address' => '123', 'vars' => {'foo' => '1', 'bar' => '2'}}, user)
+        response = projects.invoke({'channel' => 'Channel', 'address' => '123', 'vars' => {'foo' => '1', 'bar' => '2'}}, context)
         expect(response).to eq({
           "call_id" => 755961,
           "state" => "queued"
@@ -305,10 +304,10 @@ describe VerboiceConnector do
                 }
               ), :headers => {})
 
-        phone_book = connector.lookup %w(projects 495 phone_book), user
+        phone_book = connector.lookup %w(projects 495 phone_book), context
 
-        response = phone_book.query({address: "12345"}, user, {})
-        response = response.map {|contact| contact.raw(url_proc, user) }
+        response = phone_book.query({address: "12345"}, context, {})
+        response = response.map {|contact| contact.raw(context) }
         expect(response).to eq([
           {
             id: 1,
@@ -351,17 +350,17 @@ describe VerboiceConnector do
       end
 
       it "reflects on root" do
-        expect(connector.reflect(url_proc, user)).to eq({
+        expect(connector.reflect(context)).to eq({
           label: "foo",
           path: "",
-          reflect_url: "http://server/",
+          reflect_url: "http://server/api/reflect/connectors/1",
           type: :entity,
           properties: {
             "projects" => {
               label: "Projects",
               type: :entity_set,
               path: "projects",
-              reflect_url: "http://server/projects",
+              reflect_url: "http://server/api/reflect/connectors/1/projects",
             }
           }
         })
@@ -381,10 +380,10 @@ describe VerboiceConnector do
 
         projects = connector.lookup(%w(projects), user)
 
-        expect(projects.reflect(url_proc, user)).to eq({
+        expect(projects.reflect(context)).to eq({
           label: "Projects",
           path: "projects",
-          reflect_url: "http://server/projects",
+          reflect_url: "http://server/api/reflect/connectors/1/projects",
           type: :entity_set,
           protocol: [:query],
           entities: [
@@ -392,7 +391,7 @@ describe VerboiceConnector do
               label: "my project",
               path: "projects/495",
               type: :entity,
-              reflect_url: "http://server/projects/495"
+              reflect_url: "http://server/api/reflect/connectors/1/projects/495"
             }
           ]
         })
@@ -409,12 +408,12 @@ describe VerboiceConnector do
             "schedules": []
             }), headers: {})
 
-        projects = connector.lookup %w(projects 495), user
+        projects = connector.lookup %w(projects 495), context
 
-        expect(projects.reflect(url_proc, user)).to eq({
+        expect(projects.reflect(context)).to eq({
           label: "my project",
           path: "projects/495",
-          reflect_url: "http://server/projects/495",
+          reflect_url: "http://server/api/reflect/connectors/1/projects/495",
           type: :entity,
           properties: {
             "id" => {
@@ -429,20 +428,20 @@ describe VerboiceConnector do
               label: "Call flows",
               type: :entity_set,
               path: "projects/495/call_flows",
-              reflect_url: "http://server/projects/495/call_flows",
+              reflect_url: "http://server/api/reflect/connectors/1/projects/495/call_flows",
             },
             "phone_book" => {
               label: "Phone Book",
               type: :entity_set,
               path: "projects/495/phone_book",
-              reflect_url: "http://server/projects/495/phone_book",
+              reflect_url: "http://server/api/reflect/connectors/1/projects/495/phone_book",
             }
           },
           actions: {
             "call"=> {
               label: "Call",
               path: "projects/495/$actions/call",
-              reflect_url: "http://server/projects/495/$actions/call"
+              reflect_url: "http://server/api/reflect/connectors/1/projects/495/$actions/call"
             }
           }
         })
@@ -459,9 +458,9 @@ describe VerboiceConnector do
               "contact_vars":["name","age"]
             }), headers: {})
 
-        projects = connector.lookup %w(projects 495 $actions call), user
+        projects = connector.lookup %w(projects 495 $actions call), context
 
-        expect(projects.reflect(url_proc, user)).to eq({
+        expect(projects.reflect(context)).to eq({
           label:"Call",
           args: {
             channel: {
@@ -504,9 +503,9 @@ describe VerboiceConnector do
           with(:headers => {'Authorization'=>'Bearer This is a guisso auth token!'}).
           to_return(:status => 200, :body => %({"call_id":755961,"state":"queued"}), :headers => {})
 
-        projects = connector.lookup %w(projects 495 $actions call), user
+        projects = connector.lookup %w(projects 495 $actions call), context
 
-        response = projects.invoke({'channel' => 'Channel', 'number' => '123'}, user)
+        response = projects.invoke({'channel' => 'Channel', 'number' => '123'}, context)
         expect(response).to eq({
           "call_id" => 755961,
           "state" => "queued"
@@ -526,9 +525,9 @@ describe VerboiceConnector do
           with(:headers => {'Authorization'=>'Bearer This is a guisso auth token!'}).
           to_return(:status => 200, :body => %({"call_id":755961,"state":"queued"}), :headers => {})
 
-        projects = connector.lookup %w(projects 495 $actions call), user
+        projects = connector.lookup %w(projects 495 $actions call), context
 
-        response = projects.invoke({'channel' => 'Channel 123', 'number' => '123 456'}, user)
+        response = projects.invoke({'channel' => 'Channel 123', 'number' => '123 456'}, context)
         expect(response).to be_present
       end
     end

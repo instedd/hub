@@ -4,7 +4,7 @@ class ACTConnector < Connector
 
   validates_presence_of :url
 
-  def properties(user)
+  def properties(context)
     {"cases" => Cases.new(self)}
   end
 
@@ -29,14 +29,14 @@ class ACTConnector < Connector
       "Cases"
     end
 
-    def reflect_entities(user)
+    def reflect_entities(context)
     end
 
-    def query(filters, user, options)
+    def query(filters, context, options)
       []
     end
 
-    def find_entity(id, user)
+    def find_entity(id, context)
       raise "Individual cases cannot be accessed through the connector"
     end
 
@@ -47,7 +47,7 @@ class ACTConnector < Connector
       }
     end
 
-    def actions(user)
+    def actions(context)
       {
         "update_case" => UpdateCaseAction.new(self)
       }
@@ -84,7 +84,7 @@ class ACTConnector < Connector
       cases
     end
 
-    def args(user)
+    def args(context)
       {
         id: { type: :integer },
         patient_name: { type: :string },
@@ -128,7 +128,7 @@ class ACTConnector < Connector
       notifications
     end
 
-    def args(user)
+    def args(context)
       {
         id: { type: :integer },
         patient_name: { type: :string },
@@ -159,7 +159,7 @@ class ACTConnector < Connector
       "update_case"
     end
 
-    def args(user)
+    def args(context)
       {
         case_id: {
           type: "string",
@@ -172,7 +172,7 @@ class ACTConnector < Connector
       }
     end
 
-    def invoke(args, user)
+    def invoke(args, context)
       url = "#{connector.url}/api/v1/cases/#{args['case_id']}/"
       url += "?sick=#{args['is_sick']}"
       headers = { "Authorization" => connector.authorization_header }

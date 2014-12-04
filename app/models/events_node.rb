@@ -3,14 +3,14 @@ class EventsNode
     @parent = parent
   end
 
-  def lookup(path, user)
+  def lookup(path, context)
     return self if path.empty?
 
     event_name = path.shift
     @parent.events[event_name]
   end
 
-  def reflect(proc, user)
-    SimpleProperty.reflect proc, @parent.events, user
+  def reflect(proc, context)
+    SimpleProperty.reflect context, @parent.events
   end
 end

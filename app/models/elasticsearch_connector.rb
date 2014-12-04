@@ -4,7 +4,7 @@ class ElasticsearchConnector < Connector
 
   validates_presence_of :url
 
-  def properties(user)
+  def properties(context)
     {"indices" => Indices.new(self)}
   end
 
@@ -25,12 +25,12 @@ class ElasticsearchConnector < Connector
       "Indices"
     end
 
-    def query(filters, user, options)
+    def query(filters, context, options)
       response = JSON.parse RestClient.get("#{connector.url}/_stats/indices")
       response["indices"].map { |name, index| Index.new(self, name) }
     end
 
-    def find_entity(id, user)
+    def find_entity(id, context)
       Index.new(self, id)
     end
   end
@@ -56,7 +56,7 @@ class ElasticsearchConnector < Connector
       @name
     end
 
-    def properties(user)
+    def properties(context)
       {"types" => Types.new(self)}
     end
   end
@@ -77,12 +77,12 @@ class ElasticsearchConnector < Connector
       "Types"
     end
 
-    def query(filters, user, options)
+    def query(filters, context, options)
       response = JSON.parse RestClient.get("#{connector.url}/#{index_name}/_mapping")
       response[@parent.name]["mappings"].keys.map { |type| Type.new(self, type) }
     end
 
-    def find_entity(id, user)
+    def find_entity(id, context)
       Type.new(self, id)
     end
   end
@@ -109,18 +109,18 @@ class ElasticsearchConnector < Connector
       @name
     end
 
-    def query(filters, current_user, options)
+    def query(filters, context, options)
       filter = {query:{bool: {must: filters.map { |k, v| {match: {k => v}} } }}}.to_json
       response = JSON.parse RestClient.post("#{connector.url}/#{index_name}/_search", filter)
       response['hits']['hits'].map { |r| Record.new(self, r['_source']) }
     end
 
-    def insert(properties, user)
+    def insert(properties, context)
       properties.delete "_id"
       RestClient.post("#{connector.url}/#{index_name}/#{type_name}", properties.to_json)
     end
 
-    def update(filters, properties, user)
+    def update(filters, properties, context)
       query = {
         query: {
           filtered: {
@@ -142,11 +142,11 @@ class ElasticsearchConnector < Connector
       end
     end
 
-    def reflect_entities(user)
+    def reflect_entities(context)
       # Rows are not displayed during reflection
     end
 
-    def entity_properties(user)
+    def entity_properties(context)
       mapping = JSON.parse RestClient.get("#{connector.url}/#{index_name}/#{type_name}/_mapping")
       properties = mapping[index_name]['mappings'][type_name]['properties']
       elasticsearch_properties(properties)
@@ -165,7 +165,7 @@ class ElasticsearchConnector < Connector
     end
 
     class InsertAction < EntitySet::InsertAction
-      def args(user)
+      def args(context)
         super.tap do |args|
           args[:properties][:type][:open] = true
         end
@@ -173,7 +173,7 @@ class ElasticsearchConnector < Connector
     end
 
     class UpdateAction < EntitySet::UpdateAction
-      def args(user)
+      def args(context)
         super.tap do |args|
           args[:properties][:type][:open] = true
           args[:filters][:type][:open] = true
@@ -190,8 +190,8 @@ class ElasticsearchConnector < Connector
       @row = row
     end
 
-    def properties(user)
-      Hash[parent.entity_properties(user).map { |n,d| [n, SimpleProperty.string(n, @row[n])] }]
+    def properties(context)
+      Hash[parent.entity_properties(context).map { |n,d| [n, SimpleProperty.string(n, @row[n])] }]
     end
   end
 end

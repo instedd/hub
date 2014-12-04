@@ -4,7 +4,7 @@ class RapidProConnector < Connector
 
   validates_presence_of :url, :token
 
-  def properties(user)
+  def properties(context)
     {"flows" => Flows.new(self)}
   end
 
@@ -49,7 +49,7 @@ class RapidProConnector < Connector
       "Flows"
     end
 
-    def query(filters, user, options)
+    def query(filters, context, options)
       url = "#{connector.url}/api/v1/flows.json"
       all_flows = []
 
@@ -62,7 +62,7 @@ class RapidProConnector < Connector
       all_flows
     end
 
-    def find_entity(id, user)
+    def find_entity(id, context)
       Flow.new(self, id)
     end
   end
@@ -94,7 +94,7 @@ class RapidProConnector < Connector
       }
     end
 
-    def actions(user)
+    def actions(context)
       {
         "run" => RunAction.new(self)
       }
@@ -119,7 +119,7 @@ class RapidProConnector < Connector
       "#{@parent.path}/$events/run_update"
     end
 
-    def args(user)
+    def args(context)
       headers = connector.auth_headers
       results = JSON.parse(RestClient.get("#{connector.url}/api/v1/flows.json?flow=#{@parent.id}", headers))
       flow = results["results"].first
@@ -193,14 +193,14 @@ class RapidProConnector < Connector
       "#{@parent.path}/$actions/run"
     end
 
-    def args(user)
+    def args(context)
       {
         phone: {type: :string},
         extra: {type: {kind: :struct, members: [], open: true}},
       }
     end
 
-    def invoke(args, user)
+    def invoke(args, context)
       connector.http_post_json "#{connector.url}/api/v1/runs.json", {
         flow: @parent.id.to_i,
         phone: [args["phone"]],

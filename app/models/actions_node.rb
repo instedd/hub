@@ -3,14 +3,14 @@ class ActionsNode
     @parent = parent
   end
 
-  def lookup(path, user)
+  def lookup(path, context)
     return self if path.empty?
 
     action_name = path.shift
-    @parent.actions(user)[action_name]
+    @parent.actions(context)[action_name]
   end
 
-  def reflect(proc, user)
-    SimpleProperty.reflect proc, @parent.actions(user), user
+  def reflect(context)
+    SimpleProperty.reflect context, @parent.actions(context)
   end
 end

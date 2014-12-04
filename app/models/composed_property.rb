@@ -7,11 +7,11 @@ class ComposedProperty
     @open = open
   end
 
-  def reflect_property reflect_url_proc, user
+  def reflect_property(context)
     struct = {
       type: {
         kind: :struct,
-        members: SimpleProperty.reflect(reflect_url_proc, members, user),
+        members: SimpleProperty.reflect(context, members),
       }
     }
     struct[:type][:open] = true if open

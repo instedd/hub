@@ -4,7 +4,6 @@ describe ElasticsearchConnector do
 
   let(:user) { User.make }
   let(:connector) { ElasticsearchConnector.make url: URL }
-  let(:url_proc) { ->(path) { "http://server/#{path}" }}
 
   def refresh_index
     RestClient.post "#{INDEX_URL}/_refresh", ""
@@ -32,53 +31,53 @@ describe ElasticsearchConnector do
 
   describe "reflect" do
     it "connector" do
-      result = connector.reflect(url_proc, user)
+      result = connector.reflect(context)
       expect(result).to eq({
         label: connector.name,
         path: "",
-        reflect_url: "http://server/",
+        reflect_url: "http://server/api/reflect/connectors/1",
         type: :entity,
         properties: {
           "indices" => {
             label: "Indices",
             type: :entity_set,
             path: "indices",
-            reflect_url: "http://server/indices",
+            reflect_url: "http://server/api/reflect/connectors/1/indices",
           }
         }
       })
     end
 
     it "indices" do
-      result = connector.lookup_path("indices", user).reflect(url_proc, user)
+      result = connector.lookup_path("indices", user).reflect(context)
       entity = result[:entities].select { |entity| entity[:label] == "instedd_hub_test" }
       expect(entity).to_not be_nil
     end
 
     it "index" do
-      result = connector.lookup_path("indices/instedd_hub_test", user).reflect(url_proc, user)
+      result = connector.lookup_path("indices/instedd_hub_test", user).reflect(context)
       expect(result).to eq({
         label: "instedd_hub_test",
         path: "indices/instedd_hub_test",
-        reflect_url: "http://server/indices/instedd_hub_test",
+        reflect_url: "http://server/api/reflect/connectors/1/indices/instedd_hub_test",
         type: :entity,
         properties: {
           "types" => {
             label: "Types",
             type: :entity_set,
             path: "indices/instedd_hub_test/types",
-            reflect_url: "http://server/indices/instedd_hub_test/types"
+            reflect_url: "http://server/api/reflect/connectors/1/indices/instedd_hub_test/types"
           }
         }
       })
     end
 
     it "types" do
-      result = connector.lookup_path("indices/instedd_hub_test/types", user).reflect(url_proc, user)
+      result = connector.lookup_path("indices/instedd_hub_test/types", user).reflect(context)
       expect(result).to eq({
         label: "Types",
         path: "indices/instedd_hub_test/types",
-        reflect_url: "http://server/indices/instedd_hub_test/types",
+        reflect_url: "http://server/api/reflect/connectors/1/indices/instedd_hub_test/types",
         type: :entity_set,
         protocol: [:query],
         entities: [
@@ -86,14 +85,14 @@ describe ElasticsearchConnector do
             label: "type1",
             path: "indices/instedd_hub_test/types/type1",
             type: :entity_set,
-            reflect_url: "http://server/indices/instedd_hub_test/types/type1"
+            reflect_url: "http://server/api/reflect/connectors/1/indices/instedd_hub_test/types/type1"
           }
         ]
       })
     end
 
     it "type" do
-      result = connector.lookup_path("indices/instedd_hub_test/types/type1", user).reflect(url_proc, user)
+      result = connector.lookup_path("indices/instedd_hub_test/types/type1", user).reflect(context)
       expect(result).to eq({
         label: "type1",
         entity_definition: {
@@ -104,25 +103,25 @@ describe ElasticsearchConnector do
         },
         protocol: [:query, :insert, :update],
         path: "indices/instedd_hub_test/types/type1",
-        reflect_url: "http://server/indices/instedd_hub_test/types/type1",
+        reflect_url: "http://server/api/reflect/connectors/1/indices/instedd_hub_test/types/type1",
         type: :entity_set,
         actions: {
           "insert" => {
             label: "Insert",
             path: "indices/instedd_hub_test/types/type1/$actions/insert",
-            reflect_url: "http://server/indices/instedd_hub_test/types/type1/$actions/insert"
+            reflect_url: "http://server/api/reflect/connectors/1/indices/instedd_hub_test/types/type1/$actions/insert"
           },
           "update" => {
             label: "Update",
             path: "indices/instedd_hub_test/types/type1/$actions/update",
-            reflect_url: "http://server/indices/instedd_hub_test/types/type1/$actions/update"
+            reflect_url: "http://server/api/reflect/connectors/1/indices/instedd_hub_test/types/type1/$actions/update"
           }
         }
       })
     end
 
     it "insert action" do
-      result = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/insert", user).reflect(url_proc, user)
+      result = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/insert", user).reflect(context)
       expect(result).to eq({
         label: "Insert",
         args: {
@@ -141,7 +140,7 @@ describe ElasticsearchConnector do
     end
 
     it "update action" do
-      result = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/update", user).reflect(url_proc, user)
+      result = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/update", user).reflect(context)
       expect(result).to eq({
         label: "Update",
         args: {

@@ -2,7 +2,6 @@ describe ACTConnector do
 
   describe "lookup" do
     let(:connector) { ACTConnector.make url: "http://act.instedd.org" }
-    let(:url_proc) { ->(path) { "http://server/#{path}" }}
     let(:user) { User.make }
 
     it "has guid when saved" do
@@ -15,17 +14,17 @@ describe ACTConnector do
     end
 
     it "reflects on root" do
-      expect(connector.reflect(url_proc, user)).to eq({
+      expect(connector.reflect(context)).to eq({
         label: connector.name,
         path: "",
-        reflect_url: "http://server/",
+        reflect_url: "http://server/api/reflect/connectors/1",
         type: :entity,
         properties: {
           "cases" => {
             label: "Cases",
             type: :entity_set,
             path: "cases",
-            reflect_url: "http://server/cases"
+            reflect_url: "http://server/api/reflect/connectors/1/cases"
           }
         }
       })
@@ -34,7 +33,7 @@ describe ACTConnector do
     it "doesn't list individual cases" do
       # empty entity list should be returned without needing to contact the API
       cases = connector.lookup %w(cases), user
-      listed_entities = cases.reflect(url_proc, user)[:entities]
+      listed_entities = cases.reflect(context)[:entities]
       expect(listed_entities).to be(nil)
     end
 
@@ -42,11 +41,11 @@ describe ACTConnector do
 
       it "reflects event" do
         cases = connector.lookup %w(cases), user
-        listed_events = cases.reflect(url_proc, user)[:events]
+        listed_events = cases.reflect(context)[:events]
         expect(listed_events["new_case"]).to eq({
             :label => "New case",
             :path => "cases/$events/new_case",
-            :reflect_url => "http://server/cases/$events/new_case"
+            :reflect_url => "http://server/api/reflect/connectors/1/cases/$events/new_case"
         })
       end
 
@@ -62,11 +61,11 @@ describe ACTConnector do
 
       it "reflects event" do
         cases = connector.lookup %w(cases), user
-        listed_events = cases.reflect(url_proc, user)[:events]
+        listed_events = cases.reflect(context)[:events]
         expect(listed_events["case_confirmed_sick"]).to eq({
             :label => "Case confirmed sick",
             :path => "cases/$events/case_confirmed_sick",
-            :reflect_url => "http://server/cases/$events/case_confirmed_sick"
+            :reflect_url => "http://server/api/reflect/connectors/1/cases/$events/case_confirmed_sick"
         })
       end
 
@@ -76,12 +75,12 @@ describe ACTConnector do
 
       it "reflects task" do
         cases = connector.lookup %w(cases), user
-        listed_actions = cases.reflect(url_proc, user)[:actions]
+        listed_actions = cases.reflect(context)[:actions]
         expect(listed_actions).to eq({
           "update_case" => {
             :label => "Update case",
             :path => "cases/$actions/update_case",
-            :reflect_url => "http://server/cases/$actions/update_case"
+            :reflect_url => "http://server/api/reflect/connectors/1/cases/$actions/update_case"
           }
         })
       end

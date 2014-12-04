@@ -1,5 +1,4 @@
 describe MBuilderConnector do
-  let(:url_proc) { ->(path) { "http://server/#{path}" }}
   let(:user) { User.make }
 
   context "basic auth" do
@@ -7,21 +6,21 @@ describe MBuilderConnector do
 
     describe "lookup" do
       it "finds root" do
-        expect(connector.lookup [], user).to be(connector)
+        expect(connector.lookup [], context).to be(connector)
       end
 
       it "reflects on root" do
-        expect(connector.reflect(url_proc, user)).to eq({
+        expect(connector.reflect(context)).to eq({
           label: nil,
           path: "",
-          reflect_url: "http://server/",
+          reflect_url: "http://server/api/reflect/connectors/1",
           type: :entity,
           properties: {
             "applications" => {
               label: "Applications",
               type: :entity_set,
               path: "applications",
-              reflect_url: "http://server/applications"
+              reflect_url: "http://server/api/reflect/connectors/1/applications"
             }
           }
         })
@@ -31,11 +30,11 @@ describe MBuilderConnector do
         stub_request(:get, "http://jdoe:1234@example.com/api/applications").
           to_return(status: 200, body: %([{"id": 1, "name": "Application 1"}]), headers: {})
 
-        applications = connector.lookup %w(applications), user
-        expect(applications.reflect(url_proc, user)).to eq({
+        applications = connector.lookup %w(applications), context
+        expect(applications.reflect(context)).to eq({
           label: "Applications",
           path: "applications",
-          reflect_url: "http://server/applications",
+          reflect_url: "http://server/api/reflect/connectors/1/applications",
           type: :entity_set,
           protocol: [:query],
           entities: [
@@ -43,7 +42,7 @@ describe MBuilderConnector do
               label: "Application 1",
               path: "applications/1",
               type: :entity,
-              reflect_url: "http://server/applications/1"
+              reflect_url: "http://server/api/reflect/connectors/1/applications/1"
             }
           ]
         })
@@ -62,12 +61,12 @@ describe MBuilderConnector do
               }
             }]), headers: {})
 
-        application = connector.lookup %w(applications 1), user
+        application = connector.lookup %w(applications 1), context
 
-        expect(application.reflect(url_proc, user)).to eq({
+        expect(application.reflect(context)).to eq({
           label: nil,
           path: "applications/1",
-          reflect_url: "http://server/applications/1",
+          reflect_url: "http://server/api/reflect/connectors/1/applications/1",
           type: :entity,
           properties: {
             "id" => {
@@ -83,7 +82,7 @@ describe MBuilderConnector do
             "trigger_2" => {
               label: "Trigger asd",
               path: "applications/1/$actions/trigger_2",
-              reflect_url: "http://server/applications/1/$actions/trigger_2"
+              reflect_url: "http://server/api/reflect/connectors/1/applications/1/$actions/trigger_2"
             }
           }
         })
@@ -102,8 +101,8 @@ describe MBuilderConnector do
               }
             }]), headers: {})
 
-        application = connector.lookup %w(applications 1 $actions trigger_2), user
-        expect(application.reflect(url_proc, user)).to eq({
+        application = connector.lookup %w(applications 1 $actions trigger_2), context
+        expect(application.reflect(context)).to eq({
           label: "Trigger asd",
           args: {
             "foo" => {
@@ -129,12 +128,12 @@ describe MBuilderConnector do
               }
             }]), headers: {})
 
-        application = connector.lookup %w(applications 1 $actions trigger_2), user
+        application = connector.lookup %w(applications 1 $actions trigger_2), context
 
         stub_request(:post, "http://jdoe:1234@example.com/external/application/1/trigger/asd?foo=bar").
           to_return(status: 200, body: "ok foo!", headers: {})
 
-        expect(application.invoke({'foo' => 'bar'}, user)).to eq("ok foo!")
+        expect(application.invoke({'foo' => 'bar'}, context)).to eq("ok foo!")
       end
     end
   end
@@ -161,21 +160,21 @@ describe MBuilderConnector do
     describe "lookup" do
 
       it "finds root" do
-        expect(connector.lookup [], user).to be(connector)
+        expect(connector.lookup [], context).to be(connector)
       end
 
       it "reflects on root" do
-        expect(connector.reflect(url_proc, user)).to eq({
+        expect(connector.reflect(context)).to eq({
           label: nil,
           path: "",
-          reflect_url: "http://server/",
+          reflect_url: "http://server/api/reflect/connectors/1",
           type: :entity,
           properties: {
             "applications" => {
               label: "Applications",
               type: :entity_set,
               path: "applications",
-              reflect_url: "http://server/applications"
+              reflect_url: "http://server/api/reflect/connectors/1/applications"
             }
           }
         })
@@ -186,11 +185,11 @@ describe MBuilderConnector do
           with(:headers => {'Authorization'=>'Bearer This is a guisso auth token!'}).
           to_return(status: 200, body: %([{"id": 1, "name": "Application 1"}]), headers: {})
 
-        applications = connector.lookup %w(applications), user
-        expect(applications.reflect(url_proc, user)).to eq({
+        applications = connector.lookup %w(applications), context
+        expect(applications.reflect(context)).to eq({
           label: "Applications",
           path: "applications",
-          reflect_url: "http://server/applications",
+          reflect_url: "http://server/api/reflect/connectors/1/applications",
           type: :entity_set,
           protocol: [:query],
           entities: [
@@ -198,7 +197,7 @@ describe MBuilderConnector do
               label: "Application 1",
               path: "applications/1",
               type: :entity,
-              reflect_url: "http://server/applications/1"
+              reflect_url: "http://server/api/reflect/connectors/1/applications/1"
             }
           ]
         })
@@ -218,12 +217,12 @@ describe MBuilderConnector do
               }
             }]), headers: {})
 
-        application = connector.lookup %w(applications 1), user
+        application = connector.lookup %w(applications 1), context
 
-        expect(application.reflect(url_proc, user)).to eq({
+        expect(application.reflect(context)).to eq({
           label: nil,
           path: "applications/1",
-          reflect_url: "http://server/applications/1",
+          reflect_url: "http://server/api/reflect/connectors/1/applications/1",
           type: :entity,
           properties: {
             "id" => {
@@ -239,7 +238,7 @@ describe MBuilderConnector do
             "trigger_2" => {
               label: "Trigger asd",
               path: "applications/1/$actions/trigger_2",
-              reflect_url: "http://server/applications/1/$actions/trigger_2"
+              reflect_url: "http://server/api/reflect/connectors/1/applications/1/$actions/trigger_2"
             }
           }
         })
@@ -259,8 +258,8 @@ describe MBuilderConnector do
               }
             }]), headers: {})
 
-        application = connector.lookup %w(applications 1 $actions trigger_2), user
-        expect(application.reflect(url_proc, user)).to eq({
+        application = connector.lookup %w(applications 1 $actions trigger_2), context
+        expect(application.reflect(context)).to eq({
           label: "Trigger asd",
           args: {
             "foo" => {
@@ -287,13 +286,13 @@ describe MBuilderConnector do
               }
             }]), headers: {})
 
-        application = connector.lookup %w(applications 1 $actions trigger_2), user
+        application = connector.lookup %w(applications 1 $actions trigger_2), context
 
         stub_request(:post, "http://example.com/external/application/1/trigger/asd?foo=bar").
           with(:headers => {'Authorization'=>'Bearer This is a guisso auth token!'}).
           to_return(status: 200, body: "ok foo!", headers: {})
 
-        expect(application.invoke({'foo' => 'bar'}, user)).to eq("ok foo!")
+        expect(application.invoke({'foo' => 'bar'}, context)).to eq("ok foo!")
       end
     end
   end

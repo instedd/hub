@@ -17,9 +17,10 @@ class EventHandler < ActiveRecord::Base
   end
 
   def trigger(data)
-    target_action = target_connector.lookup_path(action, user)
+    context = RequestContext.new(user)
+    target_action = target_connector.lookup_path(action, context)
     PoirotRails::Activity.start("Action invoked", target_action: target_action.path, data: data) do
-      target_action.invoke bind_event_data(data), user
+      target_action.invoke bind_event_data(data), context
     end
   end
 
@@ -31,14 +32,14 @@ class EventHandler < ActiveRecord::Base
   end
 
   def notify_action_created
-    target_action = target_connector.lookup_path(action, user)
+    target_action = target_connector.lookup_path(action, RequestContext.new(user))
     if target_action.respond_to?(:after_create)
       target_action.after_create(self.binding)
     end
   end
 
   def notify_action_updated
-    target_action = target_connector.lookup_path(action, user)
+    target_action = target_connector.lookup_path(action, RequestContext.new(user))
     if target_action.respond_to?(:after_update)
       target_action.after_update(self.binding)
     end

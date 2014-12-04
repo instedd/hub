@@ -15,11 +15,11 @@ class GoogleSpreadsheetsConnector < Connector
     ""
   end
 
-  def query(filters, user, options)
+  def query(filters, context, options)
     [Spreadsheet.new(self, spreadsheet_key)]
   end
 
-  def find_entity(key, user)
+  def find_entity(key, context)
     Spreadsheet.new(self, key)
   end
 
@@ -116,13 +116,13 @@ class GoogleSpreadsheetsConnector < Connector
       session.spreadsheet_by_key(@key)
     end
 
-    def query(filter, user, options)
+    def query(filter, context, options)
       spreadsheet.worksheets.map do |ws|
         Worksheet.new(self, ws.title, ws)
       end
     end
 
-    def find_entity(title, user)
+    def find_entity(title, context)
       Worksheet.new(self, title)
     end
   end
@@ -132,7 +132,7 @@ class GoogleSpreadsheetsConnector < Connector
     protocol :update, :insert
 
     class InsertAction < EntitySet::InsertAction
-      def args(user)
+      def args(context)
         super.tap do |args|
           args[:properties][:type][:open] = true
         end
@@ -171,27 +171,27 @@ class GoogleSpreadsheetsConnector < Connector
       "#{@parent.path}/#{@label}"
     end
 
-    def reflect_entities(user)
+    def reflect_entities(context)
       # Rows are not displayed during reflection
     end
 
-    def entity_properties(user)
+    def entity_properties(context)
       Hash[headers.map { |h| [h, SimpleProperty.string(h)] }]
     end
 
-    def query(filters, current_user, options)
+    def query(filters, context, options)
       worksheet.list.select do |row|
         row_matches_filters?(row, filters)
       end.map { |row| Row.new(self, row) }
     end
 
-    def insert(properties, user)
+    def insert(properties, context)
       list = worksheet.list
       list.push properties
       worksheet.save
     end
 
-    def update(filters, properties, user)
+    def update(filters, properties, context)
       updated_rows = 0
       list = worksheet.list
       list.each do |row|
@@ -209,7 +209,7 @@ class GoogleSpreadsheetsConnector < Connector
       filters.all? { |key, value| row[key] == value }
     end
 
-    def find_entity(id, user)
+    def find_entity(id, context)
       Row.new(self, worksheet.list[id.to_i - 1])
     end
 
@@ -230,7 +230,7 @@ class GoogleSpreadsheetsConnector < Connector
       @row = row
     end
 
-    def properties(user)
+    def properties(context)
       Hash[parent.headers.map { |h| [h, SimpleProperty.string(h, @row[h])] }]
     end
   end

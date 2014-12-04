@@ -6,6 +6,7 @@ describe ApiController do
 
   describe "entity set data api" do
     let(:entity_properties) { { "foo" => "bar" } }
+    let(:duck_context) { duck_type(:user, :data_url, :reflect_url) }
 
     it 'should be able to query with empty filter' do
       expect_any_instance_of(ElasticsearchConnector::Type).to receive(:query).and_return([])
@@ -16,29 +17,29 @@ describe ApiController do
     end
 
     it "should be able to insert into an entity set" do
-      expect_any_instance_of(ElasticsearchConnector::Type).to receive(:insert).with(entity_properties, user)
+      expect_any_instance_of(ElasticsearchConnector::Type).to receive(:insert).with(entity_properties, duck_context)
 
       post :insert, id: connector.guid, path: "indices/my_index/types/patients", properties: entity_properties
       expect(response.status).to eq(200)
     end
 
     it "should be able to update elements of an entity set" do
-      expect_any_instance_of(ElasticsearchConnector::Type).to receive(:update).with({}, entity_properties, user)
+      expect_any_instance_of(ElasticsearchConnector::Type).to receive(:update).with({}, entity_properties, duck_context)
 
       put :update, id: connector.guid, path: "indices/my_index/types/patients", properties: entity_properties
       expect(response.status).to eq(200)
     end
-    
+
     it "should create elements if none where updated and create_or_update is set" do
       expect_any_instance_of(ElasticsearchConnector::Type).to receive(:update).and_return(0)
-      expect_any_instance_of(ElasticsearchConnector::Type).to receive(:insert).with(entity_properties, user)
+      expect_any_instance_of(ElasticsearchConnector::Type).to receive(:insert).with(entity_properties, duck_context)
 
       put :update, id: connector.guid, path: "indices/my_index/types/patients",\
                                          properties: entity_properties,\
                                          create_or_update: true
       expect(response.status).to eq(200)
     end
-    
+
     it "should not create elements if none where updated and create_or_update is not set" do
       expect_any_instance_of(ElasticsearchConnector::Type).to receive(:update).and_return(0)
       expect_any_instance_of(ElasticsearchConnector::Type).not_to receive(:insert)
@@ -46,14 +47,14 @@ describe ApiController do
       put :update, id: connector.guid, path: "indices/my_index/types/patients", properties: entity_properties
       expect(response.status).to eq(200)
     end
-    
+
     it "should be able to delete elements of an entity set" do
-      expect_any_instance_of(ElasticsearchConnector::Type).to receive(:delete).with({}, user)
+      expect_any_instance_of(ElasticsearchConnector::Type).to receive(:delete).with({}, duck_context)
 
       delete :delete, id: connector.guid, path: "indices/my_index/types/patients"
       expect(response.status).to eq(200)
     end
-    
+
   end
 
 

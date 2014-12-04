@@ -21,40 +21,38 @@ class ApiController < ApplicationController
   end
 
   def reflect
-    reflect_url_proc = ->(path) { path.blank? ? reflect_api_url(params[:id]) : reflect_with_path_api_url(params[:id], path) }
-    render json: target.reflect(reflect_url_proc, current_user)
+    render json: target.reflect(request_context)
   end
 
   def query
     options = {page: 1, page_size: 20}.merge(params.slice(:page, :page_size))
-    data_url_proc = ->(path) { data_with_path_api_url(params[:id], path) }
 
     if target.is_a? Entity
-      render json: target.raw(data_url_proc, current_user)
+      render json: target.raw(request_context)
     else
-      items = target.query(entity_filter, current_user, options)
-      render json: items.map { |e| e.raw(data_url_proc, current_user) }
+      items = target.query(entity_filter, request_context, options)
+      render json: items.map { |e| e.raw(request_context) }
     end
   end
 
   def insert
-    target.insert(params[:properties], current_user)
+    target.insert(params[:properties], request_context)
     render nothing: true, status: 200
   end
 
   def update
     properties = params[:properties]
-    updated_entity_count = target.update(entity_filter, properties, current_user)
+    updated_entity_count = target.update(entity_filter, properties, request_context)
 
     if updated_entity_count == 0 && params[:create_or_update]
-      target.insert(properties, current_user)
+      target.insert(properties, request_context)
     end
 
     render nothing: true, status: 200
   end
 
   def delete
-    target.delete(entity_filter, current_user)
+    target.delete(entity_filter, request_context)
     render nothing: true, status: 200
   end
 

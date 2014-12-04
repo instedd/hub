@@ -4,7 +4,7 @@ class VerboiceConnector < Connector
   store_accessor :settings, :url, :username, :password
   after_initialize :initialize_defaults, :if => :new_record?
 
-  def properties(user)
+  def properties(context)
     {"projects" => Projects.new(self)}
   end
 
@@ -33,12 +33,12 @@ class VerboiceConnector < Connector
       "Projects"
     end
 
-    def query(filters, user, options)
-      projects(user).map { |project| entity(project) }
+    def query(filters, context, options)
+      projects(context.user).map { |project| entity(project) }
     end
 
-    def find_entity(id, user)
-      Project.new(self, id, nil, user)
+    def find_entity(id, context)
+      Project.new(self, id, nil, context.user)
     end
 
     def projects(user)
@@ -73,16 +73,16 @@ class VerboiceConnector < Connector
       @label ||= verboice_project(user || @user)["name"]
     end
 
-    def properties(user)
+    def properties(context)
       {
         "id" => SimpleProperty.id(@id),
-        "name" => SimpleProperty.name(label(user)),
+        "name" => SimpleProperty.name(label(context.user)),
         "call_flows" => CallFlows.new(self),
         "phone_book" => PhoneBook.new(self)
       }
     end
 
-    def actions(user)
+    def actions(context)
       {
         "call" => CallAction.new(self)
       }
@@ -113,8 +113,8 @@ class VerboiceConnector < Connector
       "#{@parent.path}/phone_book"
     end
 
-    def entity_properties(user)
-      vars = GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{@parent.id}/project_variables.json")
+    def entity_properties(context)
+      vars = GuissoRestClient.new(connector, context.user).get("#{connector.url}/api/projects/#{@parent.id}/project_variables.json")
       properties = {
         id: SimpleProperty.id,
         address: SimpleProperty.integer("Address")
@@ -125,11 +125,11 @@ class VerboiceConnector < Connector
       properties
     end
 
-    def query(filters, user, options)
+    def query(filters, context, options)
       contacts = if filters[:address]
-        [contact(filters[:address], user)]
+        [contact(filters[:address], context.user)]
       else
-        GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{@parent.id}/contacts.json")
+        GuissoRestClient.new(connector, context.user).get("#{connector.url}/api/projects/#{@parent.id}/contacts.json")
       end
       contacts.inject Array.new do |contacts, contact|
         contact["addresses"].inject contacts do |contacts, address|
@@ -138,11 +138,11 @@ class VerboiceConnector < Connector
       end
     end
 
-    def reflect_entities(user)
+    def reflect_entities(context)
     end
 
-    def find_entity(address, user)
-      Contact.new(self, address, contact(address, user))
+    def find_entity(address, context)
+      Contact.new(self, address, contact(address, context.user))
     end
 
     def contact(address, user)
@@ -170,7 +170,7 @@ class VerboiceConnector < Connector
       id
     end
 
-    def properties(user)
+    def properties(context)
       {
         id: SimpleProperty.id(@contact["id"]),
         address: SimpleProperty.integer("Address", address)
@@ -195,12 +195,12 @@ class VerboiceConnector < Connector
       "#{@parent.path}/call_flows"
     end
 
-    def query(filters, user, options)
-      verboice_project(user)["call_flows"].map { |cf| CallFlow.new(self, cf["id"], cf["name"]) }
+    def query(filters, context, options)
+      verboice_project(context.user)["call_flows"].map { |cf| CallFlow.new(self, cf["id"], cf["name"]) }
     end
 
-    def find_entity(id, user)
-      CallFlow.new(self, id, call_flow(id, user)["name"])
+    def find_entity(id, context)
+      CallFlow.new(self, id, call_flow(id, context.user)["name"])
     end
 
     def call_flow(id, user)
@@ -229,7 +229,7 @@ class VerboiceConnector < Connector
       id
     end
 
-    def properties(user)
+    def properties(context)
       {
         id: SimpleProperty.id(id),
         name: SimpleProperty.name(@name)
@@ -260,7 +260,7 @@ class VerboiceConnector < Connector
       "call"
     end
 
-    def args(user)
+    def args(context)
       {
         channel: {
           type: "string",
@@ -273,18 +273,18 @@ class VerboiceConnector < Connector
         vars: {
           type: {
             kind: :struct,
-            members: Hash[verboice_project(user)["contact_vars"].map { |arg| [arg, {type: :string}] }],
+            members: Hash[verboice_project(context.user)["contact_vars"].map { |arg| [arg, {type: :string}] }],
             open: true,
           }
         },
       }
     end
 
-    def invoke(args, user)
+    def invoke(args, context)
       params = {channel: args["channel"], address: args["number"]}
       params[:vars] = args["vars"] if args["vars"].present?
       call_url = "#{connector.url}/api/call?#{params.to_query}"
-      GuissoRestClient.new(connector, user).get(call_url)
+      GuissoRestClient.new(connector, context.user).get(call_url)
     end
   end
 
@@ -306,8 +306,8 @@ class VerboiceConnector < Connector
       "call_finished"
     end
 
-    def args(user)
-      args = Hash[verboice_project(user)["contact_vars"].map { |arg| [arg, {type: :string}] }]
+    def args(context)
+      args = Hash[verboice_project(context.user)["contact_vars"].map { |arg| [arg, {type: :string}] }]
       args["address"] = {type: :string}
       args
     end
