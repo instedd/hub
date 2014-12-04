@@ -97,6 +97,11 @@ class ONAConnector < Connector
       @parent = parent
     end
 
+    def subscribe
+      super
+      poll unless load_state
+    end
+
     def label
       "New data"
     end
