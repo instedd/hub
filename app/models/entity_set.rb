@@ -66,6 +66,12 @@ module EntitySet
 
   abstract def query(filters, current_user, options)
   end
+  abstract def insert(properties, user)
+  end
+  abstract def update(filters, properties, user)
+  end
+  abstract def delete filters, user
+  end
 
   def entity_properties(user)
   end
