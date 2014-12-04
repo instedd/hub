@@ -1,14 +1,61 @@
 describe ApiController do
 
   let(:connector) { ElasticsearchConnector.make! }
-  before { sign_in connector.user }
+  let(:user)      { connector.user }
+  before          { sign_in user }
 
-  it 'should be able to query with empty filter' do
-    allow_any_instance_of(ElasticsearchConnector::Type).to receive(:query).and_return([])
+  describe "entity set data api" do
+    let(:entity_properties) { { "foo" => "bar" } }
 
-    get :data, id: connector.guid, path: "indices/my_index/types/patients", filter: "" # filter: "" mimics ?filter=
-    expect(response.status).to eq(200)
+    it 'should be able to query with empty filter' do
+      expect_any_instance_of(ElasticsearchConnector::Type).to receive(:query).and_return([])
+
+      get :query, id: connector.guid, path: "indices/my_index/types/patients", filter: "" # filter: "" mimics ?filter=
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)).to eq([])
+    end
+
+    it "should be able to insert into an entity set" do
+      expect_any_instance_of(ElasticsearchConnector::Type).to receive(:insert).with(entity_properties, user)
+
+      post :insert, id: connector.guid, path: "indices/my_index/types/patients", properties: entity_properties
+      expect(response.status).to eq(200)
+    end
+
+    it "should be able to update elements of an entity set" do
+      expect_any_instance_of(ElasticsearchConnector::Type).to receive(:update).with({}, entity_properties, user)
+
+      put :update, id: connector.guid, path: "indices/my_index/types/patients", properties: entity_properties
+      expect(response.status).to eq(200)
+    end
+    
+    it "should create elements if none where updated and create_or_update is set" do
+      expect_any_instance_of(ElasticsearchConnector::Type).to receive(:update).and_return(0)
+      expect_any_instance_of(ElasticsearchConnector::Type).to receive(:insert).with(entity_properties, user)
+
+      put :update, id: connector.guid, path: "indices/my_index/types/patients",\
+                                         properties: entity_properties,\
+                                         create_or_update: true
+      expect(response.status).to eq(200)
+    end
+    
+    it "should not create elements if none where updated and create_or_update is not set" do
+      expect_any_instance_of(ElasticsearchConnector::Type).to receive(:update).and_return(0)
+      expect_any_instance_of(ElasticsearchConnector::Type).not_to receive(:insert)
+
+      put :update, id: connector.guid, path: "indices/my_index/types/patients", properties: entity_properties
+      expect(response.status).to eq(200)
+    end
+    
+    it "should be able to delete elements of an entity set" do
+      expect_any_instance_of(ElasticsearchConnector::Type).to receive(:delete).with({}, user)
+
+      delete :delete, id: connector.guid, path: "indices/my_index/types/patients"
+      expect(response.status).to eq(200)
+    end
+    
   end
+
 
   describe 'verboice events' do
     let!(:verboice_connector) { VerboiceConnector.make! user: nil }

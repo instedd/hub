@@ -7,6 +7,7 @@ class ApiController < ApplicationController
 
   expose(:accessible_connectors) { Connector.with_optional_user(current_user) }
   expose(:connector) { accessible_connectors.find_by_guid(params[:id]) }
+  expose(:target) { connector.lookup_path(params[:path], current_user) }
 
   def connectors
     c = accessible_connectors.map do |c|
@@ -20,29 +21,41 @@ class ApiController < ApplicationController
   end
 
   def reflect
-    target = connector.lookup_path(params[:path], current_user)
     reflect_url_proc = ->(path) { path.blank? ? reflect_api_url(params[:id]) : reflect_with_path_api_url(params[:id], path) }
     render json: target.reflect(reflect_url_proc, current_user)
   end
 
-  def data
-    target = connector.lookup_path(params[:path], current_user)
+  def query
     options = {page: 1, page_size: 20}.merge(params.slice(:page, :page_size))
     data_url_proc = ->(path) { data_with_path_api_url(params[:id], path) }
 
     if target.is_a? Entity
       render json: target.raw(data_url_proc, current_user)
     else
-      case request.method
-      when "GET"
-        params[:filter] = nil if params[:filter] == ""
-        filters = (params[:filter] || {}).slice(*target.filters(current_user))
-        items = target.query(filters, current_user, options)
-        render json: items.map { |e| e.raw(data_url_proc, current_user) }
-      else
-        head :not_found
-      end
+      items = target.query(entity_filter, current_user, options)
+      render json: items.map { |e| e.raw(data_url_proc, current_user) }
     end
+  end
+
+  def insert
+    target.insert(params[:properties], current_user)
+    render nothing: true, status: 200
+  end
+
+  def update
+    properties = params[:properties]
+    updated_entity_count = target.update(entity_filter, properties, current_user)
+
+    if updated_entity_count == 0 && params[:create_or_update]
+      target.insert(properties, current_user)
+    end
+
+    render nothing: true, status: 200
+  end
+
+  def delete
+    target.delete(entity_filter, current_user)
+    render nothing: true, status: 200
   end
 
   def picker
@@ -61,6 +74,11 @@ class ApiController < ApplicationController
   end
 
   private
+
+  def entity_filter
+    params[:filter] = nil if params[:filter] == ""
+    (params[:filter] || {}).slice(*target.filters(current_user))
+  end
 
   def verify_access_token!
     unless connector.authenticate_with_secret_token(request.headers["X-InSTEDD-Hub-Token"])
