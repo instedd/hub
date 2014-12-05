@@ -68,7 +68,7 @@ class EventHandlersController < ApplicationController
 
   def resolve_reference(event_or_action)
     if event_or_action["connector"].present? && event_or_action["path"].present?
-      Connector.with_optional_user(current_user).find_by_guid(event_or_action["connector"]).lookup_path(event_or_action["path"], current_user)
+      Connector.with_optional_user(current_user).find_by_guid(event_or_action["connector"]).lookup_path(event_or_action["path"], request_context)
     else
       nil
     end

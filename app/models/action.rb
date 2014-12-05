@@ -3,6 +3,10 @@ module Action
   attr_reader :parent
   delegate :connector, to: :parent
 
+  def initialize(parent)
+    @parent = parent
+  end
+
   def args(context)
     {}
   end

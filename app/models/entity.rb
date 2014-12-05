@@ -36,10 +36,10 @@ module Entity
     end
   end
 
-  def properties(context)
+  def properties(context = nil)
   end
 
-  def actions(context)
+  def actions(context = nil)
   end
 
   def events

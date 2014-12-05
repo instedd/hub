@@ -4,6 +4,10 @@ module Event
   attr_reader :parent
   delegate :connector, to: :parent
 
+  def initialize(parent)
+    @parent = parent
+  end
+
   def args(context)
     {}
   end
@@ -36,7 +40,11 @@ module Event
   end
 
   def path
-    "#{parent.path}/$events/#{sub_path}"
+    if parent.path.present?
+      "#{parent.path}/$events/#{sub_path}"
+    else
+      "$events/#{sub_path}"
+    end
   end
 
   def load_state
