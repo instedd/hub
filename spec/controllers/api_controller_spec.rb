@@ -36,7 +36,7 @@ describe ApiController do
 
         put :update, id: connector.guid, path: "indices/my_index/types/patients",\
                                            properties: entity_properties,\
-                                           create_or_update: true
+                                           create_or_update: "true"
         expect(response.status).to eq(200)
       end
 
