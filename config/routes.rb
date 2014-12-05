@@ -16,6 +16,7 @@ Rails.application.routes.draw do
 
     collection do
       get 'google_spreadsheets_callback'
+      get 'google_fusiontables_callback'
     end
   end
 

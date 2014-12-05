@@ -58,6 +58,29 @@ class ConnectorsController < ApplicationController
     redirect_to connectors_path, notice: "Connector #{connector.name} successfully deleted."
   end
 
+  def google_fusiontables_callback
+    params[:type] = "GoogleFusionTablesConnector"
+    connector = self.connector
+
+    api = GoogleFusionTablesConnector.api_client
+    api.authorization.code = params[:code]
+    api.authorization.redirect_uri = url_for(controller: 'connectors', action: connector.callback_action)
+    access_token = api.authorization.fetch_access_token!
+
+    connector.update_attributes JSON.parse(params[:state])
+    connector.access_token = access_token["access_token"]
+    connector.refresh_token = access_token["refresh_token"]
+    connector.expires_at = access_token["expires_in"].seconds.from_now
+
+    if connector.save
+      redirect_to edit_connector_path(connector), notice: "Connector #{connector.name} successfully created."
+    else
+      render action: "new"
+    end
+
+  end
+
+
   def google_spreadsheets_callback
     # These two lines so we can reuse decent_exposure's logic
     params[:type] = "GoogleSpreadsheetsConnector"
