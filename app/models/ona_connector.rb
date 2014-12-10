@@ -97,7 +97,7 @@ class ONAConnector < Connector
       @parent = parent
     end
 
-    def subscribe
+    def subscribe(*)
       super
       poll unless load_state
     end
