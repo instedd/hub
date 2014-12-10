@@ -17,6 +17,18 @@ class SimpleProperty
     new(label, :integer, value)
   end
 
+  def self.numeric(label, value = nil)
+    new(label, :numeric, value)
+  end
+
+  def self.datetime(label, value = nil)
+    new(label, :datetime, value)
+  end
+
+  def self.location(label, value = nil)
+    new(label, :location, value)
+  end
+
   def self.name(value = nil)
     string("Name", value)
   end

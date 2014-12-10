@@ -7,6 +7,10 @@ class GoogleFusionTablesConnector < Connector
   validates_presence_of :refresh_token
   validates_presence_of :expires_at
 
+  def properties(context)
+    {"tables" => Tables.new(self)}
+  end
+
   def needs_authorization?
     true
   end
@@ -38,10 +42,131 @@ class GoogleFusionTablesConnector < Connector
     auth.client_secret = Settings.google.client_secret
     auth.scope = [
       "https://www.googleapis.com/auth/fusiontables",
-      "https://www.googleapis.com/auth/userinfo.profile",
     ]
     client
   end
 
+  def access_token
+    if access_token_expired?
+      token = OAuth2::AccessToken.from_hash(oauth_client, refresh_token: refresh_token)
+      auth_token = token.refresh!
+      self.access_token = auth_token.token
+      self.expires_at = auth_token.expires_in.seconds.from_now
+      self.refresh_token = auth_token.refresh_token if auth_token.refresh_token
+      save!
+    end
+    settings[:access_token]
+  end
+
+  def access_token_expired?
+    if expires_at
+      Time.now > expires_at - 5.minutes
+    else
+      false
+    end
+  end
+
+  def oauth_client
+    self.class.oauth_client
+  end
+
+  def self.oauth_client
+    OAuth2::Client.new(
+        Settings.google.client_id,
+        Settings.google.client_secret,
+        site: "https://accounts.google.com",
+        token_url: "/o/oauth2/token",
+        authorize_url: "/o/oauth2/auth")
+  end
+
+  def get url
+    token = Rack::OAuth2::AccessToken::Bearer.new(
+      :access_token => access_token
+    )
+    response = token.get url
+    JSON.parse(response.body)
+  end
+
+  class Tables
+    include EntitySet
+
+    def initialize(parent)
+      @parent = parent
+    end
+
+    def label
+      "Tables"
+    end
+
+    def path
+      'tables'
+    end
+
+    def tables
+      data = connector.get "https://www.googleapis.com/fusiontables/v2/tables?fields=items(name%2CtableId)"
+      tables = (data["items"] || [])
+    end
+
+    def query(filter, context, options)
+      tables.map do |table|
+        Table.new(self, table["tableId"], table["name"])
+      end
+    end
+
+    def find_entity(table_id, context)
+      table_data = connector.get "https://www.googleapis.com/fusiontables/v2/tables/#{table_id}"
+      Table.new self, table_id, table_data["name"], table_data["columns"]
+    end
+
+  end
+
+  class Table
+    include EntitySet
+
+    def initialize(parent, id, name, columns=nil)
+      @parent = parent
+      @id = id
+      @name = name
+      @columns = columns
+    end
+
+    def path
+      "tables/#{@id}"
+    end
+
+    def label
+      @name
+    end
+
+     def properties(context)
+      {
+        "id" => SimpleProperty.string("id", @id),
+        "name" => SimpleProperty.name(@name),
+      }
+    end
+
+    def entity_properties(context)
+      Hash[@columns.map do |c|
+        label = c["name"]
+
+        property_type = case c["type"]
+          when "DATETIME"
+            SimpleProperty.datetime(label)
+          when "LOCATION"
+            SimpleProperty.location(label)
+          when "NUMBER"
+            SimpleProperty.numeric(label)
+          when "STRING"
+            SimpleProperty.string(label)
+        end
+
+        [label, property_type]
+      end]
+    end
+
+    def reflect_entities(context)
+      # Rows are not displayed during reflection
+    end
+  end
 
 end
