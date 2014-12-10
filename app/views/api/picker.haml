@@ -6,7 +6,7 @@
     %style
       body { background: white; margin: 0 20px; }
 
-  %body(ng-app='ApiPickerApp')
+  %body{'ng-app' => 'ApiPickerApp', 'ng-init' => init_scope(type: @type)}
     %div(ng-controller='ApiPickerCtrl')
       %br
       %br

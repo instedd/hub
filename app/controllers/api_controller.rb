@@ -55,6 +55,7 @@ class ApiController < ApplicationController
   end
 
   def picker
+    @type = params[:type] # 'entityset' | 'action' | 'event'
     render layout: false
   end
 
