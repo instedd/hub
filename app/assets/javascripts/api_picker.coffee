@@ -2,7 +2,7 @@ angular
 .module('ApiPickerApp', ['InSTEDD.UI', 'InSTEDD.Hub.Browser'])
 .controller 'ApiPickerCtrl', ($scope, $http) ->
 
-  # $scope.type = 'entityset' | 'action' | 'event'
+  # $scope.type = 'entity_set' | 'action' | 'event'
   $scope.selectedItem = null
 
   $scope.entitySetSelected = (item) ->
