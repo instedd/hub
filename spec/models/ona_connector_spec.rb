@@ -77,9 +77,26 @@ describe ONAConnector do
       })
     end
 
-    # it "reflects form new_data event" do
-    #   form = connector.lookup %w(forms 1)
-    #   expect(form.reflect(url_proc)).to eq({events: %w(new_data)})
-    # end
+    class MockAction
+      attr_reader :connector
+
+      def initialize(connector)
+        @connector
+      end
+
+      def path
+        "foo"
+      end
+    end
+
+    it "reflects form new_data event" do
+      allow_any_instance_of(EventHandler).to receive(:notify_action_created)
+      allow_any_instance_of(ONAConnector::NewDataEvent).to receive(:poll)
+      allow_any_instance_of(ONAConnector::NewDataEvent).to receive(:load_state)
+
+      event = connector.lookup %w(forms 1 $events new_data), context
+      handler = event.subscribe(MockAction.new(connector), "binding", user)
+      expect(handler).to be_a(EventHandler)
+    end
   end
 end

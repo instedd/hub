@@ -98,8 +98,9 @@ class ONAConnector < Connector
     end
 
     def subscribe(*)
-      super
+      handler = super
       poll unless load_state
+      handler
     end
 
     def label
