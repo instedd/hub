@@ -269,4 +269,74 @@ describe ElasticsearchConnector do
     expect(peter["age"]).to eq(40)
     expect(peter["extra"]).to be_nil
   end
+
+  it "executes update action with nil values" do
+    RestClient.post("http://localhost:9200/instedd_hub_test/type1", %({"name": "john", "age": 20}))
+    RestClient.post("http://localhost:9200/instedd_hub_test/type1", %({"name": "peter", "age": 40}))
+    refresh_index
+
+    action = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/update", user)
+    action.invoke(
+      {
+        "filters" => {
+          "name" => "john",
+          "age" => nil,
+        },
+        "properties" => {
+          "name" => "john",
+          "age" => 10,
+          "extra" => "hello"
+        },
+      },
+      user
+    )
+    refresh_index
+
+    response = JSON.parse RestClient.get "#{INDEX_URL}/_search"
+    hits = response["hits"]["hits"]
+    expect(hits.length).to eq(2)
+
+    sources = hits.map { |hit| hit["_source"] }
+
+    john = sources.find { |source| source["name"] == "john" }
+    expect(john["age"]).to eq(10)
+    expect(john["extra"]).to eq("hello")
+
+    peter = sources.find { |source| source["name"] == "peter" }
+    expect(peter["age"]).to eq(40)
+    expect(peter["extra"]).to be_nil
+  end
+
+  it "executes update over all values" do
+    RestClient.post("http://localhost:9200/instedd_hub_test/type1", %({"name": "john", "age": 20}))
+    RestClient.post("http://localhost:9200/instedd_hub_test/type1", %({"name": "peter", "age": 40}))
+    refresh_index
+
+    action = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/update", user)
+    action.invoke(
+      {
+        "filters" => {
+          "name" => nil,
+          "age" => nil,
+        },
+        "properties" => {
+          "name" => "john",
+          "age" => 10,
+          "extra" => "hello"
+        },
+      },
+      user
+    )
+    refresh_index
+
+    response = JSON.parse RestClient.get "#{INDEX_URL}/_search"
+    hits = response["hits"]["hits"]
+    expect(hits.length).to eq(2)
+
+    sources = hits.map { |hit| hit["_source"] }
+    expect(sources).to eq([
+      {"name"=>"john", "age"=>10, "extra"=>"hello"},
+      {"name"=>"john", "age"=>10, "extra"=>"hello"}
+    ])
+  end
 end

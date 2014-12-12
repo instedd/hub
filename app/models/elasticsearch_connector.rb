@@ -122,15 +122,37 @@ class ElasticsearchConnector < Connector
 
     def update(filters, properties, context)
       # TODO update does not work if filters is empty
-      query = {
-        query: {
-          filtered: {
-            filter: {
-              and: filters.map { |k, v| {term: {k => v}} }
+
+      and_filters = filters.map do |k, v|
+        if v.nil?
+          nil
+        else
+          {term: {k => v}}
+        end
+      end
+      and_filters.compact!
+
+      if and_filters.empty?
+        query = {
+          query: {
+            filtered: {
+              filter: {
+                match_all: {}
+              }
             }
           }
         }
-      }
+      else
+        query = {
+          query: {
+            filtered: {
+              filter: {
+                and: and_filters.compact
+              }
+            }
+          }
+        }
+      end
 
       result = JSON.parse RestClient.post("#{connector.url}/#{index_name}/#{type_name}/_search", query.to_json)
       hits = result["hits"]["hits"]
