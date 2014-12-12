@@ -122,6 +122,7 @@ class GoogleFusionTablesConnector < Connector
 
   class Table
     include EntitySet
+    protocol :update, :insert, :delete
 
     def initialize(parent, id, name, columns=nil)
       @parent = parent
@@ -164,8 +165,45 @@ class GoogleFusionTablesConnector < Connector
       end]
     end
 
+    def column_names
+      @columns.map {|c| c["name"]}
+    end
+
     def reflect_entities(context)
       # Rows are not displayed during reflection
+    end
+
+    def generate_query_url(filters)
+      conditions = []
+      filters.keys.each do |key|
+        conditions << "#{key}='#{URI.escape(filters[key].to_s)}'"
+      end
+      sql = "SELECT * FROM #{@id}"
+      if conditions.count > 0
+        sql << " WHERE #{conditions.join(" AND ")}"
+      end
+      "https://www.googleapis.com/fusiontables/v2/query?#{{sql: sql}.to_query}"
+    end
+
+    def query(filters, context, options)
+      results = connector.get generate_query_url(filters)
+      results["rows"].map{|data| Row.new(self, data)}
+    end
+  end
+
+   class Row
+    include Entity
+
+    def initialize(parent, row)
+      @parent = parent
+      @row = {}
+      parent.column_names.each_with_index do |header, index|
+        @row[header] = row[index]
+      end
+    end
+
+    def properties(context)
+      Hash[parent.columns.map { |c| [c, SimpleProperty.string(h, @row[c])] }]
     end
   end
 
