@@ -3,6 +3,7 @@ class ACTConnector < Connector
   store_accessor :settings, :url, :access_token
 
   validates_presence_of :url
+  validates_presence_of :access_token
 
   def properties(context)
     {"cases" => Cases.new(self)}
@@ -72,10 +73,11 @@ class ACTConnector < Connector
 
     def poll
       since_id = load_state
-      url = "#{connector.url}/api/v1/cases/"
-      url += "?since_id=#{since_id}" if since_id.present?
-      token = connector.access_token
+      query_params = since_id.present? ? { since_id: since_id } : {}
+      url = "#{connector.url}/api/v1/cases/?#{query_params.to_query}"
+
       headers = { "Authorization" => connector.authorization_header }
+      
       cases = JSON.parse(RestClient.get(url, headers))
 
       # assumes cases are sorted by date
@@ -117,11 +119,14 @@ class ACTConnector < Connector
 
     def poll
       since_id = load_state
-      url = "#{connector.url}/api/v1/notifications/?notification_type=case_confirmed_sick"
-      url += "&since_id=#{since_id}" if since_id.present?
-      token = connector.access_token
+      
+      query_params = { notification_type: :case_confirmed_sick }
+      query_params[:since_id] = since_id if since_id.present?
+      url = "#{connector.url}/api/v1/notifications/?#{query_params.to_query}"
+
       headers = { "Authorization" => connector.authorization_header }
       notifications = JSON.parse(RestClient.get(url, headers))
+      
       # assumes notifications are sorted by date
       save_state(notifications.last["id"]) unless notifications.empty?
 
@@ -173,8 +178,8 @@ class ACTConnector < Connector
     end
 
     def invoke(args, context)
-      url = "#{connector.url}/api/v1/cases/#{args['case_id']}/"
-      url += "?sick=#{args['is_sick']}"
+      query_params = { sick: args['is_sick'] }
+      url = "#{connector.url}/api/v1/cases/#{args['case_id']}/?#{query_params.to_query}"
       headers = { "Authorization" => connector.authorization_header }
       RestClient.put(url, nil, headers)
     end
