@@ -121,8 +121,6 @@ class ElasticsearchConnector < Connector
     end
 
     def update(filters, properties, context)
-      # TODO update does not work if filters is empty
-
       and_filters = filters.map do |k, v|
         if v.nil?
           nil

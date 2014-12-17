@@ -1,6 +1,5 @@
 class ConnectorsController < ApplicationController
   add_breadcrumb 'Connectors', :connectors_path
-  protect_from_forgery except: :invoke
 
   # connectors can be edited. accessible_connectors are just listed
   expose(:accessible_connectors) { Connector.with_optional_user(current_user) }
@@ -118,13 +117,6 @@ class ConnectorsController < ApplicationController
     else
       render action: "new"
     end
-  end
-
-  def invoke
-    connector = connector_from_guid()
-    target = connector.lookup_path(params[:path], current_user)
-    response = target.invoke(JSON.parse(request.body.read), current_user)
-    render json: response
   end
 
   def poll

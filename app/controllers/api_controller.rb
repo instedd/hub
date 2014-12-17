@@ -75,6 +75,12 @@ class ApiController < ApplicationController
     end
   end
 
+  def invoke
+    target = connector.lookup_path(params[:path], request_context)
+    response = target.invoke(JSON.parse(request.body.read), request_context)
+    render json: response
+  end
+
   private
 
   def entity_filter
