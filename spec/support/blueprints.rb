@@ -43,6 +43,11 @@ RapidProConnector.blueprint do
   token { "token" }
 end
 
+ResourceMapConnector.blueprint do
+  name { "Connector #{sn}" }
+  user
+end
+
 EventHandler.blueprint do
   connector
   event { 'info/$events/new_data'}
