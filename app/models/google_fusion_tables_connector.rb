@@ -181,23 +181,34 @@ class GoogleFusionTablesConnector < Connector
       # Rows are not displayed during reflection
     end
 
-    def generate_query_url(filters)
+    def generate_query_url(filters, fields='all')
       conditions = []
       filters.keys.each do |key|
         conditions << "#{key}='#{URI.escape(filters[key].to_s)}'"
       end
-      sql = "SELECT * FROM #{@id}"
+
+      if fields == 'all'
+        fields = '*'
+      end
+
+      sql = "SELECT #{fields} FROM #{@id}"
       if conditions.count > 0
         sql << " WHERE #{conditions.join(" AND ")}"
       end
+
       "https://www.googleapis.com/fusiontables/v2/query?#{{sql: sql}.to_query}"
     end
 
     def generate_insert_body(properties)
-      columns = properties.keys.join(',')
-      values = properties.values.map{|v| "'#{v}'"}.join(',')
+      columns = properties.keys.join(', ')
+      values = properties.values.map{|v| "'#{v}'"}.join(', ')
 
       "sql=INSERT INTO #{@id} (#{columns}) VALUES (#{values})"
+    end
+
+    def generate_update_body(properties, row_id)
+      properties_query = properties.map{|k,v| "'#{k}' = '#{v}'"}.join(', ')
+      "sql=UPDATE #{@id} SET #{properties_query} WHERE ROWID = '#{row_id}'"
     end
 
     def query(filters, context, options)
@@ -205,8 +216,20 @@ class GoogleFusionTablesConnector < Connector
       (results["rows"]|| []).map{|data| Row.new(self, data)}
     end
 
+    def query_row_id(filters)
+      results = connector.get generate_query_url(filters, 'ROWID')
+      # Google responds: => {"kind"=>"fusiontables#sqlresponse", "columns"=>["rowid"], "rows"=>[["2701"]]}
+      results["rows"].first.first rescue ""
+    end
+
     def insert(properties, context)
       connector.post "https://www.googleapis.com/fusiontables/v2/query", generate_insert_body(properties)
+    end
+
+    #This updates a single registry
+    def update(filters, properties, context)
+      row_id = query_row_id(filters)
+      connector.post "https://www.googleapis.com/fusiontables/v2/query", generate_update_body(properties, row_id)
     end
   end
 
@@ -222,7 +245,7 @@ class GoogleFusionTablesConnector < Connector
     end
 
     def properties(context)
-      Hash[parent.columns.map { |c| [c, SimpleProperty.string(h, @row[c])] }]
+      Hash[parent.column_names.map { |c| [c, @row[c]] }]
     end
   end
 
