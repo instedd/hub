@@ -80,6 +80,11 @@ describe JsonMapper do
 
     source = {"project_id"=>1, "call_flow_id"=>4, "address"=>"17772632588", "vars"=>{"age"=>"20"}}
     expect(mapper.map(source)).to eq({"channel"=>"callcentric", "number"=> "17772632588"})
+  end
 
+  it "maps struct with nil bindings" do
+    mapper = JsonMapper.new({"type" => "struct", "members" => {"foo" => {"type" => "literal", "value" => nil}, "bar" => "y"}})
+    source = {"x" => 1, "y" => 2}
+    expect(mapper.map(source)).to eq({"bar" => 2})
   end
 end

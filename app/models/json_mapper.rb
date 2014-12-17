@@ -6,7 +6,8 @@ class JsonMapper
   def map_members(context, members)
     target = {}
     members.each do |key, value|
-      target[key] = map(context, value)
+      mapped_value = map(context, value)
+      target[key] = mapped_value unless mapped_value.nil?
     end
     target
   end
