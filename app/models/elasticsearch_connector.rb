@@ -121,14 +121,7 @@ class ElasticsearchConnector < Connector
     end
 
     def update(filters, properties, context)
-      and_filters = filters.map do |k, v|
-        if v.nil?
-          nil
-        else
-          {term: {k => v}}
-        end
-      end
-      and_filters.compact!
+      and_filters = filters.map { |k, v| {term: {k => v}} }
 
       if and_filters.empty?
         query = {
@@ -145,7 +138,7 @@ class ElasticsearchConnector < Connector
           query: {
             filtered: {
               filter: {
-                and: and_filters.compact
+                and: and_filters
               }
             }
           }

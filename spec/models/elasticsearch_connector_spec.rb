@@ -1,17 +1,22 @@
 describe ElasticsearchConnector do
-  URL = "http://localhost:9200"
-  INDEX_URL = "#{URL}/instedd_hub_test"
+  def url
+    "http://localhost:9200"
+  end
+
+  def index_url
+    "#{url}/instedd_hub_test"
+  end
 
   let(:user) { User.make }
-  let(:connector) { ElasticsearchConnector.make url: URL }
+  let(:connector) { ElasticsearchConnector.make url: url }
 
   def refresh_index
-    RestClient.post "#{INDEX_URL}/_refresh", ""
+    RestClient.post "#{index_url}/_refresh", ""
   end
 
   before(:each) do
-    RestClient.delete INDEX_URL rescue nil
-    RestClient.post INDEX_URL, %(
+    RestClient.delete index_url rescue nil
+    RestClient.post index_url, %(
       {
         "mappings": {
           "type1": {
@@ -26,7 +31,7 @@ describe ElasticsearchConnector do
   end
 
   after(:all) do
-    RestClient.delete INDEX_URL rescue nil
+    RestClient.delete index_url rescue nil
   end
 
   describe "reflect" do
@@ -170,8 +175,8 @@ describe ElasticsearchConnector do
   end
 
   it "executes query" do
-    RestClient.post("http://localhost:9200/instedd_hub_test/type1", %({"name": "john", "age": 20}))
-    RestClient.post("http://localhost:9200/instedd_hub_test/type1", %({"name": "peter", "age": 40}))
+    RestClient.post("#{index_url}/type1", %({"name": "john", "age": 20}))
+    RestClient.post("#{index_url}/type1", %({"name": "peter", "age": 40}))
     refresh_index
 
     entity_set = connector.lookup_path("indices/instedd_hub_test/types/type1", user)
@@ -187,7 +192,7 @@ describe ElasticsearchConnector do
     action.invoke({"properties" => {"name" => "john", "age" => 30, "extra" => "hello"}}, user)
     refresh_index
 
-    response = JSON.parse RestClient.get "#{INDEX_URL}/_search"
+    response = JSON.parse RestClient.get "#{index_url}/_search"
     hits = response["hits"]["hits"]
     expect(hits.length).to eq(1)
 
@@ -198,8 +203,8 @@ describe ElasticsearchConnector do
   end
 
   it "executes update action" do
-    RestClient.post("http://localhost:9200/instedd_hub_test/type1", %({"name": "john", "age": 20}))
-    RestClient.post("http://localhost:9200/instedd_hub_test/type1", %({"name": "peter", "age": 40}))
+    RestClient.post("#{index_url}/type1", %({"name": "john", "age": 20}))
+    RestClient.post("#{index_url}/type1", %({"name": "peter", "age": 40}))
     refresh_index
 
     action = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/update", user)
@@ -218,7 +223,7 @@ describe ElasticsearchConnector do
     )
     refresh_index
 
-    response = JSON.parse RestClient.get "#{INDEX_URL}/_search"
+    response = JSON.parse RestClient.get "#{index_url}/_search"
     hits = response["hits"]["hits"]
     expect(hits.length).to eq(2)
 
@@ -234,8 +239,8 @@ describe ElasticsearchConnector do
   end
 
   it "executes update action with many keys" do
-    RestClient.post("http://localhost:9200/instedd_hub_test/type1", %({"name": "john", "age": 20}))
-    RestClient.post("http://localhost:9200/instedd_hub_test/type1", %({"name": "peter", "age": 40}))
+    RestClient.post("#{index_url}/type1", %({"name": "john", "age": 20}))
+    RestClient.post("#{index_url}/type1", %({"name": "peter", "age": 40}))
     refresh_index
 
     action = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/update", user)
@@ -255,44 +260,7 @@ describe ElasticsearchConnector do
     )
     refresh_index
 
-    response = JSON.parse RestClient.get "#{INDEX_URL}/_search"
-    hits = response["hits"]["hits"]
-    expect(hits.length).to eq(2)
-
-    sources = hits.map { |hit| hit["_source"] }
-
-    john = sources.find { |source| source["name"] == "john" }
-    expect(john["age"]).to eq(10)
-    expect(john["extra"]).to eq("hello")
-
-    peter = sources.find { |source| source["name"] == "peter" }
-    expect(peter["age"]).to eq(40)
-    expect(peter["extra"]).to be_nil
-  end
-
-  it "executes update action with nil values" do
-    RestClient.post("http://localhost:9200/instedd_hub_test/type1", %({"name": "john", "age": 20}))
-    RestClient.post("http://localhost:9200/instedd_hub_test/type1", %({"name": "peter", "age": 40}))
-    refresh_index
-
-    action = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/update", user)
-    action.invoke(
-      {
-        "filters" => {
-          "name" => "john",
-          "age" => nil,
-        },
-        "properties" => {
-          "name" => "john",
-          "age" => 10,
-          "extra" => "hello"
-        },
-      },
-      user
-    )
-    refresh_index
-
-    response = JSON.parse RestClient.get "#{INDEX_URL}/_search"
+    response = JSON.parse RestClient.get "#{index_url}/_search"
     hits = response["hits"]["hits"]
     expect(hits.length).to eq(2)
 
@@ -308,16 +276,14 @@ describe ElasticsearchConnector do
   end
 
   it "executes update over all values" do
-    RestClient.post("http://localhost:9200/instedd_hub_test/type1", %({"name": "john", "age": 20}))
-    RestClient.post("http://localhost:9200/instedd_hub_test/type1", %({"name": "peter", "age": 40}))
+    RestClient.post("#{index_url}/type1", %({"name": "john", "age": 20}))
+    RestClient.post("#{index_url}/type1", %({"name": "peter", "age": 40}))
     refresh_index
 
     action = connector.lookup_path("indices/instedd_hub_test/types/type1/$actions/update", user)
     action.invoke(
       {
         "filters" => {
-          "name" => nil,
-          "age" => nil,
         },
         "properties" => {
           "name" => "john",
@@ -329,7 +295,7 @@ describe ElasticsearchConnector do
     )
     refresh_index
 
-    response = JSON.parse RestClient.get "#{INDEX_URL}/_search"
+    response = JSON.parse RestClient.get "#{index_url}/_search"
     hits = response["hits"]["hits"]
     expect(hits.length).to eq(2)
 

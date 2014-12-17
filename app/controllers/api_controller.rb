@@ -77,7 +77,9 @@ class ApiController < ApplicationController
 
   def invoke
     target = connector.lookup_path(params[:path], request_context)
-    response = target.invoke(JSON.parse(request.body.read), request_context)
+    args = JSON.parse(request.body.read)
+    remove_nil_hash_values_from(args)
+    response = target.invoke(args, request_context)
     render json: response
   end
 
@@ -90,5 +92,21 @@ class ApiController < ApplicationController
 
   def allow_iframe
     response.headers.except! 'X-Frame-Options'
+  end
+
+  def remove_nil_hash_values_from(args)
+    case args
+    when Array
+      args.each { |arg| remove_nil_hash_values_from arg }
+    when Hash
+      args.delete_if do |key, value|
+        if value.nil? || (value.is_a?(String) && value.empty?)
+          true
+        else
+          remove_nil_hash_values_from value
+          false
+        end
+      end
+    end
   end
 end

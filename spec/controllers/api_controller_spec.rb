@@ -104,4 +104,108 @@ describe ApiController do
     end
   end
 
+  describe "invoke" do
+    def url
+      "http://localhost:9200"
+    end
+
+    def index_url
+      "#{url}/instedd_hub_test"
+    end
+
+    let(:connector) { ElasticsearchConnector.make! url: url }
+    let(:user)      { connector.user }
+    before(:each)   { sign_in user }
+
+    before(:each) do
+      RestClient.delete index_url rescue nil
+      RestClient.post index_url, %(
+        {
+          "mappings": {
+            "type1": {
+              "properties": {
+                  "name": { "type" : "string" },
+                  "age":  { "type" : "integer" },
+                  "other": { "type" : "string" }
+              }
+            }
+          }
+        }
+      )
+    end
+
+    after(:all) do
+      RestClient.delete index_url rescue nil
+    end
+
+    it "updates elastic search values (with null values)" do
+      RestClient.post("#{index_url}/type1", %({"name": "john", "age": 20, "other": 50}))
+      RestClient.post("#{index_url}/type1", %({"name": "peter", "age": 40, "other": 60}))
+      RestClient.post "#{index_url}/_refresh", ""
+
+      request.env["RAW_POST_DATA"] = %({
+        "filters": {
+          "name": "john",
+          "age": null
+        },
+        "properties": {
+          "name": "john",
+          "age": 10,
+          "other": null
+        }
+      })
+      post :invoke, id: connector.guid, path: "indices/instedd_hub_test/types/type1/$actions/update"
+
+      RestClient.post "#{index_url}/_refresh", ""
+
+      response = JSON.parse RestClient.get "#{index_url}/_search"
+      hits = response["hits"]["hits"]
+      expect(hits.length).to eq(2)
+
+      sources = hits.map { |hit| hit["_source"] }
+
+      john = sources.find { |source| source["name"] == "john" }
+      expect(john["age"]).to eq(10)
+      expect(john["other"]).to eq(50)
+
+      peter = sources.find { |source| source["name"] == "peter" }
+      expect(peter["age"]).to eq(40)
+      expect(peter["other"]).to eq(60)
+    end
+
+    it "updates elastic search values (with empty string values)" do
+      RestClient.post("#{index_url}/type1", %({"name": "john", "age": 20, "other": 50}))
+      RestClient.post("#{index_url}/type1", %({"name": "peter", "age": 40, "other": 60}))
+      RestClient.post "#{index_url}/_refresh", ""
+
+      request.env["RAW_POST_DATA"] = %({
+        "filters": {
+          "name": "john",
+          "age": ""
+        },
+        "properties": {
+          "name": "john",
+          "age": 10,
+          "other": ""
+        }
+      })
+      post :invoke, id: connector.guid, path: "indices/instedd_hub_test/types/type1/$actions/update"
+
+      RestClient.post "#{index_url}/_refresh", ""
+
+      response = JSON.parse RestClient.get "#{index_url}/_search"
+      hits = response["hits"]["hits"]
+      expect(hits.length).to eq(2)
+
+      sources = hits.map { |hit| hit["_source"] }
+
+      john = sources.find { |source| source["name"] == "john" }
+      expect(john["age"]).to eq(10)
+      expect(john["other"]).to eq(50)
+
+      peter = sources.find { |source| source["name"] == "peter" }
+      expect(peter["age"]).to eq(40)
+      expect(peter["other"]).to eq(60)
+    end
+  end
 end
