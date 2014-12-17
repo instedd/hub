@@ -99,7 +99,9 @@ class VerboiceConnector < Connector
 
   class PhoneBook
     include EntitySet
-    protocol :insert, :update, :delete
+
+    # Only query is supported for now
+    # protocol :insert, :update, :delete
 
     def initialize(parent)
       @parent = parent
