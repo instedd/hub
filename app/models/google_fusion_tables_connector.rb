@@ -87,6 +87,14 @@ class GoogleFusionTablesConnector < Connector
     JSON.parse(response.body)
   end
 
+  def post url, body
+    token = Rack::OAuth2::AccessToken::Bearer.new(
+      :access_token => access_token
+    )
+    response = token.post url, body
+    JSON.parse(response.body)
+  end
+
   class Tables
     include EntitySet
 
@@ -185,9 +193,20 @@ class GoogleFusionTablesConnector < Connector
       "https://www.googleapis.com/fusiontables/v2/query?#{{sql: sql}.to_query}"
     end
 
+    def generate_insert_body(properties)
+      columns = properties.keys.join(',')
+      values = properties.values.map{|v| "'#{v}'"}.join(',')
+
+      "sql=INSERT INTO #{@id} (#{columns}) VALUES (#{values})"
+    end
+
     def query(filters, context, options)
       results = connector.get generate_query_url(filters)
-      results["rows"].map{|data| Row.new(self, data)}
+      (results["rows"]|| []).map{|data| Row.new(self, data)}
+    end
+
+    def insert(properties, context)
+      connector.post "https://www.googleapis.com/fusiontables/v2/query", generate_insert_body(properties)
     end
   end
 
