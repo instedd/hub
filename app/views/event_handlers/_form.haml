@@ -1,4 +1,4 @@
-%div{'ng-app'=>'CreateTaskApp', 'ng-init' => init_scope(event: {connector: event_handler.connector.try(:guid), path: event_handler.event}, action: {connector: event_handler.target_connector.try(:guid), path: event_handler.action}, binding: event_handler.binding)}
+%div{'ng-app'=>'CreateTaskApp', 'ng-init' => init_scope(event: {connector: event_handler.connector.try(:guid), path: event_handler.event}, action: {connector: event_handler.target_connector.try(:guid), path: event_handler.action}, binding: event_handler.binding, name: event_handler.name)}
 
   %div(ng-controller='CreateTaskCtrl')
     = form_for(event_handler, html: {name: 'taskForm'}) do |f|
