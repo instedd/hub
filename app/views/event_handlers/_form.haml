@@ -1,10 +1,10 @@
 %div{'ng-app'=>'CreateTaskApp', 'ng-init' => init_scope(event: {connector: event_handler.connector.try(:guid), path: event_handler.event}, action: {connector: event_handler.target_connector.try(:guid), path: event_handler.action}, binding: event_handler.binding)}
 
   %div(ng-controller='CreateTaskCtrl')
-    = form_for(event_handler) do |f|
-      %input(type='hidden' name='task[event]' value='{{event_json}}')
-      %input(type='hidden' name='task[action]' value='{{action_json}}')
-      %input(type='hidden' name='task[binding]' value='{{binding_json}}')
+    = form_for(event_handler, html: {name: 'taskForm'}) do |f|
+      %input(type='hidden' name='task[event]' value='{{event_json}}' ng-model="event" required='true')
+      %input(type='hidden' name='task[action]' value='{{action_json}}' ng-model="action" required='true')
+      %input(type='hidden' name='task[binding]' value='{{binding_json}}' ng-model="binding" required='true')
 
       - if event_handler.errors.any?
         .row-fluid
@@ -20,7 +20,7 @@
         .span12
           .field
             = f.label :name
-            = f.text_field :name
+            = f.text_field :name, 'ng-model' => 'name', required: true
 
       .row-fluid
         .span6
@@ -41,7 +41,7 @@
           .actions
             %hr
               - if event_handler.new_record?
-                %button.btn{:type => "submit"} Save
+                %button.btn{:type => "submit", 'ng-disabled' => '!taskForm.$valid'} Save
               - else
                 %button.btn{:type => "submit"} Update
                 = icon_link_to :'icf-delete', 'Delete this task', event_handler_path(event_handler), method: :delete, :'data-confirm' => "Are you sure you want to delete this task?", class: "pull-right"
