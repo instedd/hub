@@ -211,6 +211,10 @@ class GoogleFusionTablesConnector < Connector
       "sql=UPDATE #{@id} SET #{properties_query} WHERE ROWID = '#{row_id}'"
     end
 
+    def generate_delete_body(row_id)
+      "sql=DELETE FROM #{@id} WHERE ROWID = '#{row_id}'"
+    end
+
     def query(filters, context, options)
       results = connector.get generate_query_url(filters)
       (results["rows"]|| []).map{|data| Row.new(self, data)}
@@ -219,7 +223,7 @@ class GoogleFusionTablesConnector < Connector
     def query_row_id(filters)
       results = connector.get generate_query_url(filters, 'ROWID')
       # Google responds: => {"kind"=>"fusiontables#sqlresponse", "columns"=>["rowid"], "rows"=>[["2701"]]}
-      results["rows"].first.first rescue ""
+      results["rows"].first.first rescue nil
     end
 
     def insert(properties, context)
@@ -229,7 +233,15 @@ class GoogleFusionTablesConnector < Connector
     #This updates a single registry
     def update(filters, properties, context)
       row_id = query_row_id(filters)
+      # Question: What happens if there are no rows that matches the filters?
       connector.post "https://www.googleapis.com/fusiontables/v2/query", generate_update_body(properties, row_id)
+    end
+
+    #This deletes a single registry
+    def delete(filters, user)
+      row_id = query_row_id(filters)
+      # Question: What happens if there are no rows that matches the filters?
+      connector.post "https://www.googleapis.com/fusiontables/v2/query", generate_delete_body(row_id)
     end
   end
 
