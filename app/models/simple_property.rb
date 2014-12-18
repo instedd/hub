@@ -21,6 +21,10 @@ class SimpleProperty
     new(label, :numeric, value)
   end
 
+  def self.float(label, value = nil)
+    new(label, :float, value)
+  end
+
   def self.datetime(label, value = nil)
     new(label, :datetime, value)
   end

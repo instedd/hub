@@ -125,18 +125,38 @@ describe ResourceMapConnector do
           type: :entity_set,
           entity_definition: {
             properties: {
-              "123" => {
-                label: "my layer",
+              name: {
+                label: "Name",
+                type: :string,
+              },
+              lat: {
+                label: "Latitude",
+                type: :float,
+              },
+              lng: {
+                label: "Longitude",
+                type: :float,
+              },
+              layers: {
+                label: "Layers",
                 type: {
                   kind: :struct,
                   members: {
-                    "234" => {
-                      label: "my field",
-                      kind: :string,
+                    "123" => {
+                      label: "my layer",
+                      type: {
+                        kind: :struct,
+                        members: {
+                          "234" => {
+                            label: "my field",
+                            kind: :string,
+                          },
+                        },
+                      },
                     },
-                  },
-                },
-              },
+                  }
+                }
+              }
             }
           },
           actions: {

@@ -106,19 +106,30 @@ class ResourceMapConnector < Connector
 
     def entity_properties(context)
       layers = GuissoRestClient.new(connector, context.user).get("#{connector.url}/api/collections/#{@parent.id}/layers.json")
-      Hash[layers.map do |layer|
-        [layer["id"].to_s, {
-          label: layer["name"],
+      {
+        name: SimpleProperty.string("Name"),
+        lat: SimpleProperty.float("Latitude"),
+        lng: SimpleProperty.float("Longitude"),
+        layers: {
+          label: "Layers",
           type: {
             kind: :struct,
-            members: Hash[
-              (layer["fields"] || []).map do |field|
-                [field["id"].to_s, field_properties(field)]
-              end
-            ]
+            members: Hash[layers.map do |layer|
+              [layer["id"].to_s, {
+                label: layer["name"],
+                type: {
+                  kind: :struct,
+                  members: Hash[
+                    (layer["fields"] || []).map do |field|
+                      [field["id"].to_s, field_properties(field)]
+                    end
+                  ]
+                }
+              }]
+            end]
           }
-        }]
-      end]
+        }
+      }
     end
 
     def query(filters, context, options)
