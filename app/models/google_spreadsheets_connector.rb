@@ -147,7 +147,9 @@ class GoogleSpreadsheetsConnector < Connector
       end
 
       def define_columns_for(binding)
-        new_columns = binding["members"]["properties"]["open"].keys
+        new_columns = (binding["members"]["properties"]["open"] || {}).keys
+        return if new_columns.empty?
+
         worksheet = parent.worksheet
         list = worksheet.list
         headers = list.keys
