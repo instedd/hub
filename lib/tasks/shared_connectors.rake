@@ -14,5 +14,14 @@ namespace :shared_connectors do
       c.url = "http://mbuilder#{url_suffix}.instedd.org"
       c.user = nil
     end
+
+    ResourceMapConnector.find_or_create_by name: "InSTEDD Resource Map#{app_suffix}" do |c|
+      if is_stg
+        c.url = "http://resmap-stg.instedd.org"
+      else
+        c.url = "http://resourcemap.instedd.org"
+      end
+      c.user = nil
+    end
   end
 end

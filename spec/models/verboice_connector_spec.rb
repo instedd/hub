@@ -75,9 +75,9 @@ describe VerboiceConnector do
             "schedules": []
           }), :headers => {})
 
-        projects = connector.lookup %w(projects 495), context
+        project = connector.lookup %w(projects 495), context
 
-        expect(projects.reflect(context)).to eq({
+        expect(project.reflect(context)).to eq({
           label: "my project",
           path: "projects/495",
           reflect_url: "http://server/api/reflect/connectors/1/projects/495",

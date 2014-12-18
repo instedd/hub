@@ -43,7 +43,7 @@ class SimpleProperty
 
   def self.reflect context, properties
     Hash[(properties || {}).map do |k, v|
-      [k, v.reflect_property(context)]
+      [k, v.is_a?(Hash) ? v : v.reflect_property(context)]
     end]
   end
 end

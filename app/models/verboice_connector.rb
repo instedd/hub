@@ -93,7 +93,7 @@ class VerboiceConnector < Connector
     end
 
     def verboice_project(user)
-      @verboice_project ||= GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{id}.json")
+      @verboice_project ||= parent.project(id, user)
     end
   end
 
