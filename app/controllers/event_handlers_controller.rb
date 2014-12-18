@@ -1,7 +1,7 @@
 class EventHandlersController < ApplicationController
   add_breadcrumb 'Tasks', :event_handlers_path
 
-  expose(:event_handlers) { current_user.event_handlers }
+  expose(:event_handlers) { current_user.event_handlers.order(:id) }
   expose(:event_handler)
 
   def index
