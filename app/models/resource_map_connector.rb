@@ -135,6 +135,34 @@ class ResourceMapConnector < Connector
     def query(filters, context, options)
     end
 
+    def insert(properties, context)
+      site = {}
+
+      site["name"] = properties["name"] if properties["name"].present?
+      site["lat"] = properties["lat"].to_f if properties["lat"].present?
+      site["lng"] = properties["lng"].to_f if properties["lng"].present?
+
+      site_properties = site["properties"] = {}
+
+      layers = properties["layers"]
+      if layers
+        layers.each do |layer_id, fields|
+          if fields
+            fields.each do |field_id, value|
+              site_properties[field_id.to_s] = value
+            end
+          end
+        end
+      end
+
+      if site_properties.empty?
+        site.delete "properties"
+      end
+
+      # body = {site: site}
+      GuissoRestClient.new(connector, context.user).post("#{connector.url}/api/collections/#{@parent.id}/sites.json", site: site.to_json)
+    end
+
     def field_properties(field)
       h = {}
       h[:label] = field["name"]
