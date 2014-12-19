@@ -211,23 +211,16 @@ class GoogleFusionTablesConnector < Connector
       "sql=UPDATE #{@id} SET #{properties_query} WHERE ROWID = '#{row_id}'"
     end
 
-    def generate_delete_body(row_id, delete_all)
-      if delete_all
-        "sql=DELETE FROM #{@id}"
-      else
-        "sql=DELETE FROM #{@id} WHERE ROWID = '#{row_id}'"
-      end
-    end
 
     def query(filters, context, options)
       results = connector.get generate_query_url(filters)
       (results["rows"]|| []).map{|data| Row.new(self, data)}
     end
 
-    def query_row_id(filters)
+    def query_row_ids(filters)
       results = connector.get generate_query_url(filters, 'ROWID')
-      # Google responds: => {"kind"=>"fusiontables#sqlresponse", "columns"=>["rowid"], "rows"=>[["2701"]]}
-      results["rows"].first.first rescue nil
+      # Google responds: => {"kind"=>"fusiontables#sqlresponse", "columns"=>["rowid"], "rows"=>[["2701"], ["2702"]]}
+      results["rows"].flatten rescue nil
     end
 
     def insert(properties, context)
@@ -236,15 +229,23 @@ class GoogleFusionTablesConnector < Connector
 
     #This updates a single registry
     def update(filters, properties, context)
-      row_id = query_row_id(filters)
+      row_id = query_row_ids(filters)
       # Question: What happens if there are no rows that matches the filters?
       connector.post "https://www.googleapis.com/fusiontables/v2/query", generate_update_body(properties, row_id)
     end
 
-    #This deletes a single registry
+    # Deletes all rows that match the filters
+    # Fusion tables API allows to delete one row (or the full table) per query.
     def delete(filters, user)
-      row_id = query_row_id(filters)
-      connector.post "https://www.googleapis.com/fusiontables/v2/query", generate_delete_body(row_id, filters.empty?)
+      row_ids = query_row_ids(filters)
+      if filters.empty?
+        body = "sql=DELETE FROM #{@id}"
+      else
+        row_ids.each do |row_id|
+          body = "sql=DELETE FROM #{@id} WHERE ROWID = '#{row_id}';"
+          connector.post "https://www.googleapis.com/fusiontables/v2/query", body
+        end
+      end
     end
   end
 
