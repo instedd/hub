@@ -137,7 +137,7 @@ describe ResourceMapConnector do
               label: "Latitude",
               type: :float,
             },
-            lng: {
+            long: {
               label: "Longitude",
               type: :float,
             },
@@ -202,7 +202,7 @@ describe ResourceMapConnector do
       sites.insert({
         "name" => "New site",
         "lat" => 12.34,
-        "lng" => 56.78,
+        "long" => 56.78,
         "layers" => {
           "123" => {
             "field_code" => "New value",
@@ -264,7 +264,7 @@ describe ResourceMapConnector do
       results = sites.query({
         "name" => "New site",
         "lat" => 12.34,
-        "lng" => 56.78,
+        "long" => 56.78,
         "layers" => {
           "123" => {
             "field_code" => "Some value",
@@ -276,7 +276,7 @@ describe ResourceMapConnector do
         "id" => 1234,
         "name" => "My new site",
         "lat" => 12.5,
-        "lng" => 13.5,
+        "long" => 13.5,
         "layers" => {
           "123" => {
             "field_code" => "some value",

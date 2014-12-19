@@ -113,7 +113,7 @@ class ResourceMapConnector < Connector
         id: SimpleProperty.integer("ID"),
         name: SimpleProperty.string("Name"),
         lat: SimpleProperty.float("Latitude"),
-        lng: SimpleProperty.float("Longitude"),
+        long: SimpleProperty.float("Longitude"),
         layers: {
           label: "Layers",
           type: {
@@ -175,7 +175,7 @@ class ResourceMapConnector < Connector
 
       site["name"] = properties["name"] if properties["name"].present?
       site["lat"] = properties["lat"].to_f if properties["lat"].present?
-      site["lng"] = properties["lng"].to_f if properties["lng"].present?
+      site["lng"] = properties["long"].to_f if properties["long"].present?
 
       site_properties = site["properties"] = {}
 
@@ -219,7 +219,7 @@ class ResourceMapConnector < Connector
 
       query["name"] = filters["name"] if filters["name"].present?
       query["lat"] = filters["lat"] if filters["lat"].present?
-      query["lng"] = filters["lng"] if filters["lng"].present?
+      query["lng"] = filters["long"] if filters["long"].present?
 
       layers = filters["layers"]
       if layers
@@ -245,7 +245,7 @@ class ResourceMapConnector < Connector
       ui["id"] = site["id"]
       ui["name"] = site["name"]
       ui["lat"] = site["lat"] if site["lat"].present?
-      ui["lng"] = site["long"] if site["long"].present?
+      ui["long"] = site["long"] if site["long"].present?
       ui_layers = ui["layers"] = {}
 
       properties = site["properties"]
