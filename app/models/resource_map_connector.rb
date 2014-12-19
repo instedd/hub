@@ -141,7 +141,7 @@ class ResourceMapConnector < Connector
       if url_query.empty?
         url_query = ""
       else
-        url_query = url_query.to_query
+        url_query = "?#{url_query.to_query}"
       end
 
       sites = GuissoRestClient.new(connector, context.user).
