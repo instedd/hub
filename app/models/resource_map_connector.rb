@@ -104,9 +104,13 @@ class ResourceMapConnector < Connector
       "#{@parent.path}/sites"
     end
 
+    def reflect_entities(context)
+    end
+
     def entity_properties(context)
       layers = GuissoRestClient.new(connector, context.user).get("#{connector.url}/api/collections/#{@parent.id}/layers.json")
       {
+        id: SimpleProperty.integer("ID"),
         name: SimpleProperty.string("Name"),
         lat: SimpleProperty.float("Latitude"),
         lng: SimpleProperty.float("Longitude"),
@@ -121,7 +125,7 @@ class ResourceMapConnector < Connector
                   kind: :struct,
                   members: Hash[
                     (layer["fields"] || []).map do |field|
-                      [field["id"].to_s, field_properties(field)]
+                      [field["code"].to_s, field_properties(field)]
                     end
                   ]
                 }
@@ -133,9 +137,33 @@ class ResourceMapConnector < Connector
     end
 
     def query(filters, context, options)
+      url_query = filters_as_query(filters)
+      if url_query.empty?
+        url_query = ""
+      else
+        url_query = url_query.to_query
+      end
+
+      sites = GuissoRestClient.new(connector, context.user).
+                get("#{connector.url}/api/collections/#{@parent.id}.json#{url_query}")
+
+      layers = GuissoRestClient.new(connector, context.user).get("#{connector.url}/api/collections/#{@parent.id}/layers.json")
+      layers_by_field_code = index_layers_by_field_code(layers)
+
+      sites_to_ui(sites["sites"], layers_by_field_code)
     end
 
     def insert(properties, context)
+      GuissoRestClient.new(connector, context.user).
+        post("#{connector.url}/api/collections/#{@parent.id}/sites.json",
+          site: site_as_json(properties).to_json)
+    end
+
+    def update(filters, properties, context)
+      #
+    end
+
+    def site_as_json(properties)
       site = {}
 
       site["name"] = properties["name"] if properties["name"].present?
@@ -148,8 +176,8 @@ class ResourceMapConnector < Connector
       if layers
         layers.each do |layer_id, fields|
           if fields
-            fields.each do |field_id, value|
-              site_properties[field_id.to_s] = value
+            fields.each do |field_code, value|
+              site_properties[field_code] = value
             end
           end
         end
@@ -159,8 +187,7 @@ class ResourceMapConnector < Connector
         site.delete "properties"
       end
 
-      # body = {site: site}
-      GuissoRestClient.new(connector, context.user).post("#{connector.url}/api/collections/#{@parent.id}/sites.json", site: site.to_json)
+      site
     end
 
     def field_properties(field)
@@ -178,6 +205,67 @@ class ResourceMapConnector < Connector
         h[:kind]= :string
       end
       h
+    end
+
+    def filters_as_query(filters)
+      query = {}
+
+      query["name"] = filters["name"] if filters["name"].present?
+      query["lat"] = filters["lat"] if filters["lat"].present?
+      query["lng"] = filters["lng"] if filters["lng"].present?
+
+      layers = filters["layers"]
+      if layers
+        layers.each do |layer_id, fields|
+          if fields
+            fields.each do |field_code, value|
+              query[field_code] = value
+            end
+          end
+        end
+      end
+
+      query
+    end
+
+    def sites_to_ui(sites, layers_by_field_code)
+      sites.map { |site| site_to_ui(site, layers_by_field_code) }
+    end
+
+    def site_to_ui(site, layers_by_field_code)
+      ui = {}
+
+      ui["id"] = site["id"]
+      ui["name"] = site["name"]
+      ui["lat"] = site["lat"] if site["lat"].present?
+      ui["lng"] = site["long"] if site["long"].present?
+      ui_layers = ui["layers"] = {}
+
+      properties = site["properties"]
+      if properties
+        properties.each do |field_code, value|
+          layer_id = layers_by_field_code[field_code]
+          if layer_id
+            layer_properties = ui_layers[layer_id.to_s] ||= {}
+            layer_properties[field_code] = value
+          end
+        end
+      end
+
+      ui
+    end
+
+    def index_layers_by_field_code(layers)
+      index = {}
+      layers.each do |layer|
+        fields = layer["fields"]
+        if fields
+          fields.each do |field|
+            index[field["code"]] = layer["id"]
+          end
+        end
+      end
+      index
     end
   end
 end

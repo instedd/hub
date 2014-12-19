@@ -30,7 +30,9 @@ class ApiController < ApplicationController
       render json: target.raw(request_context)
     else
       items = target.query(entity_filter, request_context, options)
-      render json: items.map { |e| e.raw(request_context) }
+      render json: items.map do |e|
+        e.is_a?(Hash) ? e : e.raw(request_context)
+      end
     end
   end
 

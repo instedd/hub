@@ -108,6 +108,7 @@ describe ResourceMapConnector do
             "fields": [
               {
                 "id": 234,
+                "code": "field_code",
                 "name": "my field",
                 "kind": "text"
               }
@@ -124,6 +125,10 @@ describe ResourceMapConnector do
         type: :entity_set,
         entity_definition: {
           properties: {
+            id: {
+              label: "ID",
+              type: :integer,
+            },
             name: {
               label: "Name",
               type: :string,
@@ -146,7 +151,7 @@ describe ResourceMapConnector do
                     type: {
                       kind: :struct,
                       members: {
-                        "234" => {
+                        "field_code" => {
                           label: "my field",
                           kind: :string,
                         },
@@ -181,6 +186,7 @@ describe ResourceMapConnector do
             "fields": [
               {
                 "id": 234,
+                "code": "field_code",
                 "name": "my field",
                 "kind": "text"
               }
@@ -188,7 +194,7 @@ describe ResourceMapConnector do
           }]))
 
       stub_request(:post, "https://jdoe:1234@resourcemap.instedd.org/api/collections/495/sites.json").
-         with(:body => {"site"=> %({"name":"New site","lat":12.34,"lng":56.78})},
+         with(:body => {"site"=> %({"name":"New site","lat":12.34,"lng":56.78,"properties":{"field_code":"New value"}})},
               :headers => {'Content-Type'=>'application/x-www-form-urlencoded'}).
          to_return(:status => 200, :body => "")
 
@@ -197,12 +203,81 @@ describe ResourceMapConnector do
         "name" => "New site",
         "lat" => 12.34,
         "lng" => 56.78,
-        "properties" => {
+        "layers" => {
           "123" => {
-            "234" => "New value",
+            "field_code" => "New value",
           },
         }
       }, context)
+    end
+
+    it "executes query site action" do
+      stub_request(:get, "https://jdoe:1234@resourcemap.instedd.org/api/collections.json").
+        to_return(:status => 200, :body => %([{
+            "id": 495,
+            "name": "my collection"
+        }]))
+
+      stub_request(:get, "https://jdoe:1234@resourcemap.instedd.org/api/collections/495/layers.json").
+        to_return(:status => 200, :body => %([
+          {
+            "id": 123,
+            "name": "my layer",
+            "fields": [
+              {
+                "id": 234,
+                "code": "field_code",
+                "name": "my field",
+                "kind": "text"
+              }
+            ]
+          }]))
+
+      stub_request(:get, "https://jdoe:1234@resourcemap.instedd.org/api/collections/495.json?name=#{CGI.escape "New site"}&lat=12.34&lng=56.78&field_code=#{CGI.escape "Some value"}").
+         to_return(:status => 200, :body => %(
+            {
+              "name": "Hub collection",
+              "count": 1,
+              "totalPages": null,
+              "sites": [
+                {
+                  "id": 1234,
+                  "name": "My new site",
+                  "createdAt": "2014-12-18T20:59:40.695Z",
+                  "updatedAt": "2014-12-18T20:59:40.695Z",
+                  "lat": 12.5,
+                  "long": 13.5,
+                  "properties": {
+                    "field_code": "some value"
+                  }
+                }
+              ]
+            }
+          ))
+
+      sites = connector.lookup %w(collections 495 sites), context
+      results = sites.query({
+        "name" => "New site",
+        "lat" => 12.34,
+        "lng" => 56.78,
+        "layers" => {
+          "123" => {
+            "field_code" => "Some value",
+          },
+        }
+      }, context, {})
+
+      expect(results).to eq([{
+        "id" => 1234,
+        "name" => "My new site",
+        "lat" => 12.5,
+        "lng" => 13.5,
+        "layers" => {
+          "123" => {
+            "field_code" => "some value",
+          }
+        }
+      }])
     end
   end
 end
