@@ -20,6 +20,14 @@ class GuissoRestClient
     end
   end
 
+  def delete(url)
+    if use_guisso?
+      guisso_resource.delete(url).body
+    else
+      rest_client_resource(url).delete {|response, request, result| response }
+    end
+  end
+
   def use_guisso?
     @connector.shared? and Guisso.enabled?
   end

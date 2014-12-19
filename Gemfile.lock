@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/instedd/alto_guisso.git
-  revision: a68286fa260dd092d54a5c471c252874d17feb51
+  revision: b767af4621523215b79fccafd1cb94ccd88df828
   branch: master
   specs:
     alto_guisso (0.0.2)
@@ -199,7 +199,7 @@ GEM
     method_source (0.8.2)
     mime-types (2.4.3)
     mini_portile (0.6.1)
-    minitest (5.4.3)
+    minitest (5.5.0)
     mono_logger (1.1.0)
     multi_json (1.10.1)
     multi_xml (0.5.5)

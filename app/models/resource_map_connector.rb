@@ -137,15 +137,7 @@ class ResourceMapConnector < Connector
     end
 
     def query(filters, context, options)
-      url_query = filters_as_query(filters)
-      if url_query.empty?
-        url_query = ""
-      else
-        url_query = "?#{url_query.to_query}"
-      end
-
-      sites = GuissoRestClient.new(connector, context.user).
-                get("#{connector.url}/api/collections/#{@parent.id}.json#{url_query}")
+      sites = internal_query(filters, context)
 
       layers = GuissoRestClient.new(connector, context.user).get("#{connector.url}/api/collections/#{@parent.id}/layers.json")
       layers_by_field_code = index_layers_by_field_code(layers)
@@ -156,14 +148,29 @@ class ResourceMapConnector < Connector
     def insert(properties, context)
       GuissoRestClient.new(connector, context.user).
         post("#{connector.url}/api/collections/#{@parent.id}/sites.json",
-          site: site_as_json(properties).to_json)
+          site: properties_as_site_json(properties).to_json)
     end
 
     def update(filters, properties, context)
-      #
+      sites = internal_query(filters, context)
+      ids = sites["sites"].map { |site| site["id"] }
+      ids.each do |id|
+        GuissoRestClient.new(connector, context.user).
+          post("#{connector.url}/api/sites/#{id}/partial_update.json",
+            site: properties_as_site_json(properties).to_json)
+      end
     end
 
-    def site_as_json(properties)
+    def delete(filters, context)
+      sites = internal_query(filters, context)
+      ids = sites["sites"].map { |site| site["id"] }
+      ids.each do |id|
+        GuissoRestClient.new(connector, context.user).
+          delete("#{connector.url}/api/sites/#{id}.json")
+      end
+    end
+
+    def properties_as_site_json(properties)
       site = {}
 
       site["name"] = properties["name"] if properties["name"].present?
@@ -266,6 +273,18 @@ class ResourceMapConnector < Connector
         end
       end
       index
+    end
+
+    def internal_query(filters, context)
+      url_query = filters_as_query(filters)
+      if url_query.empty?
+        url_query = ""
+      else
+        url_query = "?#{url_query.to_query}"
+      end
+
+      GuissoRestClient.new(connector, context.user).
+        get("#{connector.url}/api/collections/#{@parent.id}.json#{url_query}")
     end
   end
 end

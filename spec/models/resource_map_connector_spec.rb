@@ -209,6 +209,11 @@ describe ResourceMapConnector do
           },
         }
       }, context)
+
+      expect(a_request(:post, "https://jdoe:1234@resourcemap.instedd.org/api/collections/495/sites.json").
+         with(:body => {"site"=> %({"name":"New site","lat":12.34,"lng":56.78,"properties":{"field_code":"New value"}})},
+              :headers => {'Content-Type'=>'application/x-www-form-urlencoded'})
+         ).to have_been_made
     end
 
     it "executes query site action" do
@@ -278,6 +283,141 @@ describe ResourceMapConnector do
           }
         }
       }])
+    end
+
+    it "executes update site action" do
+      stub_request(:get, "https://jdoe:1234@resourcemap.instedd.org/api/collections.json").
+        to_return(:status => 200, :body => %([{
+            "id": 495,
+            "name": "my collection"
+        }]))
+
+      stub_request(:get, "https://jdoe:1234@resourcemap.instedd.org/api/collections/495/layers.json").
+        to_return(:status => 200, :body => %([
+          {
+            "id": 123,
+            "name": "my layer",
+            "fields": [
+              {
+                "id": 234,
+                "code": "field_code",
+                "name": "my field",
+                "kind": "text"
+              }
+            ]
+          }]))
+
+      stub_request(:get, "https://jdoe:1234@resourcemap.instedd.org/api/collections/495.json?field_code=#{CGI.escape "Some value"}").
+         to_return(:status => 200, :body => %(
+            {
+              "name": "Hub collection",
+              "count": 1,
+              "totalPages": null,
+              "sites": [
+                {
+                  "id": 1234,
+                  "name": "My new site",
+                  "createdAt": "2014-12-18T20:59:40.695Z",
+                  "updatedAt": "2014-12-18T20:59:40.695Z",
+                  "lat": 12.5,
+                  "long": 13.5,
+                  "properties": {
+                    "field_code": "some value"
+                  }
+                }
+              ]
+            }
+          ))
+
+      stub_request(:post, "https://jdoe:1234@resourcemap.instedd.org/api/sites/1234/partial_update.json").
+         with(:body => {"site"=> %({"properties":{"field_code":"Some other value"}})},
+              :headers => {'Content-Type'=>'application/x-www-form-urlencoded'}).
+         to_return(:status => 200, :body => "")
+
+      sites = connector.lookup %w(collections 495 sites), context
+      results = sites.update(
+        {
+          "layers" => {
+            "123" => {
+              "field_code" => "Some value",
+            },
+          }
+        },
+        {
+          "layers" => {
+            "123" => {
+              "field_code" => "Some other value",
+            },
+          }
+        },
+        context)
+
+      expect(a_request(:post, "https://jdoe:1234@resourcemap.instedd.org/api/sites/1234/partial_update.json").
+         with(:body => {"site"=> %({"properties":{"field_code":"Some other value"}})},
+              :headers => {'Content-Type'=>'application/x-www-form-urlencoded'})
+         ).to have_been_made
+    end
+
+    it "executes delete site action" do
+      stub_request(:get, "https://jdoe:1234@resourcemap.instedd.org/api/collections.json").
+        to_return(:status => 200, :body => %([{
+            "id": 495,
+            "name": "my collection"
+        }]))
+
+      stub_request(:get, "https://jdoe:1234@resourcemap.instedd.org/api/collections/495/layers.json").
+        to_return(:status => 200, :body => %([
+          {
+            "id": 123,
+            "name": "my layer",
+            "fields": [
+              {
+                "id": 234,
+                "code": "field_code",
+                "name": "my field",
+                "kind": "text"
+              }
+            ]
+          }]))
+
+      stub_request(:get, "https://jdoe:1234@resourcemap.instedd.org/api/collections/495.json?field_code=#{CGI.escape "Some value"}").
+         to_return(:status => 200, :body => %(
+            {
+              "name": "Hub collection",
+              "count": 1,
+              "totalPages": null,
+              "sites": [
+                {
+                  "id": 1234,
+                  "name": "My new site",
+                  "createdAt": "2014-12-18T20:59:40.695Z",
+                  "updatedAt": "2014-12-18T20:59:40.695Z",
+                  "lat": 12.5,
+                  "long": 13.5,
+                  "properties": {
+                    "field_code": "some value"
+                  }
+                }
+              ]
+            }
+          ))
+
+      stub_request(:delete, "https://jdoe:1234@resourcemap.instedd.org/api/sites/1234.json").
+         to_return(:status => 200, :body => "")
+
+      sites = connector.lookup %w(collections 495 sites), context
+      results = sites.delete(
+        {
+          "layers" => {
+            "123" => {
+              "field_code" => "Some value",
+            },
+          }
+        },
+        context)
+
+      expect(a_request(:delete, "https://jdoe:1234@resourcemap.instedd.org/api/sites/1234.json")
+         ).to have_been_made
     end
   end
 end
