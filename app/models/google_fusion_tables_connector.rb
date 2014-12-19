@@ -199,18 +199,6 @@ class GoogleFusionTablesConnector < Connector
       "https://www.googleapis.com/fusiontables/v2/query?#{{sql: sql}.to_query}"
     end
 
-    def generate_insert_body(properties)
-      columns = properties.keys.join(', ')
-      values = properties.values.map{|v| "'#{v}'"}.join(', ')
-
-      "sql=INSERT INTO #{@id} (#{columns}) VALUES (#{values})"
-    end
-
-    def generate_update_body(properties, row_id)
-      properties_query = properties.map{|k,v| "'#{k}' = '#{v}'"}.join(', ')
-      "sql=UPDATE #{@id} SET #{properties_query} WHERE ROWID = '#{row_id}'"
-    end
-
 
     def query(filters, context, options)
       results = connector.get generate_query_url(filters)
@@ -220,27 +208,38 @@ class GoogleFusionTablesConnector < Connector
     def query_row_ids(filters)
       results = connector.get generate_query_url(filters, 'ROWID')
       # Google responds: => {"kind"=>"fusiontables#sqlresponse", "columns"=>["rowid"], "rows"=>[["2701"], ["2702"]]}
-      results["rows"].flatten rescue nil
+      results["rows"].flatten rescue []
     end
 
     def insert(properties, context)
-      connector.post "https://www.googleapis.com/fusiontables/v2/query", generate_insert_body(properties)
+      binding.pry
+      columns = properties.keys.map{|c| "'#{c}'"}.join(', ')
+      values = properties.values.map{|v| "'#{v}'"}.join(', ')
+
+      body = "sql=INSERT INTO #{@id} (#{columns}) VALUES (#{values})"
+      connector.post "https://www.googleapis.com/fusiontables/v2/query", body
     end
 
-    #This updates a single registry
+    # Updates all rows that match the filters
+    # Fusion tables API allows to update one row (or the full table) per query.
     def update(filters, properties, context)
-      row_id = query_row_ids(filters)
-      # Question: What happens if there are no rows that matches the filters?
-      connector.post "https://www.googleapis.com/fusiontables/v2/query", generate_update_body(properties, row_id)
+      properties_query = properties.map{|k,v| "'#{k}' = '#{v}'"}.join(', ')
+      row_ids = query_row_ids(filters)
+      row_ids.each do |row_id|
+        body = "sql=UPDATE #{@id} SET #{properties_query} WHERE ROWID = '#{row_id}'"
+        connector.post "https://www.googleapis.com/fusiontables/v2/query", body
+      end
+      row_ids.count
     end
 
     # Deletes all rows that match the filters
     # Fusion tables API allows to delete one row (or the full table) per query.
     def delete(filters, user)
-      row_ids = query_row_ids(filters)
       if filters.empty?
         body = "sql=DELETE FROM #{@id}"
+        connector.post "https://www.googleapis.com/fusiontables/v2/query", body
       else
+        row_ids = query_row_ids(filters)
         row_ids.each do |row_id|
           body = "sql=DELETE FROM #{@id} WHERE ROWID = '#{row_id}';"
           connector.post "https://www.googleapis.com/fusiontables/v2/query", body
