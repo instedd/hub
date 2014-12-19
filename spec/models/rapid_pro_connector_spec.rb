@@ -181,4 +181,31 @@ describe RapidProConnector do
       }])
     end
   end
+
+  describe "poll" do
+    let(:connector) { RapidProConnector.make! }
+    let(:user) { User.make! }
+
+    class RapidProMockAction
+      attr_reader :connector
+
+      def initialize(connector)
+        @connector
+      end
+
+      def path
+        "foo"
+      end
+    end
+
+    it "reflects form new_data event" do
+      allow_any_instance_of(EventHandler).to receive(:notify_action_created)
+      allow_any_instance_of(RapidProConnector::RunUpdateEvent).to receive(:poll)
+      allow_any_instance_of(RapidProConnector::RunUpdateEvent).to receive(:load_state)
+
+      event = connector.lookup %w(flows 1 $events run_update), context
+      handler = event.subscribe(RapidProMockAction.new(connector), "binding", user)
+      expect(handler).to be_a(EventHandler)
+    end
+  end
 end

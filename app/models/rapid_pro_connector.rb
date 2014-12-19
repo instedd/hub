@@ -134,6 +134,12 @@ class RapidProConnector < Connector
       }
     end
 
+    def subscribe(*)
+      handler = super
+      poll unless load_state
+      handler
+    end
+
     def poll
       url = "#{connector.url}/api/v1/runs.json?flow=#{@parent.id}"
 
