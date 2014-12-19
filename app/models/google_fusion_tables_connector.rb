@@ -211,8 +211,12 @@ class GoogleFusionTablesConnector < Connector
       "sql=UPDATE #{@id} SET #{properties_query} WHERE ROWID = '#{row_id}'"
     end
 
-    def generate_delete_body(row_id)
-      "sql=DELETE FROM #{@id} WHERE ROWID = '#{row_id}'"
+    def generate_delete_body(row_id, delete_all)
+      if delete_all
+        "sql=DELETE FROM #{@id}"
+      else
+        "sql=DELETE FROM #{@id} WHERE ROWID = '#{row_id}'"
+      end
     end
 
     def query(filters, context, options)
@@ -240,8 +244,7 @@ class GoogleFusionTablesConnector < Connector
     #This deletes a single registry
     def delete(filters, user)
       row_id = query_row_id(filters)
-      # Question: What happens if there are no rows that matches the filters?
-      connector.post "https://www.googleapis.com/fusiontables/v2/query", generate_delete_body(row_id)
+      connector.post "https://www.googleapis.com/fusiontables/v2/query", generate_delete_body(row_id, filters.empty?)
     end
   end
 
