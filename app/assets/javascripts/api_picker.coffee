@@ -3,17 +3,26 @@ angular
 .controller 'ApiPickerCtrl', ($scope, $http) ->
 
   # $scope.type = 'entity_set' | 'action' | 'event'
-  $scope.selectedItem = null
+  $scope.selection = null
 
-  $scope.entitySetSelected = (item) ->
-    $scope.selectedItem = item
+  $scope.entitySetSelected = (item, parents) ->
+    console.log(item, parents)
+    $scope.selection = {
+      item: item
+      parents: parents
+    }
 
   caller = null
   source = null
   origin = null
 
   $scope.closePicker = () ->
-    data = {target: source, message:"selected", path: "connectors/#{$scope.selectedItem.connector}/#{$scope.selectedItem.path}"}
+    data = {
+      target: source,
+      message:"selected",
+      path: "connectors/#{$scope.selection.item.connector}/#{$scope.selection.item.path}",
+      selection: $scope.selection
+    }
     caller.postMessage(JSON.stringify(data), origin)
 
   listener = (event) ->

@@ -81,7 +81,19 @@ angular
   $scope.select = (item) ->
     $scope.selection.splice($scope.column_index, Number.MAX_VALUE)
     $scope.selection.push item
-    $scope.onSelect()({connector: $scope.selection[0].guid, path: item.path, type: item.__type})
+
+    parents = []
+    for e in $scope.selection
+      parents.push {
+        label: e.label
+        path: e.path
+        type: e.__type
+      }
+
+    $scope.onSelect()(
+      {connector: $scope.selection[0].guid, path: item.path, type: item.__type},
+      parents
+    )
 
   $scope.is_in_selection = (item) ->
     $scope.column_index < $scope.selection.length &&

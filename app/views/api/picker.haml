@@ -14,10 +14,10 @@
 
       %br
 
-      %span(ng-show='selectedItem.path')
+      %span(ng-show='selection')
         %button.btn(type="button" ng-click="closePicker()")
-          Select {{selectedItem.path}}
+          Select {{selection.item.path}}
 
-      %span(ng-hide='selectedItem.path')
+      %span(ng-hide='selection')
         No item selected
 
