@@ -116,7 +116,7 @@ class ElasticsearchConnector < Connector
     end
 
     def query(filters, context, options)
-      page = options[:page] || 1
+      page = (options[:page] || 1).to_i
       size = ElasticsearchConnector.default_page_size
       from = (page - 1) * size
 

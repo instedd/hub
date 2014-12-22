@@ -139,15 +139,17 @@ class ResourceMapConnector < Connector
     end
 
     def query(filters, context, options)
-      # TODO: paging
-
-      sites = internal_query(filters, context)
+      page = (options[:page] || 1).to_i
+      sites = internal_query(filters, context, page)
 
       layers = GuissoRestClient.new(connector, context.user).get("#{connector.url}/api/collections/#{@parent.id}/layers.json")
       layers_by_field_code = index_layers_by_field_code(layers)
 
       items = sites_to_ui(sites["sites"], layers_by_field_code)
-      {items: items}
+      result = {}
+      result[:items] = items
+      result[:next_page] = page + 1 if has_more_pages?(sites, page)
+      result
     end
 
     def insert(properties, context)
@@ -157,9 +159,7 @@ class ResourceMapConnector < Connector
     end
 
     def update(filters, properties, context)
-      sites = internal_query(filters, context)
-      ids = sites["sites"].map { |site| site["id"] }
-      ids.each do |id|
+      for_each_site_id(filters, context) do |id|
         GuissoRestClient.new(connector, context.user).
           post("#{connector.url}/api/sites/#{id}/partial_update.json",
             site: properties_as_site_json(properties).to_json)
@@ -167,11 +167,24 @@ class ResourceMapConnector < Connector
     end
 
     def delete(filters, context)
-      sites = internal_query(filters, context)
-      ids = sites["sites"].map { |site| site["id"] }
-      ids.each do |id|
+      for_each_site_id(filters, context) do |id|
         GuissoRestClient.new(connector, context.user).
           delete("#{connector.url}/api/sites/#{id}.json")
+      end
+    end
+
+    def for_each_site_id(filters, context)
+      page = 1
+
+      while true
+        sites = internal_query(filters, context, page)
+        sites["sites"].each do |site|
+          yield site["id"]
+        end
+
+        break unless has_more_pages?(sites, page)
+
+        page += 1
       end
     end
 
@@ -280,8 +293,10 @@ class ResourceMapConnector < Connector
       index
     end
 
-    def internal_query(filters, context)
+    def internal_query(filters, context, page)
       url_query = filters_as_query(filters)
+      url_query[:page] = page unless page == 1
+
       if url_query.empty?
         url_query = ""
       else
@@ -290,6 +305,11 @@ class ResourceMapConnector < Connector
 
       GuissoRestClient.new(connector, context.user).
         get("#{connector.url}/api/collections/#{@parent.id}.json#{url_query}")
+    end
+
+    def has_more_pages?(sites, page)
+      total = sites["count"]
+      total > page * 50
     end
   end
 end
