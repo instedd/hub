@@ -31,7 +31,8 @@ class ElasticsearchConnector < Connector
 
     def query(filters, context, options)
       response = JSON.parse RestClient.get("#{connector.url}/_stats/indices")
-      response["indices"].map { |name, index| Index.new(self, name) }
+      items = response["indices"].map { |name, index| Index.new(self, name) }
+      {items: items}
     end
 
     def find_entity(id, context)
@@ -83,7 +84,8 @@ class ElasticsearchConnector < Connector
 
     def query(filters, context, options)
       response = JSON.parse RestClient.get("#{connector.url}/#{index_name}/_mapping")
-      response[@parent.name]["mappings"].keys.map { |type| Type.new(self, type) }
+      items = response[@parent.name]["mappings"].keys.map { |type| Type.new(self, type) }
+      {items: items}
     end
 
     def find_entity(id, context)

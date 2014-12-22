@@ -48,6 +48,7 @@ class ONAConnector < Connector
       forms = connector.get_json "forms.json"
       forms.map! { |form| Form.new(self, form["formid"], form) }
       forms.sort_by! { |form| form.label.downcase }
+      {items: forms}
     end
 
     def find_entity(id, context)

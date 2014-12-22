@@ -34,7 +34,9 @@ class VerboiceConnector < Connector
     end
 
     def query(filters, context, options)
-      projects(context.user).map { |project| entity(project) }
+      items = projects(context.user)
+      items = items.map { |project| entity(project) }
+      {items: items}
     end
 
     def find_entity(id, context)
@@ -128,16 +130,21 @@ class VerboiceConnector < Connector
     end
 
     def query(filters, context, options)
-      contacts = if filters[:address]
-        [contact(filters[:address], context.user)]
+      if filters[:address]
+        contacts = [contact(filters[:address], context.user)]
       else
-        GuissoRestClient.new(connector, context.user).get("#{connector.url}/api/projects/#{@parent.id}/contacts.json")
+        contacts = GuissoRestClient.new(connector, context.user).
+                     get("#{connector.url}/api/projects/#{@parent.id}/contacts.json")
       end
-      contacts.inject Array.new do |contacts, contact|
-        contact["addresses"].inject contacts do |contacts, address|
-          contacts.push Contact.new(self, address, contact)
+
+      items = []
+      contacts.each do |contact|
+        contact["addresses"].each do |address|
+          items << Contact.new(self, address, contact)
         end
       end
+
+      {items: items}
     end
 
     def reflect_entities(context)
@@ -198,7 +205,8 @@ class VerboiceConnector < Connector
     end
 
     def query(filters, context, options)
-      verboice_project(context.user)["call_flows"].map { |cf| CallFlow.new(self, cf["id"], cf["name"]) }
+      call_flows = verboice_project(context.user)["call_flows"].map { |cf| CallFlow.new(self, cf["id"], cf["name"]) }
+      {items: call_flows}
     end
 
     def find_entity(id, context)

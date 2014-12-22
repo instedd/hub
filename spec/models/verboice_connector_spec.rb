@@ -307,7 +307,7 @@ describe VerboiceConnector do
         phone_book = connector.lookup %w(projects 495 phone_book), context
 
         response = phone_book.query({address: "12345"}, context, {})
-        response = response.map {|contact| contact.raw(context) }
+        response = response[:items].map {|contact| contact.raw(context) }
         expect(response).to eq([
           {
             id: 1,

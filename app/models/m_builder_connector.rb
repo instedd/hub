@@ -30,9 +30,9 @@ class MBuilderConnector < Connector
     end
 
     def query(filters, context, options)
-      GuissoRestClient.new(connector, context.user).get("#{connector.url}/api/applications").map do |application|
-        Application.new(self, application["id"], application)
-      end
+      apps = GuissoRestClient.new(connector, context.user).get("#{connector.url}/api/applications")
+      apps = apps.map { |app| Application.new(self, app["id"], app) }
+      {items: apps}
     end
 
     def find_entity(id, context)

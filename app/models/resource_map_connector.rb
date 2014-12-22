@@ -30,7 +30,9 @@ class ResourceMapConnector < Connector
     end
 
     def query(filters, context, options)
-      collections(context.user).map { |collection| entity(collection) }
+      items = collections(context.user)
+      items = items.map { |collection| entity(collection) }
+      {items: items}
     end
 
     def find_entity(id, context)
@@ -137,12 +139,15 @@ class ResourceMapConnector < Connector
     end
 
     def query(filters, context, options)
+      # TODO: paging
+
       sites = internal_query(filters, context)
 
       layers = GuissoRestClient.new(connector, context.user).get("#{connector.url}/api/collections/#{@parent.id}/layers.json")
       layers_by_field_code = index_layers_by_field_code(layers)
 
-      sites_to_ui(sites["sites"], layers_by_field_code)
+      items = sites_to_ui(sites["sites"], layers_by_field_code)
+      {items: items}
     end
 
     def insert(properties, context)

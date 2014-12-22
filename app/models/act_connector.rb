@@ -34,7 +34,7 @@ class ACTConnector < Connector
     end
 
     def query(filters, context, options)
-      []
+      {items: []}
     end
 
     def find_entity(id, context)
@@ -77,7 +77,7 @@ class ACTConnector < Connector
       url = "#{connector.url}/api/v1/cases/?#{query_params.to_query}"
 
       headers = { "Authorization" => connector.authorization_header }
-      
+
       cases = JSON.parse(RestClient.get(url, headers))
 
       # assumes cases are sorted by date
@@ -119,14 +119,14 @@ class ACTConnector < Connector
 
     def poll
       since_id = load_state
-      
+
       query_params = { notification_type: :case_confirmed_sick }
       query_params[:since_id] = since_id if since_id.present?
       url = "#{connector.url}/api/v1/notifications/?#{query_params.to_query}"
 
       headers = { "Authorization" => connector.authorization_header }
       notifications = JSON.parse(RestClient.get(url, headers))
-      
+
       # assumes notifications are sorted by date
       save_state(notifications.last["id"]) unless notifications.empty?
 

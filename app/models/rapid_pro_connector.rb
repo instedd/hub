@@ -59,7 +59,7 @@ class RapidProConnector < Connector
       end
 
       all_flows.sort_by! { |flow| flow.label.downcase }
-      all_flows
+      {items: all_flows}
     end
 
     def find_entity(id, context)

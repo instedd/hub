@@ -116,16 +116,16 @@ class GoogleFusionTablesConnector < Connector
     end
 
     def query(filter, context, options)
-      tables.map do |table|
+      items = tables.map do |table|
         Table.new(self, table["tableId"], table["name"])
       end
+      {items: items}
     end
 
     def find_entity(table_id, context)
       table_data = connector.get "https://www.googleapis.com/fusiontables/v2/tables/#{table_id}"
       Table.new self, table_id, table_data["name"], table_data["columns"]
     end
-
   end
 
   class Table
@@ -202,7 +202,8 @@ class GoogleFusionTablesConnector < Connector
 
     def query(filters, context, options)
       results = connector.get generate_query_url(filters)
-      (results["rows"]|| []).map{|data| Row.new(self, data)}
+      rows = (results["rows"]|| []).map{|data| Row.new(self, data)}
+      {items: rows}
     end
 
     def query_row_ids(filters)
@@ -248,7 +249,7 @@ class GoogleFusionTablesConnector < Connector
     end
   end
 
-   class Row
+  class Row
     include Entity
 
     def initialize(parent, row)
@@ -263,5 +264,4 @@ class GoogleFusionTablesConnector < Connector
       Hash[parent.column_names.map { |c| [c, @row[c]] }]
     end
   end
-
 end

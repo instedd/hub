@@ -272,7 +272,7 @@ describe ResourceMapConnector do
         }
       }, context, {})
 
-      expect(results).to eq([{
+      expect(results[:items]).to eq([{
         "id" => 1234,
         "name" => "My new site",
         "lat" => 12.5,

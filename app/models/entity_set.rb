@@ -5,7 +5,7 @@ module EntitySet
 
   abstract :path, :label
   def reflect_entities(context)
-    query({}, context, page: 1, page_size: 1000)
+    query({}, context, page: 1, page_size: 1000)[:items]
   end
 
   def self.included(mod)

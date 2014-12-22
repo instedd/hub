@@ -16,7 +16,7 @@ class GoogleSpreadsheetsConnector < Connector
   end
 
   def query(filters, context, options)
-    [Spreadsheet.new(self, spreadsheet_key)]
+    {items: [Spreadsheet.new(self, spreadsheet_key)]}
   end
 
   def find_entity(key, context)
@@ -117,9 +117,9 @@ class GoogleSpreadsheetsConnector < Connector
     end
 
     def query(filter, context, options)
-      spreadsheet.worksheets.map do |ws|
-        Worksheet.new(self, ws.title, ws)
-      end
+      ws = spreadsheet.worksheets
+      ws = ws.map { |w| Worksheet.new(self, w.title, w) }
+      {items: ws}
     end
 
     def find_entity(title, context)
@@ -182,9 +182,9 @@ class GoogleSpreadsheetsConnector < Connector
     end
 
     def query(filters, context, options)
-      worksheet.list.select do |row|
-        row_matches_filters?(row, filters)
-      end.map { |row| Row.new(self, row) }
+      rows = worksheet.list.select { |row| row_matches_filters?(row, filters) }
+      rows = rows.map { |row| Row.new(self, row) }
+      {items: rows}
     end
 
     def insert(properties, context)
