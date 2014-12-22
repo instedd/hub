@@ -98,4 +98,15 @@ describe Event do
     expect_any_instance_of(MockAction).to receive(:invoke)
     Connector::PollJob.perform(event_connector.id)
   end
+
+  it "shouldn't trigger an action for disabled event handlers" do
+    event = MockPollEvent.new(event_connector)
+    action = MockAction.new(action_connector)
+    handler = event.subscribe(action, "some_binding", user)
+    handler.enabled = false
+    handler.save!
+
+    expect_any_instance_of(MockAction).to_not receive(:invoke)
+    Connector::PollJob.perform(event_connector.id)
+  end
 end

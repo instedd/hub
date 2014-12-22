@@ -21,6 +21,10 @@
           .field
             = f.label :name
             = f.text_field :name, 'ng-model' => 'name', required: true
+          .checkbox
+            %label
+              = f.check_box :enabled
+              Enabled
 
       .row-fluid
         .span6

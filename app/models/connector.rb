@@ -84,7 +84,7 @@ class Connector < ActiveRecord::Base
     def self.perform(connector_id)
       PoirotRails::Activity.start("Poll", connector_id: connector_id) do
         connector = Connector.find(connector_id)
-        handlers_by_event = connector.event_handlers.where(poll: true).group_by do |handler|
+        handlers_by_event = connector.event_handlers.where(poll: true, enabled: true).group_by do |handler|
           [handler.event, handler.user]
         end
 

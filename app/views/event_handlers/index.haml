@@ -4,7 +4,9 @@
     - event_handlers.each do |event_handler|
       .row-fluid
         .span12.box-list
-          = icon_link_to :'icf-arrow', event_handler.name, edit_event_handler_path(event_handler)
+          - name = event_handler.name
+          - name = "#{name} (disabled)" unless event_handler.enabled?
+          = icon_link_to :'icf-arrow', name, edit_event_handler_path(event_handler)
 
     = icon_link_to :'icc-add', "Add Task", new_event_handler_path, class: "blue"
     %br
