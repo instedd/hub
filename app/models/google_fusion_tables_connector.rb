@@ -213,7 +213,6 @@ class GoogleFusionTablesConnector < Connector
     end
 
     def insert(properties, context)
-      binding.pry
       columns = properties.keys.map{|c| "'#{c}'"}.join(', ')
       values = properties.values.map{|v| "'#{v}'"}.join(', ')
 
