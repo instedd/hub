@@ -38,12 +38,15 @@ class ApiController < ApplicationController
   end
 
   def insert
-    target.insert(params[:properties], request_context)
+    properties = params[:properties]
+    remove_nil_hash_values_from(properties)
+    target.insert(properties, request_context)
     render nothing: true, status: 200
   end
 
   def update
     properties = params[:properties]
+    remove_nil_hash_values_from(properties)
     updated_entity_count = target.update(entity_filter, properties, request_context)
     if updated_entity_count == 0 && params[:create_or_update] == 'true'
       target.insert(properties, request_context)
@@ -90,7 +93,10 @@ class ApiController < ApplicationController
 
   def entity_filter
     params[:filter] = nil if params[:filter] == ""
-    (params[:filter] || {}).slice(*target.filters(request_context))
+    filters = (params[:filter] || {}).slice(*target.filters(request_context))
+    remove_nil_hash_values_from filters
+
+    filters
   end
 
   def allow_iframe
