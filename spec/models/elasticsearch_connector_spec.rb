@@ -181,10 +181,30 @@ describe ElasticsearchConnector do
 
     entity_set = connector.lookup_path("indices/instedd_hub_test/types/type1", user)
     result = entity_set.query({}, context, {})
-    expect(result.count).to eq(2)
+    expect(result[:next_page]).to be_nil
+    expect(result[:items].count).to eq(2)
 
     result = entity_set.query({name: 'peter'}, context, {})
-    expect(result.count).to eq(1)
+    expect(result[:next_page]).to be_nil
+    expect(result[:items].count).to eq(1)
+  end
+
+  it "executes query paginated" do
+    RestClient.post("#{index_url}/type1", %({"name": "john", "age": 20}))
+    RestClient.post("#{index_url}/type1", %({"name": "peter", "age": 40}))
+    RestClient.post("#{index_url}/type1", %({"name": "martin", "age": 30}))
+    refresh_index
+
+    allow(ElasticsearchConnector).to receive(:default_page_size).and_return(2)
+
+    entity_set = connector.lookup_path("indices/instedd_hub_test/types/type1", user)
+    result = entity_set.query({}, context, {})
+    expect(result[:next_page]).to eq(2)
+    expect(result[:items].count).to eq(2)
+
+    result = entity_set.query({}, context, {page: 2})
+    expect(result[:next_page]).to be_nil
+    expect(result[:items].count).to eq(1)
   end
 
   it "executes insert action" do

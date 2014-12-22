@@ -9,11 +9,11 @@ describe ApiController do
       let(:duck_context) { duck_type(:user, :data_url, :reflect_url) }
 
       it 'should be able to query with empty filter' do
-        expect_any_instance_of(ElasticsearchConnector::Type).to receive(:query).and_return([])
+        expect_any_instance_of(ElasticsearchConnector::Type).to receive(:query).and_return({items: []})
 
         get :query, id: connector.guid, path: "indices/my_index/types/patients", filter: "" # filter: "" mimics ?filter=
         expect(response.status).to eq(200)
-        expect(JSON.parse(response.body)).to eq([])
+        expect(JSON.parse(response.body)).to eq({"items" => []})
       end
 
       it "should be able to insert into an entity set" do
@@ -104,7 +104,7 @@ describe ApiController do
     end
   end
 
-  describe "invoke" do
+  describe "query and invoke" do
     def url
       "http://localhost:9200"
     end
@@ -136,6 +136,21 @@ describe ApiController do
 
     after(:all) do
       RestClient.delete index_url rescue nil
+    end
+
+    it "queries elastic search" do
+      RestClient.post("#{index_url}/type1", %({"name": "john", "age": 20}))
+      RestClient.post("#{index_url}/type1", %({"name": "peter", "age": 40}))
+      RestClient.post("#{index_url}/type1", %({"name": "martin", "age": 30}))
+      RestClient.post "#{index_url}/_refresh", ""
+
+      allow(ElasticsearchConnector).to receive(:default_page_size).and_return(2)
+
+      get :query, id: connector.guid, path: "indices/instedd_hub_test/types/type1"
+
+      result = JSON.parse(response.body)
+      expect(result["items"].length).to eq(2)
+      expect(result["next_page"]).to eq("http://test.host/api/data/connectors/#{connector.guid}/indices/instedd_hub_test/types/type1?page=2")
     end
 
     it "updates elastic search values (with null values)" do

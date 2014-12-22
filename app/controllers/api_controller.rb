@@ -24,16 +24,21 @@ class ApiController < ApplicationController
   end
 
   def query
-    options = {page: 1, page_size: 20}.merge(params.slice(:page, :page_size))
+    options = params.slice(:page)
 
     if target.is_a? Entity
-      render json: target.raw(request_context)
+      render json: {items: [target.raw(request_context)]}
     else
-      items = target.query(entity_filter, request_context, options)
-      res = items.map do |e|
-        e.is_a?(Hash) ? e : e.raw(request_context)
+      query_result = target.query(entity_filter, request_context, options)
+
+      items = query_result[:items].map { |e| e.is_a?(Hash) ? e : e.raw(request_context) }
+      result = {items: items}
+
+      if query_result[:next_page]
+        result[:next_page] = url_for(params.merge(:page => query_result[:next_page]))
       end
-      render json: res
+
+      render json: result
     end
   end
 

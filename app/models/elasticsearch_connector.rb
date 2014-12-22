@@ -8,6 +8,10 @@ class ElasticsearchConnector < Connector
     {"indices" => Indices.new(self)}
   end
 
+  def self.default_page_size
+    50
+  end
+
   private
 
   class Indices
@@ -110,9 +114,35 @@ class ElasticsearchConnector < Connector
     end
 
     def query(filters, context, options)
-      filter = {query:{bool: {must: filters.map { |k, v| {match: {k => v}} } }}}.to_json unless filters.empty?
-      response = JSON.parse RestClient.post("#{connector.url}/#{index_name}/_search", filter)
-      response['hits']['hits'].map { |r| Record.new(self, r['_source']) }
+      page = options[:page] || 1
+      size = ElasticsearchConnector.default_page_size
+      from = (page - 1) * size
+
+      filter = {}
+      filter[:from] = from
+      filter[:size] = size
+
+      unless filters.empty?
+        filter[:query] =
+          {
+            bool: {
+              must: filters.map { |k, v| {match: {k => v}} }
+            }
+          }
+      end
+
+      response = JSON.parse RestClient.post("#{connector.url}/#{index_name}/_search", filter.to_json)
+      total = response['hits']['total']
+      items = response['hits']['hits'].map { |r| Record.new(self, r['_source']) }
+
+      result = {}
+      result[:items] = items
+
+      if from + items.length != total
+        result[:next_page] = page + 1
+      end
+
+      result
     end
 
     def insert(properties, context)
