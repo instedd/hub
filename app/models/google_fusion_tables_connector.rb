@@ -184,7 +184,7 @@ class GoogleFusionTablesConnector < Connector
     def generate_query_url(filters, fields='all')
       conditions = []
       filters.keys.each do |key|
-        conditions << "#{key}='#{URI.escape(filters[key].to_s)}'"
+        conditions << "'#{key}'='#{filters[key].to_s}'"
       end
 
       if fields == 'all'
