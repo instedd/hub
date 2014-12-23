@@ -317,9 +317,15 @@ class VerboiceConnector < Connector
     end
 
     def args(context)
-      args = Hash[verboice_project(context.user)["contact_vars"].map { |arg| [arg, {type: :string}] }]
-      args["address"] = {type: :string}
-      args
+      {
+        address: {type: :string},
+        vars: {
+          type: {
+            kind: :struct,
+            members: Hash[verboice_project(context.user)["contact_vars"].map { |arg| [arg, {type: :string}] }],
+          }
+        }
+      }
     end
   end
 end

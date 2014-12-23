@@ -193,9 +193,16 @@ describe VerboiceConnector do
         expect(event.reflect(context)).to eq({
           label: "Call finished",
           args: {
-            "name" => {type: :string},
-            "age" => {type: :string},
-            "address" => {type: :string},
+            address: {type: :string},
+            vars: {
+              type: {
+                kind: :struct,
+                members: {
+                  "name" => {type: :string},
+                  "age" => {type: :string},
+                }
+              }
+            }
           }
         })
       end
