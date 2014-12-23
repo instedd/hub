@@ -76,7 +76,7 @@ describe GoogleFusionTablesConnector do
 
       table = connector.lookup_path "tables/1", user
       res = table.query({}, nil, nil)
-      expect(res.map {|r|r.properties(nil)}). to eq([
+      expect(res[:items].map {|r|r.properties(nil)}). to eq([
         {"Species"=>"1", "Elevation"=>"Amber Bead", "Year"=>"1251500558"},
         {"Species"=>"201", "Elevation"=>"Black Shoes", "Year"=>"356"},
         {"Species"=>"401", "Elevation"=>"White Shoes", "Year"=>"100"}])
@@ -104,7 +104,7 @@ describe GoogleFusionTablesConnector do
 
       table = connector.lookup_path "tables/1", user
       res = table.query({"Product"=>"Black Shoes","Inventory"=>"356"}, nil, nil)
-      expect(res.map {|r|r.properties(nil)}). to eq([
+      expect(res[:items].map {|r|r.properties(nil)}). to eq([
         {"Species"=>"201", "Elevation"=>"Black Shoes", "Year"=>"356"}])
     end
 
