@@ -8,6 +8,10 @@ class MBuilderConnector < Connector
     {"applications" => Applications.new(self)}
   end
 
+  def has_events?
+    false
+  end
+
   private
 
   def initialize_defaults

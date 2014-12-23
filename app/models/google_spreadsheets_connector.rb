@@ -7,6 +7,10 @@ class GoogleSpreadsheetsConnector < Connector
   validates_presence_of :refresh_token
   validates_presence_of :expires_at
 
+  def has_events?
+    false
+  end
+
   def label
     "Spreadsheets"
   end

@@ -8,6 +8,10 @@ class ResourceMapConnector < Connector
     {"collections" => Collections.new(self)}
   end
 
+  def has_events?
+    false
+  end
+
   private
 
   def initialize_defaults

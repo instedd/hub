@@ -8,6 +8,10 @@ class ElasticsearchConnector < Connector
     {"indices" => Indices.new(self)}
   end
 
+  def has_events?
+    false
+  end
+
   def self.default_page_size
     50
   end

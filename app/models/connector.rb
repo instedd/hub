@@ -9,6 +9,14 @@ class Connector < ActiveRecord::Base
     name
   end
 
+  def has_events?
+    true
+  end
+
+  def has_actions?
+    true
+  end
+
   before_validation :generate_guid
 
   default_scope { order('user_id desc, name') } # order first shared connectors and then by name

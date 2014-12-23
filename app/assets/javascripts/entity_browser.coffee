@@ -61,7 +61,7 @@ angular
     $scope.loading_new_column = false
 
   $scope.$emit('entitybrowser:loading')
-  $http.get('/api/connectors').success (data) ->
+  $http.get("/api/connectors?only_for=#{$scope.filterType}").success (data) ->
     for c in data
       c['__type'] = 'connector'
       connectors.push(c)

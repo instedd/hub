@@ -9,14 +9,23 @@ class ApiController < ApplicationController
   expose(:target) { connector.lookup_path(params[:path], request_context) }
 
   def connectors
-    c = accessible_connectors.map do |c|
+    connectors = accessible_connectors.all
+
+    case params[:only_for]
+    when 'event'
+      connectors = connectors.select &:has_events?
+    when 'action'
+      connectors = connectors.select &:has_actions?
+    end
+
+    result = connectors.map do |c|
       {
         label: c.name,
         guid: c.guid,
         reflect_url: api_reflect_url(c.guid),
       }
     end
-    render json: c
+    render json: result
   end
 
   def reflect

@@ -11,6 +11,10 @@ class GoogleFusionTablesConnector < Connector
     {"tables" => Tables.new(self)}
   end
 
+  def has_events?
+    false
+  end
+
   def needs_authorization?
     true
   end
