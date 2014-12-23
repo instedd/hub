@@ -125,12 +125,12 @@ class ACTConnector < Connector
       url = "#{connector.url}/api/v1/notifications/?#{query_params.to_query}"
 
       headers = { "Authorization" => connector.authorization_header }
+      
       notifications = JSON.parse(RestClient.get(url, headers))
-
       # assumes notifications are sorted by date
       save_state(notifications.last["id"]) unless notifications.empty?
 
-      notifications
+      return notifications.map { |n| n["metadata"] }
     end
 
     def args(context)
