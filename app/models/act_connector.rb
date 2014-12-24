@@ -143,6 +143,8 @@ class ACTConnector < Connector
           {value: "M", label: "Male" },
           {value: "F", label: "Female" },
         ]}},
+        supervisor_name: { type: :string },
+        supervisor_phone_number: { type: :string },
         dialect_code: { type: :string }
       }
     end
