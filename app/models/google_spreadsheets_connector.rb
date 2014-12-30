@@ -122,12 +122,12 @@ class GoogleSpreadsheetsConnector < Connector
 
     def query(filter, context, options)
       ws = spreadsheet.worksheets
-      ws = ws.map { |w| Worksheet.new(self, w.title, w) }
+      ws = ws.map { |w| Worksheet.new(self, w.gid, w.title, w) }
       {items: ws}
     end
 
-    def find_entity(title, context)
-      Worksheet.new(self, title)
+    def find_entity(gid, context)
+      Worksheet.new(self, gid)
     end
   end
 
@@ -163,18 +163,19 @@ class GoogleSpreadsheetsConnector < Connector
       end
     end
 
-    def initialize(parent, label, worksheet = nil)
+    def initialize(parent, gid, label = nil, worksheet = nil)
       @parent = parent
+      @gid = gid
       @label = label
       @worksheet = worksheet
     end
 
     def label
-      @label
+      @label ||= worksheet.title
     end
 
     def path
-      "#{@parent.path}/#{@label}"
+      "#{@parent.path}/#{@gid}"
     end
 
     def reflect_entities(context)
@@ -220,7 +221,7 @@ class GoogleSpreadsheetsConnector < Connector
     end
 
     def worksheet
-      @worksheet ||= parent.spreadsheet.worksheet_by_title(@label)
+      @worksheet ||= parent.spreadsheet.worksheet_by_gid(@gid)
     end
 
     def headers
