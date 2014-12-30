@@ -227,9 +227,9 @@ describe VerboiceConnector do
               type: "string",
               label: "Channel"
             },
-            number: {
+            phone_number: {
               type: "string",
-              label:"Number"
+              label: "Phone Number"
             },
             vars: {
               type: {
@@ -473,9 +473,9 @@ describe VerboiceConnector do
             channel: {
               type: "string",
               label: "Channel"},
-            number: {
+            phone_number: {
               type: "string",
-              label:"Number"
+              label: "Phone Number"
             },
             vars: {
               type: {
@@ -512,7 +512,7 @@ describe VerboiceConnector do
 
         projects = connector.lookup %w(projects 495 $actions call), context
 
-        response = projects.invoke({'channel' => 'Channel', 'number' => '123'}, context)
+        response = projects.invoke({'channel' => 'Channel', 'phone_number' => '123'}, context)
         expect(response).to eq({
           "call_id" => 755961,
           "state" => "queued"
@@ -534,7 +534,7 @@ describe VerboiceConnector do
 
         projects = connector.lookup %w(projects 495 $actions call), context
 
-        response = projects.invoke({'channel' => 'Channel 123', 'number' => '123 456'}, context)
+        response = projects.invoke({'channel' => 'Channel 123', 'phone_number' => '123 456'}, context)
         expect(response).to be_present
       end
     end

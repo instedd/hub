@@ -276,9 +276,9 @@ class VerboiceConnector < Connector
           type: "string",
           label: "Channel"
         },
-        number: {
+        phone_number: {
           type: "string",
-          label: "Number"
+          label: "Phone Number"
         },
         vars: {
           type: {
@@ -291,7 +291,7 @@ class VerboiceConnector < Connector
     end
 
     def invoke(args, context)
-      params = {channel: args["channel"], address: args["number"]}
+      params = {channel: args["channel"], address: args["phone_number"]}
       params[:vars] = args["vars"] if args["vars"].present?
       call_url = "#{connector.url}/api/call?#{params.to_query}"
       GuissoRestClient.new(connector, context.user).get(call_url)
