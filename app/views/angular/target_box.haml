@@ -1,7 +1,7 @@
 .target-box.form-inline
   %ul
     %li(ng-repeat='(key, prop) in model.members track by key')
-      %label {{key}}
+      %label {{prop.label || key }}
       %i.type :: {{human_type(key)}}
 
       %input(type='{{input_type(key)}}' ng-if='!is_struct(key) && prop.type == "literal"' ng-model='prop.value' ui-on-drop="dropOverMember(key, $data)")

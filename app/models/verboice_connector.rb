@@ -318,7 +318,7 @@ class VerboiceConnector < Connector
 
     def args(context)
       {
-        address: {type: :string},
+        address: {type: :string, label: "Phone Number"},
         vars: {
           type: {
             kind: :struct,

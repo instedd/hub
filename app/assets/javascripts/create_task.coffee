@@ -56,6 +56,7 @@ angular
     if object.type?.kind == 'struct'
       res = {
         type: "struct"
+        label: null
         members: { }
       }
 
@@ -67,4 +68,5 @@ angular
       {
         type: "literal"
         value: null
+        label: object.label
       }
