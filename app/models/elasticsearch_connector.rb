@@ -137,7 +137,7 @@ class ElasticsearchConnector < Connector
           }
       end
 
-      response = JSON.parse RestClient.post("#{connector.url}/#{index_name}/_search", filter.to_json)
+      response = JSON.parse RestClient.post("#{connector.url}/#{index_name}/#{type_name}/_search", filter.to_json)
       total = response['hits']['total']
       items = response['hits']['hits'].map { |r| Record.new(self, r['_source']) }
 
