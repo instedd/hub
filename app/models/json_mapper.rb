@@ -17,7 +17,7 @@ class JsonMapper
       context[mapping]
     elsif mapping.is_a?(Array)
       mapping.each do |key|
-        context = context[key]
+        context = context[key] || {}
       end
       context
     else

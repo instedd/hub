@@ -72,14 +72,50 @@ describe JsonMapper do
       "type"=>"struct",
       "members"=>{
         "channel"=>
-          {"type"=>"literal", "value"=>"callcentric"},
-        "number"=>
-          ["address"]
+          {"type"=>"literal", "value"=>"callcentric", "label"=>"Channel"},
+        "phone_number"=>
+          ["address"],
+         "vars"=>{"type"=>"struct", "label"=>nil, "members"=>{"age"=>["vars", "age"]}}
         }
     })
 
     source = {"project_id"=>1, "call_flow_id"=>4, "address"=>"17772632588", "vars"=>{"age"=>"20"}}
-    expect(mapper.map(source)).to eq({"channel"=>"callcentric", "number"=> "17772632588"})
+    expect(mapper.map(source)).to eq({"channel"=>"callcentric", "phone_number" => "17772632588", "vars" => {"age"=>"20"}})
+  end
+
+  it "maps verboice data when vars is empty" do
+    mapper = JsonMapper.new({
+      "type"=>"struct",
+      "members"=>{
+        "channel"=>
+          {"type"=>"literal", "value"=>"callcentric", "label"=>"Channel"},
+        "phone_number"=>
+          ["address"],
+         "vars"=>{"type"=>"struct", "label"=>nil, "members"=>{"age"=>["vars", "age"]}}
+        }
+    })
+
+
+    source = {"project_id"=>1, "call_flow_id"=>4, "address"=>"17772632588", "vars"=>{}}
+    expect(mapper.map(source)).to eq({"channel"=>"callcentric", "phone_number"=> "17772632588", "vars" => {"age"=> {} }})
+  end
+
+
+  it "maps verboice data when vars is nil" do
+    mapper = JsonMapper.new({
+      "type"=>"struct",
+      "members"=>{
+        "channel"=>
+          {"type"=>"literal", "value"=>"callcentric", "label"=>"Channel"},
+        "phone_number"=>
+          ["address"],
+         "vars"=>{"type"=>"struct", "label"=>nil, "members"=>{"age"=>["vars", "age"]}}
+        }
+    })
+
+
+    source = {"project_id"=>1, "call_flow_id"=>4, "address"=>"17772632588", "vars"=> nil}
+    expect(mapper.map(source)).to eq({"channel"=>"callcentric", "phone_number"=> "17772632588", "vars" => {"age" => {} }})
   end
 
   it "maps struct with nil bindings" do
