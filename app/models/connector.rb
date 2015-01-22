@@ -81,7 +81,7 @@ class Connector < ActiveRecord::Base
     def self.perform(connector_id, path, body)
       connector = Connector.find(connector_id)
       body = JSON.parse body
-      subscribed_events = connector.event_handlers.where(event: path)
+      subscribed_events = connector.event_handlers.where(event: path, enabled: true)
       subscribed_events.each do |event_handler|
         event_handler.trigger(body)
       end
