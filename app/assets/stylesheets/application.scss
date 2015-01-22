@@ -30,3 +30,7 @@
 input.ng-invalid {
   background-color: #fff6f6;
 }
+
+.task.disabled span {
+  color: #a6a6a6;
+}
