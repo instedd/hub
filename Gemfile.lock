@@ -29,7 +29,7 @@ GIT
 
 GIT
   remote: git://github.com/instedd/poirot_rails.git
-  revision: 26bb639da5f0c6fe14f29ab3f59d614553a3ed6e
+  revision: 73b1f79c30c2b27435b5e18515c228ecc2062465
   branch: master
   specs:
     poirot_rails (0.0.4)
@@ -236,6 +236,8 @@ GEM
     pry-byebug (2.0.0)
       byebug (~> 3.4)
       pry (~> 0.10)
+    puma (2.11.0)
+      rack (>= 1.1, < 2.0)
     rack (1.5.2)
     rack-cors (0.2.9)
     rack-oauth2 (1.0.8)
@@ -390,6 +392,7 @@ DEPENDENCIES
   pg
   poirot_rails!
   pry-byebug
+  puma
   rack-cors
   rails (= 4.1.6)
   rails_config

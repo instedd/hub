@@ -1,0 +1,53 @@
+db:
+  image: postgres:9.3.5
+
+redis:
+  image: redis:2.8.19
+
+web:
+  build: .
+  links:
+    - db
+    - redis
+  environment:
+    RAILS_ENV: production
+    DATABASE_URL: postgres://postgres:@db/hub
+    SECRET_KEY_BASE: test-secret-key
+    REDIS: redis:6379
+    POIROT_SERVER: receiver.poirot.dock.er:2120
+  volumes:
+    - 'config/guisso.yml:/app/config/guisso.yml'
+  ports:
+    - 80
+
+resque:
+  build: .
+  links:
+    - db
+    - redis
+  command: rake resque:work QUEUE=hub TERM_CHILD=1 FORK_PER_JOB=false
+  environment:
+    RAILS_ENV: production
+    DATABASE_URL: postgres://postgres:@db/hub
+    SECRET_KEY_BASE: test-secret-key
+    REDIS: redis:6379
+    POIROT_SERVER: receiver.poirot.dock.er:2120
+
+resquescheduler:
+  build: .
+  links:
+    - db
+    - redis
+  command: rake resque:scheduler
+  environment:
+    RAILS_ENV: production
+    DATABASE_URL: postgres://postgres:@db/hub
+    SECRET_KEY_BASE: test-secret-key
+    REDIS: redis:6379
+    POIROT_SERVER: receiver.poirot.dock.er:2120
+
+resqueweb:
+  build: .
+  links:
+    - redis
+  command: resque-web -F -r redis:6379 -p 80
