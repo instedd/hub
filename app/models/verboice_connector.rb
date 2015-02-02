@@ -102,8 +102,7 @@ class VerboiceConnector < Connector
   class PhoneBook
     include EntitySet
 
-    # Only query is supported for now
-    # protocol :insert, :update, :delete
+    protocol :insert, :update
 
     def initialize(parent)
       @parent = parent
@@ -147,6 +146,20 @@ class VerboiceConnector < Connector
       {items: items}
     end
 
+    def insert(properties, context)
+      GuissoRestClient.new(connector, context.user).
+        post("#{connector.url}/api/projects/#{@parent.id}/contacts.json",
+             properties_as_contact_json(properties).to_query)
+    end
+
+    def update(filters, properties, context)
+      if filters["address"].present?
+        GuissoRestClient.new(connector, context.user).
+          put("#{connector.url}/api/projects/#{@parent.id}/contacts/by_address/#{filters["address"]}.json",
+               properties_as_contact_json(properties).to_query)
+      end
+    end
+
     def reflect_entities(context)
     end
 
@@ -156,6 +169,20 @@ class VerboiceConnector < Connector
 
     def contact(address, user)
       GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{@parent.id}/contacts/by_address/#{address}.json")
+    end
+
+    def properties_as_contact_json(properties)
+      contact = {}
+
+      contact['address'] = properties['address'] if properties['address'].present?
+      contact['vars'] = contact_vars = {}
+      properties.each do |key, value|
+        next if %w(address).include? key
+        contact_vars[key] = value
+      end
+      contact.delete('vars') if contact_vars.empty?
+
+      contact
     end
   end
 

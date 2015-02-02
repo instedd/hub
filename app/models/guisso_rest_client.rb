@@ -20,6 +20,14 @@ class GuissoRestClient
     end
   end
 
+  def put(url, body="")
+    if use_guisso?
+      guisso_resource.put(url, body).body
+    else
+      rest_client_resource(url).put(body) {|response, request, result| response }
+    end
+  end
+
   def delete(url)
     if use_guisso?
       guisso_resource.delete(url).body

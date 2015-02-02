@@ -294,37 +294,75 @@ describe VerboiceConnector do
       end
     end
 
-    describe "query" do
-      it "should filter by address" do
-        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495.json").
-          to_return(status: 200, body: %({
-              "id": 495,
-              "name": "my project"
-            }), headers: {})
+    describe "phone_book" do
+      describe "query" do
+        it "should filter by address" do
+          stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495.json").
+            to_return(status: 200, body: %({
+                "id": 495,
+                "name": "my project"
+              }), headers: {})
 
-        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495/contacts/by_address/12345.json").
-          to_return(:status => 200, :body => %(
-                {
-                  "id": 1,
-                  "addresses": ["12345", "67890"],
-                  "vars": []
-                }
-              ), :headers => {})
+          stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495/contacts/by_address/12345.json").
+            to_return(:status => 200, :body => %(
+                  {
+                    "id": 1,
+                    "addresses": ["12345", "67890"],
+                    "vars": []
+                  }
+                ), :headers => {})
 
-        phone_book = connector.lookup %w(projects 495 phone_book), context
+          phone_book = connector.lookup %w(projects 495 phone_book), context
 
-        response = phone_book.query({address: "12345"}, context, {})
-        response = response[:items].map {|contact| contact.raw(context) }
-        expect(response).to eq([
-          {
-            id: 1,
-            address: "12345"
-          },
-          {
-            id: 1,
-            address: "67890"
-          }
-        ])
+          response = phone_book.query({address: "12345"}, context, {})
+          response = response[:items].map {|contact| contact.raw(context) }
+          expect(response).to eq([
+            {
+              id: 1,
+              address: "12345"
+            },
+            {
+              id: 1,
+              address: "67890"
+            }
+          ])
+        end
+      end
+
+      describe "insert" do
+        it "should post a new contact" do
+          stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495.json").
+            to_return(status: 200, body: %({
+                "id": 495,
+                "name": "my project"
+              }), headers: {})
+
+          stub_request(:post, "https://jdoe:1234@verboice.instedd.org/api/projects/495/contacts.json")
+
+          phone_book = connector.lookup %w(projects 495 phone_book), context
+          phone_book.insert({"address" => "12345", "foo" => "bar"}, context)
+
+          expect(a_request(:post, "https://jdoe:1234@verboice.instedd.org/api/projects/495/contacts.json").
+                 with(:body => {:address => '12345', :vars => {:foo => "bar"}})).to have_been_made
+        end
+      end
+
+      describe "update" do
+        it "should update a contact by address" do
+          stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495.json").
+            to_return(status: 200, body: %({
+                "id": 495,
+                "name": "my project"
+              }), headers: {})
+
+          stub_request(:put, "https://jdoe:1234@verboice.instedd.org/api/projects/495/contacts/by_address/12345.json")
+
+          phone_book = connector.lookup %w(projects 495 phone_book), context
+          phone_book.update({"address" => "12345"}, {"foo" => "bar"}, context)
+
+          expect(a_request(:put, "https://jdoe:1234@verboice.instedd.org/api/projects/495/contacts/by_address/12345.json").
+                 with(:body => {:vars => {:foo => "bar"}})).to have_been_made
+        end
       end
     end
   end
