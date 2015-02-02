@@ -296,6 +296,41 @@ describe VerboiceConnector do
 
     describe "phone_book" do
       describe "query" do
+        it "should return contact variables" do
+          stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495.json").
+            to_return(status: 200, body: %({
+                "id": 495,
+                "name": "my project"
+              }), headers: {})
+
+          stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495/contacts.json").
+            to_return(:status => 200, :body => %(
+                [
+                  {
+                    "id": 1,
+                    "addresses": ["12345", "67890"],
+                    "vars": {"foo": "bar"}
+                  }
+                ]), :headers => {})
+
+          phone_book = connector.lookup %w(projects 495 phone_book), context
+
+          response = phone_book.query({}, context, {})
+          response = response[:items].map {|contact| contact.raw(context) }
+          expect(response).to eq([
+            {
+              id: 1,
+              address: "12345",
+              foo: "bar"
+            },
+            {
+              id: 1,
+              address: "67890",
+              foo: "bar"
+            }
+          ])
+        end
+
         it "should filter by address" do
           stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495.json").
             to_return(status: 200, body: %({

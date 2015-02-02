@@ -177,7 +177,7 @@ class VerboiceConnector < Connector
       contact['address'] = properties['address'] if properties['address'].present?
       contact['vars'] = contact_vars = {}
       properties.each do |key, value|
-        next if %w(address).include? key
+        next if %w(id address).include? key
         contact_vars[key] = value
       end
       contact.delete('vars') if contact_vars.empty?
@@ -207,10 +207,14 @@ class VerboiceConnector < Connector
     end
 
     def properties(context)
-      {
+      properties = {
         id: SimpleProperty.id(@contact["id"]),
         address: SimpleProperty.integer("Address", address)
       }
+      @contact['vars'].each do |variable, value|
+        properties[variable.to_sym] = SimpleProperty.string(variable, value)
+      end
+      properties
     end
   end
 
