@@ -103,13 +103,6 @@ describe VerboiceConnector do
               path: "projects/495/phone_book",
               reflect_url: "http://server/api/reflect/connectors/1/projects/495/phone_book",
             }
-          },
-          actions: {
-            "call"=> {
-              label: "Call",
-              path: "projects/495/$actions/call",
-              reflect_url: "http://server/api/reflect/connectors/1/projects/495/$actions/call",
-            }
           }
         })
       end
@@ -169,6 +162,13 @@ describe VerboiceConnector do
             id: { label: "Id", type: :integer },
             name: { label: "Name", type: :string}
           },
+          actions: {
+            "call"=> {
+              label: "Call",
+              path: "projects/495/call_flows/740/$actions/call",
+              reflect_url: "http://server/api/reflect/connectors/1/projects/495/call_flows/740/$actions/call",
+            }
+          },
           events: {
             "call_finished" => {
               label: "Call finished",
@@ -212,18 +212,22 @@ describe VerboiceConnector do
           to_return(:status => 200, :body => %({
             "id": 495,
             "name": "my project",
-            "call_flows": [],
-            "addresses": [],
-            "schedules": [],
+            "call_flows": [{
+              "id": 740,
+              "name": "my flow"}],
             "contact_vars":["name","age"]
           }), :headers => {})
-
+        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495/call_flows/740.json").
+          to_return(:status => 200, :body => %({
+            "id": 740,
+            "name": "my flow"
+          }), :headers => {})
         stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/channels.json").
           to_return(:status => 200, :body => %(["channel1"]), :headers => {})
 
-        projects = connector.lookup %w(projects 495 $actions call), context
+        call = connector.lookup %w(projects 495 call_flows 740 $actions call), context
 
-        expect(projects.reflect(context)).to eq({
+        expect(call.reflect(context)).to eq({
           label:"Call",
           args: {
             channel: {
@@ -249,8 +253,8 @@ describe VerboiceConnector do
                     type: :string,
                   },
                 },
-                open: true,
-                },
+                open: true
+              }
             }
           }
         })
@@ -263,16 +267,19 @@ describe VerboiceConnector do
           to_return(:status => 200, :body => %({
             "id": 495,
             "name": "my project",
-            "call_flows": [],
-            "addresses": [],
-            "schedules": []
+            "call_flows": [{"id": 740, "name": "my flow"}]
           }), :headers => {})
-        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/call?address=&channel=Channel").
+        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495/call_flows/740.json").
+          to_return(:status => 200, :body => %({
+            "id": 740,
+            "name": "my flow"
+          }), :headers => {})
+        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/call?address=&channel=Channel&call_flow_id=740").
          to_return(:status => 200, :body => %({"call_id":755961,"state":"queued"}), :headers => {})
 
-        projects = connector.lookup %w(projects 495 $actions call), context
+        call = connector.lookup %w(projects 495 call_flows 740 $actions call), context
 
-        response = projects.invoke({'channel' => 'Channel', 'address' => '123'}, context)
+        response = call.invoke({'channel' => 'Channel', 'address' => '123'}, context)
         expect(response).to eq({
           "call_id" => 755961,
           "state" => "queued"
@@ -284,16 +291,19 @@ describe VerboiceConnector do
           to_return(:status => 200, :body => %({
             "id": 495,
             "name": "my project",
-            "call_flows": [],
-            "addresses": [],
-            "schedules": []
+            "call_flows": [{"id": 740, "name": "my flow"}]
           }), :headers => {})
-        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/call?address=&channel=Channel&vars[foo]=1&vars[bar]=2").
+        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495/call_flows/740.json").
+          to_return(:status => 200, :body => %({
+            "id": 740,
+            "name": "my flow"
+          }), :headers => {})
+        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/call?address=&channel=Channel&call_flow_id=740&vars[foo]=1&vars[bar]=2").
          to_return(:status => 200, :body => %({"call_id":755961,"state":"queued"}), :headers => {})
 
-        projects = connector.lookup %w(projects 495 $actions call), context
+        call = connector.lookup %w(projects 495 call_flows 740 $actions call), context
 
-        response = projects.invoke({'channel' => 'Channel', 'address' => '123', 'vars' => {'foo' => '1', 'bar' => '2'}}, context)
+        response = call.invoke({'channel' => 'Channel', 'address' => '123', 'vars' => {'foo' => '1', 'bar' => '2'}}, context)
         expect(response).to eq({
           "call_id" => 755961,
           "state" => "queued"
@@ -523,12 +533,46 @@ describe VerboiceConnector do
               path: "projects/495/phone_book",
               reflect_url: "http://server/api/reflect/connectors/1/projects/495/phone_book",
             }
+          }
+        })
+      end
+
+      it "reflects on call flow" do
+        stub_request(:get, "https://verboice.instedd.org/api/projects/495.json").
+          with(:headers => {'Authorization'=>'Bearer This is a guisso auth token!'}).
+          to_return(status: 200, body: %({
+            "id": 495,
+            "name": "my project",
+            "call_flows": [{"id": 740, "name": "my flow"}]
+            }), headers: {})
+        stub_request(:get, "https://verboice.instedd.org/api/projects/495/call_flows/740.json").
+          with(:headers => {'Authorization'=>'Bearer This is a guisso auth token!'}).
+          to_return(status: 200, body: %({
+            "id": 740, "name": "my flow"}), headers: {})
+
+        call_flow = connector.lookup %w(projects 495 call_flows 740), context
+
+        expect(call_flow.reflect(context)).to eq({
+          label: "my flow",
+          path: "projects/495/call_flows/740",
+          reflect_url: "http://server/api/reflect/connectors/1/projects/495/call_flows/740",
+          type: :entity,
+          properties: {
+            id: { label: "Id", type: :integer },
+            name: { label: "Name", type: :string}
           },
           actions: {
             "call"=> {
               label: "Call",
-              path: "projects/495/$actions/call",
-              reflect_url: "http://server/api/reflect/connectors/1/projects/495/$actions/call"
+              path: "projects/495/call_flows/740/$actions/call",
+              reflect_url: "http://server/api/reflect/connectors/1/projects/495/call_flows/740/$actions/call",
+            }
+          },
+          events: {
+            "call_finished" => {
+              label: "Call finished",
+              path: "projects/495/call_flows/740/$events/call_finished",
+              reflect_url: "http://server/api/reflect/connectors/1/projects/495/call_flows/740/$events/call_finished"
             }
           }
         })
@@ -538,20 +582,22 @@ describe VerboiceConnector do
         stub_request(:get, "https://verboice.instedd.org/api/projects/495.json").
           with(:headers => {'Authorization'=>'Bearer This is a guisso auth token!'}).
           to_return(status: 200, body: %({
-              "id": 495,
-              "name": "my project",
-              "call_flows": [],
-              "schedules": [],
-              "contact_vars":["name","age"]
+            "id": 495,
+            "name": "my project",
+            "call_flows": [{"id": 740, "name": "my flow"}],
+            "contact_vars":["name","age"]
             }), headers: {})
-
+        stub_request(:get, "https://verboice.instedd.org/api/projects/495/call_flows/740.json").
+          with(:headers => {'Authorization'=>'Bearer This is a guisso auth token!'}).
+          to_return(status: 200, body: %({
+            "id": 740, "name": "my flow"}), headers: {})
         stub_request(:get, "https://verboice.instedd.org/api/channels.json").
           with(:headers => {'Authorization'=>'Bearer This is a guisso auth token!'}).
           to_return(:status => 200, :body => %(["channel1"]), :headers => {})
 
-        projects = connector.lookup %w(projects 495 $actions call), context
+        call = connector.lookup %w(projects 495 call_flows 740 $actions call), context
 
-        expect(projects.reflect(context)).to eq({
+        expect(call.reflect(context)).to eq({
           label:"Call",
           args: {
             channel: {
@@ -577,8 +623,8 @@ describe VerboiceConnector do
                     type: :string,
                   },
                 },
-                open: true,
-              },
+                open: true
+              }
             }
           }
         })
@@ -590,18 +636,22 @@ describe VerboiceConnector do
         stub_request(:get, "https://verboice.instedd.org/api/projects/495.json").
           with(:headers => {'Authorization'=>'Bearer This is a guisso auth token!'}).
           to_return(status: 200, body: %({
-              "id": 495,
-              "name": "my project",
-              "call_flows": [],
-              "schedules": []
+            "id": 495,
+            "name": "my project",
+            "call_flows": [{"id": 740, "name": "my flow"}],
+            "contact_vars":["name","age"]
             }), headers: {})
-        stub_request(:get, "https://verboice.instedd.org/api/call?address=123&channel=Channel").
+        stub_request(:get, "https://verboice.instedd.org/api/projects/495/call_flows/740.json").
+          with(:headers => {'Authorization'=>'Bearer This is a guisso auth token!'}).
+          to_return(status: 200, body: %({
+            "id": 740, "name": "my flow"}), headers: {})
+        stub_request(:get, "https://verboice.instedd.org/api/call?address=123&channel=Channel&call_flow_id=740").
           with(:headers => {'Authorization'=>'Bearer This is a guisso auth token!'}).
           to_return(:status => 200, :body => %({"call_id":755961,"state":"queued"}), :headers => {})
 
-        projects = connector.lookup %w(projects 495 $actions call), context
+        call = connector.lookup %w(projects 495 call_flows 740 $actions call), context
 
-        response = projects.invoke({'channel' => 'Channel', 'phone_number' => '123'}, context)
+        response = call.invoke({'channel' => 'Channel', 'phone_number' => '123'}, context)
         expect(response).to eq({
           "call_id" => 755961,
           "state" => "queued"
@@ -612,18 +662,22 @@ describe VerboiceConnector do
         stub_request(:get, "https://verboice.instedd.org/api/projects/495.json").
           with(:headers => {'Authorization'=>'Bearer This is a guisso auth token!'}).
           to_return(status: 200, body: %({
-              "id": 495,
-              "name": "my project",
-              "call_flows": [],
-              "schedules": []
+            "id": 495,
+            "name": "my project",
+            "call_flows": [{"id": 740, "name": "my flow"}],
+            "contact_vars":["name","age"]
             }), headers: {})
-        stub_request(:get, "https://verboice.instedd.org/api/call?address=123%20456&channel=Channel%20123").
+        stub_request(:get, "https://verboice.instedd.org/api/projects/495/call_flows/740.json").
+          with(:headers => {'Authorization'=>'Bearer This is a guisso auth token!'}).
+          to_return(status: 200, body: %({
+            "id": 740, "name": "my flow"}), headers: {})
+        stub_request(:get, "https://verboice.instedd.org/api/call?address=123%20456&channel=Channel%20123&call_flow_id=740").
           with(:headers => {'Authorization'=>'Bearer This is a guisso auth token!'}).
           to_return(:status => 200, :body => %({"call_id":755961,"state":"queued"}), :headers => {})
 
-        projects = connector.lookup %w(projects 495 $actions call), context
+        call = connector.lookup %w(projects 495 call_flows 740 $actions call), context
 
-        response = projects.invoke({'channel' => 'Channel 123', 'phone_number' => '123 456'}, context)
+        response = call.invoke({'channel' => 'Channel 123', 'phone_number' => '123 456'}, context)
         expect(response).to be_present
       end
     end

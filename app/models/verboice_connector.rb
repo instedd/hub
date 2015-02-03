@@ -88,12 +88,6 @@ class VerboiceConnector < Connector
       }
     end
 
-    def actions(context)
-      {
-        "call" => CallAction.new(self)
-      }
-    end
-
     def project_id
       @id
     end
@@ -274,10 +268,20 @@ class VerboiceConnector < Connector
       id
     end
 
+    def call_flow_id
+      @id
+    end
+
     def properties(context)
       {
         id: SimpleProperty.id(id),
         name: SimpleProperty.name(@name)
+      }
+    end
+
+    def actions(context)
+      {
+        "call" => CallAction.new(self)
       }
     end
 
@@ -292,6 +296,7 @@ class VerboiceConnector < Connector
     include Action
 
     delegate :verboice_project, to: :@parent
+    delegate :call_flow_id, to: :@parent
 
     def initialize(parent)
       @parent = parent
@@ -330,7 +335,7 @@ class VerboiceConnector < Connector
     end
 
     def invoke(args, context)
-      params = {channel: args["channel"], address: args["phone_number"]}
+      params = {channel: args["channel"], address: args["phone_number"], call_flow_id: call_flow_id}
       params[:vars] = args["vars"] if args["vars"].present?
       call_url = "#{connector.url}/api/call?#{params.to_query}"
       GuissoRestClient.new(connector, context.user).get(call_url)
