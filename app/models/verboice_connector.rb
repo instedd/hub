@@ -12,6 +12,10 @@ class VerboiceConnector < Connector
     true
   end
 
+  def channels(context)
+    GuissoRestClient.new(self, context.user).get("#{connector.url}/api/channels.json")
+  end
+
   private
 
   def initialize_defaults
@@ -304,7 +308,11 @@ class VerboiceConnector < Connector
     def args(context)
       {
         channel: {
-          type: "string",
+          type: {
+            kind: :enum, value_type: :string, members: connector.channels(context).map {|channel|
+              {value: channel, label: channel }
+            }
+          },
           label: "Channel"
         },
         phone_number: {

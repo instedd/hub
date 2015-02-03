@@ -218,13 +218,20 @@ describe VerboiceConnector do
             "contact_vars":["name","age"]
           }), :headers => {})
 
+        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/channels.json").
+          to_return(:status => 200, :body => %(["channel1"]), :headers => {})
+
         projects = connector.lookup %w(projects 495 $actions call), context
 
         expect(projects.reflect(context)).to eq({
           label:"Call",
           args: {
             channel: {
-              type: "string",
+              type: {
+                kind: :enum,
+                value_type: :string,
+                members: [{value: "channel1", label: "channel1"}]
+              },
               label: "Channel"
             },
             phone_number: {
@@ -538,14 +545,23 @@ describe VerboiceConnector do
               "contact_vars":["name","age"]
             }), headers: {})
 
+        stub_request(:get, "https://verboice.instedd.org/api/channels.json").
+          with(:headers => {'Authorization'=>'Bearer This is a guisso auth token!'}).
+          to_return(:status => 200, :body => %(["channel1"]), :headers => {})
+
         projects = connector.lookup %w(projects 495 $actions call), context
 
         expect(projects.reflect(context)).to eq({
           label:"Call",
           args: {
             channel: {
-              type: "string",
-              label: "Channel"},
+              type: {
+                kind: :enum,
+                value_type: :string,
+                members: [{value: "channel1", label: "channel1"}]
+              },
+              label: "Channel"
+            },
             phone_number: {
               type: "string",
               label: "Phone Number"
