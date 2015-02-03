@@ -4,7 +4,8 @@
       %label {{prop.label || key }}
       %i.type :: {{human_type(key)}}
 
-      %input(type='{{input_type(key)}}' ng-if='!is_struct(key) && prop.type == "literal"' ng-model='prop.value' ui-on-drop="dropOverMember(key, $data)")
+      %input(type='{{input_type(key)}}' ng-if='!is_struct(key) && !is_enum(key) && prop.type == "literal"' ng-model='prop.value' ui-on-drop="dropOverMember(key, $data)")
+      %select(ng-if='!is_struct(key) && is_enum(key) && prop.type == "literal"' ng-model='prop.value' ui-on-drop="dropOverMember(key, $data)" ng-options='item.value as item.label for item in enum_options(key)')
 
       .pill(ng-if='is_mapped(prop)')
         {{prop.join('.')}}

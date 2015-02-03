@@ -19,8 +19,18 @@ angular
       res
 
     $scope.is_struct = (key) ->
-      return false unless $scope.typename_for_key(key)
-      $scope.typename_for_key(key) == 'struct'
+      typename = $scope.typename_for_key(key)
+      return false unless typename
+      typename == 'struct'
+
+    $scope.is_enum = (key) ->
+      typename = $scope.typename_for_key(key)
+      return false unless typename
+      typename == 'enum'
+
+    $scope.enum_options = (key) ->
+      return [] unless $scope.is_enum(key)
+      $scope.schema[key].type.members
 
     $scope.typename_for_key = (key) ->
       # the type is from model.open[key] (open struct member with typename)
