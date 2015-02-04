@@ -128,7 +128,7 @@ class VerboiceConnector < Connector
 
     def query(filters, context, options)
       if filters[:address]
-        contacts = [contact(filters[:address], context.user)]
+        contacts = Array.wrap(contact(filters[:address], context.user))
       else
         contacts = GuissoRestClient.new(connector, context.user).
                      get("#{connector.url}/api/projects/#{@parent.id}/contacts.json")
@@ -166,7 +166,12 @@ class VerboiceConnector < Connector
     end
 
     def contact(address, user)
-      GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{@parent.id}/contacts/by_address/#{address}.json")
+      begin
+        GuissoRestClient.new(connector, user).get("#{connector.url}/api/projects/#{@parent.id}/contacts/by_address/#{address}.json")
+      rescue => e
+        return nil if e.http_code == 404
+        raise
+      end
     end
 
     def properties_as_contact_json(properties)

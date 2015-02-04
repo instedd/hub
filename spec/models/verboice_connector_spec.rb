@@ -379,6 +379,22 @@ describe VerboiceConnector do
             }
           ])
         end
+
+        it "should return an empty set when filters don't match contacts" do
+          stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495.json").
+            to_return(status: 200, body: %({
+                "id": 495,
+                "name": "my project"
+              }), headers: {})
+
+          stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495/contacts/by_address/12345.json").
+            to_return(:status => 404, :body => "", :headers => {})
+
+          phone_book = connector.lookup %w(projects 495 phone_book), context
+
+          response = phone_book.query({address: "12345"}, context, {})
+          expect(response).to eq({items: []})
+        end
       end
 
       describe "insert" do

@@ -6,7 +6,12 @@ class GuissoRestClient
 
   def get(url)
     JSON.parse(if use_guisso?
-      guisso_resource.get(url).body
+      response = guisso_resource.get(url)
+      if response.ok?
+        response.body
+      else
+        raise HttpError.new response
+      end
     else
       rest_client_resource(url).get()
     end)
@@ -14,7 +19,12 @@ class GuissoRestClient
 
   def post(url, body="")
     if use_guisso?
-      guisso_resource.post(url, body).body
+      response = guisso_resource.post(url, body)
+      if response.ok?
+        response.body
+      else
+        raise HttpError.new response
+      end
     else
       rest_client_resource(url).post(body) {|response, request, result| response }
     end
@@ -22,7 +32,12 @@ class GuissoRestClient
 
   def put(url, body="")
     if use_guisso?
-      guisso_resource.put(url, body).body
+      response = guisso_resource.put(url, body)
+      if response.ok?
+        response.body
+      else
+        raise HttpError.new response
+      end
     else
       rest_client_resource(url).put(body) {|response, request, result| response }
     end
@@ -30,7 +45,12 @@ class GuissoRestClient
 
   def delete(url)
     if use_guisso?
-      guisso_resource.delete(url).body
+      response = guisso_resource.delete(url)
+      if response.ok?
+        response.body
+      else
+        raise HttpError.new response
+      end
     else
       rest_client_resource(url).delete {|response, request, result| response }
     end
@@ -46,5 +66,23 @@ class GuissoRestClient
 
   def rest_client_resource(url)
     RestClient::Resource.new(url, @connector.username, @connector.password)
+  end
+
+  class HttpError < RuntimeError
+    def initialize(response)
+      @response = response
+    end
+
+    def message
+      "HTTP status #{http_code}"
+    end
+
+    def http_code
+      @response.status
+    end
+
+    def http_body
+      @response.body
+    end
   end
 end
