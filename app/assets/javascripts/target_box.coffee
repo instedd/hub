@@ -9,6 +9,9 @@ angular
     prefix: '='
   templateUrl: '/angular/target_box.html'
   controller: ($scope) ->
+    $scope.label = (key) ->
+      $scope.members?[key]?.label || $scope.schema?[key]?.label || key
+
     $scope.human_type = (key) ->
       $scope.typename_for_key(key)
 
@@ -16,6 +19,7 @@ angular
       res = $scope.typename_for_key(key)
       res = 'number' if res == 'float' || res == 'integer'
       res = 'text' if res == 'string'
+      res = 'checkbox' if res == 'boolean'
       res
 
     $scope.is_struct = (key) ->
