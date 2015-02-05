@@ -5,6 +5,10 @@ class Connector < ActiveRecord::Base
   validates_presence_of :name
   validates_presence_of :guid
 
+  def human_type
+    type.to_s[0 .. -10].underscore.humanize.titleize
+  end
+
   def label
     name
   end

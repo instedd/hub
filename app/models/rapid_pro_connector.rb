@@ -4,6 +4,10 @@ class RapidProConnector < Connector
 
   validates_presence_of :url, :token
 
+  def human_type
+    "RapidPro"
+  end
+
   def properties(context)
     {"flows" => Flows.new(self)}
   end

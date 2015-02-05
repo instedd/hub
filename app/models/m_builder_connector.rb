@@ -4,6 +4,10 @@ class MBuilderConnector < Connector
   store_accessor :settings, :url, :username, :password
   after_initialize :initialize_defaults, :if => :new_record?
 
+  def human_type
+    "mBuilder"
+  end
+
   def properties(context)
     {"applications" => Applications.new(self)}
   end

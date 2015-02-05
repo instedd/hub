@@ -5,6 +5,10 @@ class ACTConnector < Connector
   validates_presence_of :url
   validates_presence_of :access_token
 
+  def human_type
+    "ACT"
+  end
+
   def properties(context)
     {"cases" => Cases.new(self)}
   end

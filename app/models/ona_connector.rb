@@ -11,6 +11,10 @@ class ONAConnector < Connector
     self.api_token = nil
   end
 
+  def human_type
+    "ONA"
+  end
+
   def properties(context)
     {"forms" => Forms.new(self)}
   end
