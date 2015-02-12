@@ -81,7 +81,7 @@ class ApiController < ApplicationController
 
   def notify
     notified_connector = Connector.find_by_guid params[:id]
-    if !notified_connector.authenticate_with_secret_token(request.headers["X-InSTEDD-Hub-Token"])
+    if !notified_connector.authenticate_with_secret_token(request.headers["X-InSTEDD-Hub-Token"] || params[:token])
       render json: {message: "Invalid authentication token"}, status: :unauthorized
     else
       raw_post = request.raw_post || "{}"
