@@ -86,8 +86,11 @@ class CDXConnector < Connector
       def args(context)
         schema = connector.get(context, "events/schema.json")
         res = {}
+        event_schema = {}
+        res['event'] = { type: { kind: 'struct', members: event_schema } }
+
         schema['properties'].each do |key, value|
-          res[key] = {type: value['type'], label: value['title']}
+          event_schema[key] = {type: value['type'], label: value['title']}
         end
 
         res
