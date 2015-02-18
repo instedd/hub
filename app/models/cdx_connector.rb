@@ -12,6 +12,10 @@ class CDXConnector < Connector
     {"filters" => Filters.new(self)}
   end
 
+  def get(context, relative_url)
+    GuissoRestClient.new(self, context.user).get("#{self.url}/cdx/v1/#{relative_url}")
+  end
+
   private
 
   class Filters
@@ -30,7 +34,7 @@ class CDXConnector < Connector
     end
 
     def query(filters, context, options)
-      filters = GuissoRestClient.new(connector, context.user).get("#{connector.url}/cdx/v1/filters")
+      filters = connector.get(context, "filters")
       filters = filters.map { |filter| Filter.new(self, filter["id"], filter) }
       {items: filters}
     end
@@ -58,6 +62,37 @@ class CDXConnector < Connector
       @filter['name']
     end
 
-  end
+    def events
+      {
+        "new_data" => NewDataEvent.new(self)
+      }
+    end
 
+    class NewDataEvent
+      include Event
+
+      def initialize(parent)
+        @parent = parent
+      end
+
+      def label
+        "New data"
+      end
+
+      def sub_path
+        "new_data"
+      end
+
+      def args(context)
+        schema = connector.get(context, "events/schema.json")
+        res = {}
+        schema['properties'].each do |key, value|
+          res[key] = {type: value['type'], label: value['title']}
+        end
+
+        res
+      end
+    end
+
+  end
 end
