@@ -47,11 +47,11 @@ class RemindemConnector < Connector
     end
 
     def schedules(user)
-      GuissoRestClient.new(connector, user).get("#{connector.url}/reminders.json")
+      GuissoRestClient.new(connector, user).get("#{connector.url}/api/reminders.json")
     end
 
     def schedule(id, user)
-      GuissoRestClient.new(connector, user).get("#{connector.url}/reminders/#{id}.json")
+      GuissoRestClient.new(connector, user).get("#{connector.url}/api/reminders/#{id}.json")
     end
 
   end
@@ -118,14 +118,13 @@ class RemindemConnector < Connector
     end
 
     def query(filters, context, options)
-      binding.pry
       subscribers = if filters[:phone_number]
-        Array.wrap(fetch_subscriber(filters[:phone_number], context.user))
+        Array.wrap(find_subscriber(filters[:phone_number], context.user))
       else
         fetch_subscribers(context.user)
       end
 
-      {items: subscribers.map{|subscriber| Subscriber.new(self, subscriber['phone_number'], subscriber)}}
+      {items: subscribers.map{|subscriber| Subscriber.new(self, subscriber)}}
     end
 
     def insert(properties, context)
@@ -135,17 +134,26 @@ class RemindemConnector < Connector
       #        properties_as_contact_json(properties).to_query)
     end
 
-    def find_entity(address, context)
-      Subscriber.new(self, address, fetch_subscriber(address, context.user))
+    def find_entity(id, context)
+      Subscriber.new(self, fetch_subscriber(id, context.user))
     end
 
     def fetch_subscribers(user)
-      GuissoRestClient.new(connector, user).get("#{connector.url}/reminders/#{@parent.id}/subscribers.json")
+      GuissoRestClient.new(connector, user).get("#{connector.url}/api/reminders/#{@parent.id}/subscribers.json")
     end
 
-    def fetch_subscriber(phone_number, user)
+    def fetch_subscriber(id, user)
       begin
-        GuissoRestClient.new(connector, user).get("#{connector.url}/reminders/#{@parent.id}/subscribers/fetch.json?phone_number=#{phone_number}")
+        GuissoRestClient.new(connector, user).get("#{connector.url}/api/reminders/#{@parent.id}/subscribers/#{id}.json")
+      rescue => e
+        return nil if e.http_code == 404
+        raise
+      end
+    end
+
+    def find_subscriber(phone_number, user)
+      begin
+        GuissoRestClient.new(connector, user).get("#{connector.url}/api/reminders/#{@parent.id}/subscribers/find.json?phone_number=#{phone_number}")
       rescue => e
         return nil if e.http_code == 404
         raise
@@ -157,17 +165,16 @@ class RemindemConnector < Connector
   class Subscriber
     include Entity
 
-    attr_reader :phone_number
-    alias_method :id, :phone_number
+    attr_reader :id
 
-    def initialize(parent, phone_number, subscriber)
+    def initialize(parent, subscriber)
       @parent = parent
-      @phone_number = phone_number
       @subscriber = subscriber
+      @id = subscriber['id']
     end
 
     def label
-      phone_number
+      @subscriber['phone_number']
     end
 
     def sub_path
@@ -177,7 +184,7 @@ class RemindemConnector < Connector
     def properties(context)
       properties = {
         id: SimpleProperty.id(@subscriber["id"]),
-        phone_number: SimpleProperty.string("Phone number", phone_number),
+        phone_number: SimpleProperty.string("Phone number", @subscriber['phone_number']),
         offset: SimpleProperty.integer("Offset", @subscriber['offset']),
         subscribed_at: SimpleProperty.datetime("Subscribed at", @subscriber['subscribed_at'])
       }
