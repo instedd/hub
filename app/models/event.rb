@@ -39,6 +39,9 @@ module Event
     )
   end
 
+  def unsubscribe
+  end
+
   def path
     if parent.path.present?
       "#{parent.path}/$events/#{sub_path}"

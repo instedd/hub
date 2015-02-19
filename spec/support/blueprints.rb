@@ -43,6 +43,13 @@ RapidProConnector.blueprint do
   token { "token" }
 end
 
+CDXConnector.blueprint do
+  name { "Connector #{sn}" }
+  url { "https://cdx.com" }
+  username { "john+#{sn}@doe.com/1" }
+  password { "foobarbaz" }
+end
+
 ResourceMapConnector.blueprint do
   name { "Connector #{sn}" }
   user

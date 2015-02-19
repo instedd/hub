@@ -95,6 +95,26 @@ class CDXConnector < Connector
 
         res
       end
+
+      def subscribe(action, binding, user)
+        super.tap do |res|
+          self.reference_count = self.reference_count + 1
+        end
+      end
+
+      def unsubscribe
+        super.tap do |res|
+          self.reference_count = self.reference_count - 1
+        end
+      end
+
+      def reference_count
+        load_state || 0
+      end
+
+      def reference_count=(value)
+        save_state(value)
+      end
     end
 
   end
