@@ -109,11 +109,13 @@ class CDXConnector < Connector
       end
 
       def reference_count
-        load_state || 0
+        (load_state || {})[:reference_count] || 0
       end
 
       def reference_count=(value)
-        save_state(value)
+        state = load_state || {}
+        state[:reference_count] = value
+        save_state(state)
       end
     end
 
