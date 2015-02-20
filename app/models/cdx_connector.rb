@@ -13,7 +13,7 @@ class CDXConnector < Connector
   end
 
   def get(context, relative_url)
-    GuissoRestClient.new(self, context.user).get("#{self.url}/cdx/v1/#{relative_url}")
+    GuissoRestClient.new(self, context.user).get("#{self.url}/#{relative_url}")
   end
 
   private
