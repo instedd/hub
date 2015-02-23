@@ -48,6 +48,7 @@ group :development do
   gem 'spring-commands-rspec'
   gem 'capistrano-rails'
   gem 'capistrano-rvm'
+  gem 'rails-dev-tweaks'
 end
 
 group :development, :test do
