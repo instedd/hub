@@ -16,6 +16,18 @@ class CDXConnector < Connector
     GuissoRestClient.new(self, context.user).get("#{self.url}/#{relative_url}")
   end
 
+  def post(context, relative_url, body)
+    GuissoRestClient.new(self, context.user).post("#{self.url}/#{relative_url}", body.to_query)
+  end
+
+  def delete(context, relative_url)
+    GuissoRestClient.new(self, context.user).delete("#{self.url}/#{relative_url}")
+  end
+
+  def callback(path, params)
+
+  end
+
   private
 
   class Filters
@@ -83,6 +95,10 @@ class CDXConnector < Connector
         "new_data"
       end
 
+      def filter_id
+        @parent.id
+      end
+
       def args(context)
         schema = connector.get(context, "events/schema.json")
         res = {}
@@ -96,26 +112,77 @@ class CDXConnector < Connector
         res
       end
 
-      def subscribe(action, binding, user)
+      def subscribe(action, binding, context)
         super.tap do |res|
-          self.reference_count = self.reference_count + 1
+          current_count = self.reference_count
+          self.reference_count = current_count + 1
+
+          if current_count == 0
+            # first time the subscription will be need
+            token = self.make_callback_secret!
+
+            subscriber = JSON.parse(connector.post(context, "filters/#{self.filter_id}/subscribers.json", {
+              subscriber: {
+                name: "InSTEDD Hub (#{Settings.host})",
+                url: "http://#{Settings.host}/api/callback/#{connector.guid}/#{self.path}?token=#{token}"
+              }
+            }))
+
+            self.subscriber_id = subscriber['id']
+          end
         end
       end
 
-      def unsubscribe
+      def unsubscribe(context)
         super.tap do |res|
-          self.reference_count = self.reference_count - 1
+          current_count = self.reference_count
+          self.reference_count = current_count - 1
+
+          if current_count == 1
+            # last time the subscription is needed
+            connector.delete(context, "filters/#{self.filter_id}/subscribers/#{self.subscriber_id}")
+          end
         end
+      end
+
+      def hash_state
+        state = JSON.parse(load_state) rescue nil
+        state = {} unless state.is_a? Hash
+        state
       end
 
       def reference_count
-        (load_state || {})[:reference_count] || 0
+        hash_state['reference_count'] || 0
       end
 
       def reference_count=(value)
-        state = load_state || {}
-        state[:reference_count] = value
-        save_state(state)
+        state = hash_state
+        state['reference_count'] = value
+        save_state(state.to_json)
+      end
+
+      def subscriber_id
+        hash_state['subscriber_id']
+      end
+
+      def subscriber_id=(value)
+        state = hash_state
+        state['subscriber_id'] = value
+        save_state(state.to_json)
+      end
+
+      def callback_secret
+        hash_state['callback_secret']
+      end
+
+      def make_callback_secret!
+        token = Guid.new.to_s
+
+        state = hash_state
+        state['callback_secret'] = BCrypt::Password.create(token)
+        save_state(state.to_json)
+
+        token
       end
     end
 

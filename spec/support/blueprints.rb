@@ -8,6 +8,7 @@ end
 
 Connector.blueprint do
   name { "Connector #{sn}" }
+  user
 end
 
 ACTConnector.blueprint do

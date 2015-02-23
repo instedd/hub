@@ -27,19 +27,19 @@ module Event
     }
   end
 
-  def subscribe(action, binding, user)
+  def subscribe(action, binding, context)
     EventHandler.create(
       connector: connector,
       event: path,
       action: action.path,
       target_connector: action.connector,
-      user: user,
+      user: context.user,
       binding: binding,
       poll: respond_to?(:poll)
     )
   end
 
-  def unsubscribe
+  def unsubscribe(context)
   end
 
   def path

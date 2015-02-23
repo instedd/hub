@@ -95,7 +95,7 @@ describe ONAConnector do
       allow_any_instance_of(ONAConnector::NewDataEvent).to receive(:load_state)
 
       event = connector.lookup %w(forms 1 $events new_data), context
-      handler = event.subscribe(ONAMockAction.new(connector), "binding", user)
+      handler = event.subscribe(ONAMockAction.new(connector), "binding", RequestContext.new(user))
       expect(handler).to be_a(EventHandler)
     end
   end

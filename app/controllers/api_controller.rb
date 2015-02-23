@@ -2,7 +2,7 @@ class ApiController < ApplicationController
   after_action :allow_iframe, only: :picker
   skip_before_action :verify_authenticity_token
   skip_before_action :authenticate_user!
-  before_filter :authenticate_api_user!, except: :notify
+  before_filter :authenticate_api_user!, except: [:notify, :callback]
 
   expose(:accessible_connectors) { Connector.with_optional_user(current_user) }
   expose(:connector) { accessible_connectors.find_by_guid(params[:id]) }
@@ -101,6 +101,12 @@ class ApiController < ApplicationController
     remove_nil_hash_values_from(args)
     response = target.invoke(args, request_context)
     render json: response
+  end
+
+  def callback
+    callback_connector = Connector.find_by_guid params[:id]
+    callback_connector.callback(params[:path], params)
+    render json: {}, status: :ok
   end
 
   private

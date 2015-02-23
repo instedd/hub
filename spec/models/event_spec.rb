@@ -72,10 +72,11 @@ describe Event do
   let(:user) { User.make! }
   let(:event_connector) { MockConnector.create! name: "Event Connector" }
   let(:action_connector) { MockConnector.create! name: "Action Connector" }
+  let(:request_context) { RequestContext.new(user) }
 
   it "subscribes action" do
     event = MockPollEvent.new(event_connector)
-    event.subscribe(MockAction.new(action_connector), "some_binding", user)
+    event.subscribe(MockAction.new(action_connector), "some_binding", request_context)
 
     handlers = EventHandler.all
     expect(handlers.length).to eq(1)
@@ -93,7 +94,7 @@ describe Event do
   it "should trigger an action for every queued jobs" do
     event = MockPollEvent.new(event_connector)
     action = MockAction.new(action_connector)
-    event.subscribe(action, "some_binding", user)
+    event.subscribe(action, "some_binding", request_context)
 
     expect_any_instance_of(MockAction).to receive(:invoke)
     Connector::PollJob.perform(event_connector.id)
@@ -102,7 +103,7 @@ describe Event do
   it "shouldn't trigger an action for disabled event handlers" do
     event = MockPollEvent.new(event_connector)
     action = MockAction.new(action_connector)
-    handler = event.subscribe(action, "some_binding", user)
+    handler = event.subscribe(action, "some_binding", request_context)
     handler.enabled = false
     handler.save!
 
