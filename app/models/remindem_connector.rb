@@ -10,7 +10,7 @@ class RemindemConnector < Connector
   end
 
   def has_notifiable_events?
-    false
+    true
   end
 
   private
@@ -159,7 +159,40 @@ class RemindemConnector < Connector
       end
     end
 
+    def events
+      { "new_subscriber" => NewSubscriberEvent.new(self) }
+    end
+
   end
+
+
+  class NewSubscriberEvent
+    include Event
+
+    def initialize(parent)
+      @parent = parent
+    end
+
+    def label
+      "New subscriber"
+    end
+
+    def sub_path
+      "new_subscriber"
+    end
+
+    def args(context)
+      {
+        id: {type: :integer, label: "Id"},
+        phone_number: {type: :string, label: "Phone Number"},
+        offset: {type: :integer, label: "Offset"},
+        subscribed_at: {type: :datetime, label: "Subscribed at"},
+        schedule_id: {type: :integer, label: "Schedule Id"}
+      }
+    end
+
+  end
+
 
   class Subscriber
     include Entity
