@@ -128,10 +128,9 @@ class RemindemConnector < Connector
     end
 
     def insert(properties, context)
-      # IMPLEMENT!
-      # GuissoRestClient.new(connector, context.user).
-      #   post("#{connector.url}/api/projects/#{@parent.id}/contacts.json",
-      #        properties_as_contact_json(properties).to_query)
+      GuissoRestClient.new(connector, context.user).
+        post("#{connector.url}/api/reminders/#{@parent.id}/subscribers.json",
+             properties.to_query)
     end
 
     def find_entity(id, context)
