@@ -1,6 +1,6 @@
 .field
-  = f.label :url, "URL"
-  = f.text_field :url, value: connector.url
+  = f.label :url, "Base API Url"
+  = f.text_field :url, value: connector.url, placeholder: "http://cdx-host.com/api"
 
 .field
   = f.label :username, "Username"
