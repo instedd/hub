@@ -105,7 +105,7 @@ class ApiController < ApplicationController
 
   def callback
     callback_connector = Connector.find_by_guid params[:id]
-    callback_connector.callback(params[:path], params)
+    callback_connector.callback(request_context, params[:path], request)
     render json: {}, status: :ok
   end
 

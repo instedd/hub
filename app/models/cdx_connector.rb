@@ -24,8 +24,9 @@ class CDXConnector < Connector
     GuissoRestClient.new(self, context.user).delete("#{self.url}/#{relative_url}")
   end
 
-  def callback(path, params)
-
+  def callback(context, path, request)
+    event = self.lookup_path(path, context)
+    event.validate_and_exec_callback(context, path, request)
   end
 
   private
@@ -124,7 +125,8 @@ class CDXConnector < Connector
             subscriber = JSON.parse(connector.post(context, "filters/#{self.filter_id}/subscribers.json", {
               subscriber: {
                 name: "InSTEDD Hub (#{Settings.host})",
-                url: "http://#{Settings.host}/api/callback/#{connector.guid}/#{self.path}?token=#{token}"
+                url: "http://#{Settings.host}/api/callback/connectors/#{connector.guid}/#{self.path}?token=#{token}",
+                verb: 'POST'
               }
             }))
 
@@ -183,6 +185,18 @@ class CDXConnector < Connector
         save_state(state.to_json)
 
         token
+      end
+
+      def validate_and_exec_callback(context, path, request)
+        raise "invalid token" unless authenticate_with_token(request.params[:token])
+
+        event = {event: JSON.parse(request.body.read)}
+
+        Resque.enqueue_to(:hub, Connector::NotifyJob, self.connector.id, path, event.to_json)
+      end
+
+      def authenticate_with_token(token)
+        BCrypt::Password.new(self.callback_secret) == token
       end
     end
 
