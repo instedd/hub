@@ -129,7 +129,7 @@ class ACTConnector < Connector
       url = "#{connector.url}/api/v1/notifications/?#{query_params.to_query}"
 
       headers = { "Authorization" => connector.authorization_header }
-      
+
       notifications = JSON.parse(RestClient.get(url, headers))
       # assumes notifications are sorted by date
       save_state(notifications.last["id"]) unless notifications.empty?
@@ -179,12 +179,31 @@ class ACTConnector < Connector
         is_sick: {
           type: "boolean",
           label: "Is patient sick?"
+        },
+        family_sick: {
+          type: "boolean",
+          label: "Is any family member sick?"
+        },
+        community_sick: {
+          type: "boolean",
+          label: "Is any community member sick?"
+        },
+        symptoms: {
+          type: {
+            kind: :struct,
+            open: true
+          }
         }
       }
     end
 
     def invoke(args, context)
-      query_params = { sick: args['is_sick'] }
+      query_params = { sick: args['is_sick'], family_sick: args['family_sick'], community_sick: args['community_sick'] }
+      symptoms = args['symptoms'] || {}
+      query_params = symptoms.keys.inject(query_params) { |params, field|
+        query_params[field] = symptoms[field]
+        query_params
+      }
       url = "#{connector.url}/api/v1/cases/#{args['case_id']}/?#{query_params.to_query}"
       headers = { "Authorization" => connector.authorization_header }
       RestClient.put(url, nil, headers)

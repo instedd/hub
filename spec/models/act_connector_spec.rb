@@ -87,12 +87,15 @@ describe ACTConnector do
 
       it "includes parameters for action" do
         action = connector.lookup %w(cases $actions update_case), user
-        expect(action.args(user).keys).to match_array([:case_id, :is_sick])
+        expect(action.args(user).keys).to match_array([:case_id, :is_sick, :community_sick, :family_sick, :symptoms])
       end
 
       it "contacts ACT API when performed" do
         case_id = 123
-        update_url = "http://act.instedd.org/api/v1/cases/#{case_id}/?sick=true"
+
+        concatenated_params = "community_sick=&diarreah_community=&diarreah_family=2&diarreah_individual=&family_sick=2&fever_community=&fever_family=1&headache_community=&headache_family=2&headache_individual=&hemorrhage_community=&hemorrhage_family=1&hemorrhage_individual=&individual_fever=&nausea_vomiting_community=&nausea_vomiting_family=1&nausea_vomiting_individual=&rash_community=&rash_family=1&rash_individual=&sick=1&sorethroat_community=&sorethroat_family=1&sorethroat_individual=&weakness_pain_community=&weakness_pain_family=2&weakness_pain_individual="
+
+        update_url = "http://act.instedd.org/api/v1/cases/#{case_id}/?#{concatenated_params}"
 
         expect(RestClient).to receive(:put) do |url, body, headers|
           expect(url).to eq(update_url)
@@ -101,7 +104,38 @@ describe ACTConnector do
         end
 
         action = connector.lookup %w(cases $actions update_case), user
-        action.invoke({'case_id' => case_id, 'is_sick' => true}, user)
+        action.invoke({
+          'case_id' => case_id,
+          'is_sick' => "1",
+          'community_sick' => nil,
+          'family_sick' => "2",
+          'symptoms' => {
+            'diarreah_community' => nil,
+            'diarreah_family' => "2",
+            'diarreah_individual' => nil,
+            'fever_community' => nil,
+            'fever_family' => "1",
+            'headache_community' => nil,
+            'headache_family' => "2",
+            'headache_individual' => nil,
+            'hemorrhage_community' => nil,
+            'hemorrhage_family' => "1",
+            'hemorrhage_individual' => nil,
+            'individual_fever' => nil,
+            'nausea_vomiting_community' => nil,
+            'nausea_vomiting_family' => "1",
+            'nausea_vomiting_individual' => nil,
+            'rash_community' => nil,
+            'rash_family' => "1",
+            'rash_individual' => nil,
+            'sorethroat_community' => nil,
+            'sorethroat_family' => "1",
+            'sorethroat_individual' => nil,
+            'weakness_pain_community' => nil,
+            'weakness_pain_family' => "2",
+            'weakness_pain_individual' => nil
+          }
+        }, user)
       end
 
     end
