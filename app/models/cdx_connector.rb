@@ -77,11 +77,11 @@ class CDXConnector < Connector
 
     def events
       {
-        "new_data" => NewDataEvent.new(self)
+        "new_event" => NewEvent.new(self)
       }
     end
 
-    class NewDataEvent
+    class NewEvent
       include Event
 
       def initialize(parent)
@@ -89,11 +89,11 @@ class CDXConnector < Connector
       end
 
       def label
-        "New data"
+        "New event"
       end
 
       def sub_path
-        "new_data"
+        "new_event"
       end
 
       def filter_id

@@ -9,7 +9,7 @@ describe CDXConnector do
     let(:request_context) { RequestContext.new(user) }
 
     let(:event) {
-      connector.lookup_path "filters/12345/$events/new_data", nil
+      connector.lookup_path "filters/12345/$events/new_event", nil
     }
 
     def base_api_url
