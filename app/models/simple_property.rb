@@ -13,6 +13,10 @@ class SimpleProperty
     integer("Id", value)
   end
 
+  def self.boolean(label, value = nil)
+    new(label, :boolean, value)
+  end
+
   def self.integer(label, value = nil)
     new(label, :integer, value)
   end
