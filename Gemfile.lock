@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/instedd/alto_guisso.git
-  revision: bdd04569e1f1925664f839f18cba3c2807aafe19
+  revision: 6d72573c211f45ff95d36847af733449acdfa04a
   branch: master
   specs:
     alto_guisso (0.0.2)
@@ -8,7 +8,7 @@ GIT
 
 GIT
   remote: git://github.com/instedd/alto_guisso_rails.git
-  revision: 9d4aa030f4e02ce63014aa7519078780e2eb25d0
+  revision: bd944d08c59e5835285f0d956fb1fb00402fc385
   branch: master
   specs:
     alto_guisso_rails (0.0.1)
@@ -270,6 +270,9 @@ GEM
       bundler (>= 1.3.0, < 2.0)
       railties (= 4.1.6)
       sprockets-rails (~> 2.0)
+    rails-dev-tweaks (1.2.0)
+      actionpack (>= 3.1)
+      railties (>= 3.1)
     rails_config (0.4.2)
       activesupport (>= 3.0)
     railties (4.1.6)
@@ -404,6 +407,7 @@ DEPENDENCIES
   puma
   rack-cors
   rails (= 4.1.6)
+  rails-dev-tweaks
   rails_config
   resque
   resque-scheduler

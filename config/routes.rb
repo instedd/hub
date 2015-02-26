@@ -33,6 +33,7 @@ Rails.application.routes.draw do
     get 'picker' => 'api#picker'
     post 'notify/connectors/:id/*path'=> 'api#notify', format: false
     post 'invoke/connectors/:id/*path' => 'api#invoke', format: false
+    post 'callback/connectors/:id/*path' => 'api#callback', format: false
   end
 
   resources :event_handlers

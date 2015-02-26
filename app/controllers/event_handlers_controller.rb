@@ -18,7 +18,7 @@ class EventHandlersController < ApplicationController
 
   def create
     load_view_models_params
-    event_handler = @param_event.subscribe(@param_action, @param_binding, current_user)
+    event_handler = @param_event.subscribe(@param_action, @param_binding, request_context)
     event_handler.name = params[:event_handler][:name]
     if event_handler.save
       redirect_to event_handlers_path, notice: "Task #{event_handler.name} successfully created."
