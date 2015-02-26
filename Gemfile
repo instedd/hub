@@ -48,6 +48,7 @@ group :development do
   gem 'spring-commands-rspec'
   gem 'capistrano-rails'
   gem 'capistrano-rvm'
+  gem 'rails-dev-tweaks'
   gem "better_errors"
   gem "binding_of_caller"
 end

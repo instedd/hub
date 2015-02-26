@@ -14,7 +14,7 @@
           - if connector.pollable?
             = link_to "Poll", "/connectors/#{connector.guid}/poll", method: :put
 
-    - %w(ACT Elasticsearch GoogleSpreadsheets GoogleFusionTables MBuilder ONA Pollit RapidPro Remindem ResourceMap Verboice).each do |name|
+    - %w(ACT CDX Elasticsearch GoogleSpreadsheets GoogleFusionTables MBuilder ONA Pollit RapidPro Remindem ResourceMap Verboice).each do |name|
       = icon_link_to :'icc-add', "Add #{connector_human_name_for_type(name)} Connector", new_connector_path(type: "#{name}Connector"), class: "add-connector blue"
       %br
       %br

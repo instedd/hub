@@ -30,6 +30,9 @@ class Connector < ActiveRecord::Base
   abstract def lookup(path, context)
   end
 
+  abstract def callback(context, path, request)
+  end
+
   store :settings
 
   def generate_guid

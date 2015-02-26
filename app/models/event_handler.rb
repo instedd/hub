@@ -6,6 +6,7 @@ class EventHandler < ActiveRecord::Base
 
   after_create :notify_action_created
   after_update :notify_action_updated
+  after_destroy :notify_event_unsubscribe
 
   module QueuePollJob
     def self.perform
@@ -43,5 +44,11 @@ class EventHandler < ActiveRecord::Base
     if target_action.respond_to?(:after_update)
       target_action.after_update(self.binding)
     end
+  end
+
+  def notify_event_unsubscribe
+    context = RequestContext.new(user)
+    source_event = connector.lookup_path(event, context)
+    source_event.unsubscribe(context)
   end
 end

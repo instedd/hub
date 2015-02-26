@@ -106,9 +106,11 @@ class MBuilderConnector < Connector
 
     def invoke(options, context)
       uri = URI(@trigger['url'])
-      uri.query= args(context).keys.map do |arg|
-          "#{arg}=#{options[arg]}"
-        end.join '&'
+      data = {}
+      args(context).keys.each do |arg|
+        data[arg] = options[arg]
+      end
+      uri.query = data.to_query
 
       GuissoRestClient.new(connector, context.user).post(uri.to_s)
     end

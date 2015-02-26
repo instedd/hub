@@ -204,7 +204,7 @@ describe RapidProConnector do
       allow_any_instance_of(RapidProConnector::RunUpdateEvent).to receive(:load_state)
 
       event = connector.lookup %w(flows 1 $events run_update), context
-      handler = event.subscribe(RapidProMockAction.new(connector), "binding", user)
+      handler = event.subscribe(RapidProMockAction.new(connector), "binding", RequestContext.new(user))
       expect(handler).to be_a(EventHandler)
     end
   end
