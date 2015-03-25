@@ -213,7 +213,17 @@ class GoogleSpreadsheetsConnector < Connector
     end
 
     def row_matches_filters?(row, filters)
-      filters.all? { |key, value| row[key] == value }
+      filters.all? { |key, value| matches?(row[key], value) }
+    end
+
+    def matches?(row_value, search)
+      if search.is_a?(Integer)
+        row_value == search.to_s
+      elsif search.is_a?(Float)
+        row_value.to_f == search
+      else
+        row_value == search
+      end
     end
 
     def find_entity(id, context)

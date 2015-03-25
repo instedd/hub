@@ -18,3 +18,4 @@ config/guisso.yml
 /log/*.log.*
 /tmp
 settings.local.yml
+.ruby-gemset
