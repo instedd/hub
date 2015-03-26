@@ -83,5 +83,28 @@ describe CDXConnector do
 
       assert_requested stub_unsubscribe
     end
+
+    it "should'n fail on unsubscribe if the subscriber is already deleted" do
+      # this allow to have mock action in connector
+      allow_any_instance_of(EventHandler).to receive(:notify_action_created)
+
+      stub_subscribe = stub_request(:post, "#{base_api_url}/filters/12345/subscribers.json").
+        to_return(status: 200, body: %({"id": 34}))
+
+      first = event.subscribe(CDXMockAction.new(connector), "binding", request_context)
+
+      remove_request_stub(stub_subscribe)
+
+      stub_unsubscribe = stub_request(:delete, "#{base_api_url}/filters/12345/subscribers/34").
+        to_return(status: [404, "not found"])
+
+      expect {
+        first.destroy
+      }.to change {
+        event.reference_count
+      }.by(-1)
+
+      assert_requested stub_unsubscribe
+    end
   end
 end

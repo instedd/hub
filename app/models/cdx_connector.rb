@@ -142,7 +142,11 @@ class CDXConnector < Connector
 
           if current_count == 1
             # last time the subscription is needed
-            connector.delete(context, "filters/#{self.filter_id}/subscribers/#{self.subscriber_id}")
+            begin
+              connector.delete(context, "filters/#{self.filter_id}/subscribers/#{self.subscriber_id}")
+            rescue Exception => ex
+              Rails.logger.warn "Error when trying to delete subscriber: #{ex.message}"
+            end
           end
         end
       end

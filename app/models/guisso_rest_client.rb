@@ -26,7 +26,7 @@ class GuissoRestClient
         raise HttpError.new response
       end
     else
-      rest_client_resource(url).post(body) {|response, request, result| response }
+      rest_client_resource(url).post(body) { |response, request, result| handle_request response, request, result }
     end
   end
 
@@ -39,7 +39,7 @@ class GuissoRestClient
         raise HttpError.new response
       end
     else
-      rest_client_resource(url).put(body) {|response, request, result| response }
+      rest_client_resource(url).put(body) { |response, request, result| handle_request response, request, result }
     end
   end
 
@@ -52,8 +52,13 @@ class GuissoRestClient
         raise HttpError.new response
       end
     else
-      rest_client_resource(url).delete {|response, request, result| response }
+      rest_client_resource(url).delete { |response, request, result| handle_request response, request, result }
     end
+  end
+
+  def handle_request response, request, result
+    result.error! if result.code_type.superclass == Net::HTTPClientError || result.code_type.superclass == Net::HTTPServerError
+    response
   end
 
   def use_guisso?
