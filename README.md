@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/instedd/hub.png?label=ready&title=Ready)](https://waffle.io/instedd/hub)
 # InSTEDD Hub
 
 Hub is a centralised point for connecting InSTEDD (and other) applications together, both for sharing data and defining IFTTT-like flows based on events and actions. Every kind of application to be connected requires a _connector_; currently the following InSTEDD apps are connected:
