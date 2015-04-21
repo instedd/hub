@@ -293,6 +293,9 @@ class VerboiceConnector < Connector
     def events
       {
         "call_finished" => CallFinishedEvent.new(self),
+        "call_done" => CallDoneEvent.new(self),
+        "call_completed" => CallCompletedEvent.new(self),
+        "call_failed" => CallFailedEvent.new(self),
       }
     end
   end
@@ -347,7 +350,7 @@ class VerboiceConnector < Connector
     end
   end
 
-  class CallFinishedEvent
+  class AfterCallEvent
     include Event
 
     delegate :project_id, to: :@parent
@@ -357,17 +360,10 @@ class VerboiceConnector < Connector
       @parent = parent
     end
 
-    def label
-      "Call finished"
-    end
-
-    def sub_path
-      "call_finished"
-    end
-
     def args(context)
       {
         address: {type: :string, label: "Phone Number"},
+        status: {type: :string, label: "Status"},
         vars: {
           type: {
             kind: :struct,
@@ -375,6 +371,54 @@ class VerboiceConnector < Connector
           }
         }
       }
+    end
+  end
+
+  class CallFinishedEvent < AfterCallEvent
+    def label
+      "Call finished"
+    end
+
+    def sub_path
+      "call_finished"
+    end
+  end
+
+  class CallDoneEvent < AfterCallEvent
+    def label
+      "Call done"
+    end
+
+    def sub_path
+      "call_done"
+    end
+
+    def args(context)
+      super.merge({fail_reason: {type: :string, label: "Fail reason (if any)"}})
+    end
+  end
+
+  class CallCompletedEvent < AfterCallEvent
+    def label
+      "Call completed"
+    end
+
+    def sub_path
+      "call_completed"
+    end
+  end
+
+  class CallFailedEvent < AfterCallEvent
+    def label
+      "Call failed"
+    end
+
+    def sub_path
+      "call_failed"
+    end
+
+    def args(context)
+      super.merge({fail_reason: {type: :string, label: "Fail reason"}})
     end
   end
 end
