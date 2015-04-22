@@ -18,10 +18,14 @@ class EventHandler < ActiveRecord::Base
   end
 
   def trigger(data)
-    context = RequestContext.new(user)
-    target_action = target_connector.lookup_path(action, context)
-    PoirotRails::Activity.start("Action invoked", target_action: target_action.path, data: data) do
-      target_action.invoke bind_event_data(data), context
+    begin
+      context = RequestContext.new(user)
+      target_action = target_connector.lookup_path(action, context)
+      PoirotRails::Activity.start("Action invoked", target_action: target_action.path, data: data) do
+        target_action.invoke bind_event_data(data), context
+      end
+    rescue Exception => e
+      logger.error "Error triggering event handler: #{e}"
     end
   end
 
