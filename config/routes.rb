@@ -34,12 +34,10 @@ Rails.application.routes.draw do
     post 'notify/connectors/:id/*path'=> 'api#notify', format: false
     post 'invoke/connectors/:id/*path' => 'api#invoke', format: false
     post 'callback/connectors/:id/*path' => 'api#callback', format: false
-
-    # resources :event_handlers, only: [:index, :create, :destroy], module: 'api'#, format: false, , defaults: {format: 'json'}
   end
 
-  namespace :api do
-    resources :event_handlers, only: [:index, :create, :destroy], defaults: { format: :json }
+  namespace :api, defaults: {format: :json}, format: false do
+    resources :event_handlers, only: [:index, :create, :destroy]
   end
 
   resources :event_handlers

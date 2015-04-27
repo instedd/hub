@@ -1,20 +1,15 @@
-class Api::EventHandlersController < ApplicationController
+class Api::EventHandlersController < BaseApiController
 
-  skip_before_action :verify_authenticity_token
-  skip_before_action :authenticate_user!
   before_filter :authenticate_api_user!
 
+  expose(:connectors) { Connector.with_optional_user(current_user) }
   expose(:event_handlers) { current_user.event_handlers }
   expose(:event_handler)
 
   def index
-    # render json: event_handlers
-    # respond_to :json
   end
 
   def create
-    connectors = Connector.with_optional_user(current_user)
-
     event = connectors.find_by_guid(params[:event_handler][:event][:connector]).lookup_path(params[:event_handler][:event][:path], request_context)
     action = connectors.find_by_guid(params[:event_handler][:action][:connector]).lookup_path(params[:event_handler][:action][:path], request_context)
 

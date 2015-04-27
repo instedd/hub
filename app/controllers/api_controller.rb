@@ -1,20 +1,11 @@
-class ApiController < ApplicationController
+class ApiController < BaseApiController
+
   after_action :allow_iframe, only: :picker
-  skip_before_action :verify_authenticity_token
-  skip_before_action :authenticate_user!
   before_filter :authenticate_api_user!, except: [:notify, :callback]
-  around_filter :rescue_with_error_detail
 
   expose(:accessible_connectors) { Connector.with_optional_user(current_user) }
   expose(:connector) { accessible_connectors.find_by_guid(params[:id]) }
   expose(:target) { connector.lookup_path(params[:path], request_context) }
-
-  def rescue_with_error_detail
-    yield
-  rescue => ex
-    code = (ex.message[/\d{3}/] || 500).to_i
-    render json: {message: ex.message, error_code: code}, status: code
-  end
 
   def connectors
     connectors = accessible_connectors.all
