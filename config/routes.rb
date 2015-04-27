@@ -36,6 +36,10 @@ Rails.application.routes.draw do
     post 'callback/connectors/:id/*path' => 'api#callback', format: false
   end
 
+  namespace :api, defaults: {format: :json}, format: false do
+    resources :event_handlers, only: [:index, :create, :destroy]
+  end
+
   resources :event_handlers
   resources :activities, only: :index
 
