@@ -1,4 +1,5 @@
 json.event_handlers event_handlers do |event_handler|
+  json.id event_handler.id
   json.name event_handler.name
   json.enabled event_handler.enabled
 

@@ -7,6 +7,7 @@ class Api::EventHandlersController < BaseApiController
   expose(:event_handler)
 
   def index
+    render layout: false
   end
 
   def create
