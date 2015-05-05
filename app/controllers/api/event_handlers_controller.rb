@@ -19,7 +19,7 @@ class Api::EventHandlersController < BaseApiController
     event_handler.enabled = params[:event_handler][:enabled]
 
     if event_handler.save
-      render json: {success: true}
+      render json: {success: true, id: event_handler.id}
     else
       render json: {success: false, errors: event_handler.errors.messages}
     end
