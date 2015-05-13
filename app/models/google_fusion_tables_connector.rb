@@ -264,7 +264,13 @@ class GoogleFusionTablesConnector < Connector
     end
 
     def properties(context)
-      Hash[parent.column_names.map { |c| [c, @row[c]] }]
+      # due to Entity#raw, the returned hash needs to have simple propeties as values
+      props = parent.entity_properties(context).deep_dup
+      Hash[parent.column_names.map { |c|
+        p = props[c]
+        p.value = @row[c]
+        [c, p]
+      }]
     end
   end
 end

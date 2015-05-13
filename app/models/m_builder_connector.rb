@@ -110,7 +110,7 @@ class MBuilderConnector < Connector
       args(context).keys.each do |arg|
         data[arg] = options[arg]
       end
-      uri.query = data.to_query
+      uri.query = data.to_query unless data.empty?
 
       GuissoRestClient.new(connector, context.user).post(uri.to_s)
     end
