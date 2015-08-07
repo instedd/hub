@@ -37,12 +37,11 @@ namespace :deploy do
 
   after :publishing, :restart
 
-  after :restart, :clear_cache do
-    on roles(:web), in: :groups, limit: 3, wait: 10 do
-      # Here we can do anything such as:
-      # within release_path do
-      #   execute :rake, 'cache:clear'
-      # end
+  after :updating, :generate_version do
+    on roles(:web) do
+      within repo_path do
+        execute :git, %(describe --always > #{release_path}/VERSION)
+      end
     end
   end
 
