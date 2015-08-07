@@ -7,26 +7,28 @@ class JsonMapper
     target = {}
     members.each do |key, value|
       mapped_value = map(context, value)
-      target[key] = mapped_value unless mapped_value.nil?
+      target[key] = mapped_value unless mapped_value == :no_value
     end
     target
   end
 
   def map(context, mapping = @mapping)
-    if mapping.is_a?(String)
-      context[mapping]
-    elsif mapping.is_a?(Array)
-      mapping.each do |key|
-        context = context[key] || {}
+    case mapping
+    when String, Numeric
+      context && context[mapping]
+    when Array
+      mapping.inject(context) do |context, key|
+        map(context, key)
       end
-      context
-    else
+    when Hash
       case mapping["type"]
       when "struct"
         map_members(context, mapping["members"])
       when "literal"
-        mapping["value"]
+        mapping["value"] || :no_value
       end
+    else
+      raise "Unexpected mapping value: #{mapping.inspect}"
     end
   end
 end
