@@ -102,15 +102,24 @@ class CDXConnector < Connector
 
       def args(context)
         schema = connector.get(context, "events/schema.json")
-        res = {}
-        event_schema = {}
-        res['event'] = { type: { kind: 'struct', members: event_schema } }
+        {"event" => convert_json_schema(schema)}
+      end
 
-        schema['properties'].each do |key, value|
-          event_schema[key] = {type: value['type'], label: value['title']}
+      def convert_json_schema(schema)
+        case schema['type']
+        when "object"
+          members = {}
+          schema['properties'].each do |key, value|
+            members[key] = convert_json_schema(value)
+          end
+          { type: { kind: 'struct', members: members }}
+        when "array"
+          # HACK: Arrays are not supported yet. The first element is mapped
+          convert_json_schema schema['items']
+        else
+          { type: schema['type'], label: schema['title'] }
         end
 
-        res
       end
 
       def subscribe(action, binding, context)
