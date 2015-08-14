@@ -1,4 +1,4 @@
-FROM instedd/nginx-rails-21
+FROM instedd/nginx-rails:2.1
 
 # Install prerequisites
 RUN \
