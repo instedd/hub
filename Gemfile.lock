@@ -29,7 +29,7 @@ GIT
 
 GIT
   remote: git://github.com/instedd/poirot_rails.git
-  revision: 22bbb52ca0fba0603873ed7d9b0c976d2675664c
+  revision: b0957aa9cbe98fd2f6bf69646075bf94ccaf87fd
   branch: master
   specs:
     poirot_rails (0.0.4)
@@ -155,8 +155,8 @@ GEM
     extlib (0.9.16)
     faraday (0.9.0)
       multipart-post (>= 1.2, < 3)
-    ffi (1.9.6)
-    ffi-rzmq (2.0.1)
+    ffi (1.9.10)
+    ffi-rzmq (2.0.4)
       ffi-rzmq-core (>= 1.0.1)
     ffi-rzmq-core (1.0.3)
       ffi (~> 1.9)
