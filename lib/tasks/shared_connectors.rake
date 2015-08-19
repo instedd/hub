@@ -1,5 +1,6 @@
 
 namespace :shared_connectors do
+
   task :create => :environment do
     is_stg = Guisso.url =~ /stg/
     app_suffix = is_stg ? ' (stg)' : ''
@@ -24,4 +25,18 @@ namespace :shared_connectors do
       c.user = nil
     end
   end
+
+  desc "Registers (finds or creates) the info for a shared connector"
+  task :register, [:name, :url, :type] => :environment do |task, args|
+    klazz = args[:type].constantize
+    connector = klazz.find_or_create_by(name: args[:name]) do |c|
+      c.url = args[:url]
+      c.user = nil
+    end
+
+    connector.generate_secret_token! if connector.secret_token.nil?
+
+    puts "guid: #{connector.guid}\nsecret_token: #{connector.secret_token}"
+  end
+
 end
