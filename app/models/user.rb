@@ -11,6 +11,6 @@ class User < ActiveRecord::Base
   has_many :event_handlers, dependent: :destroy
 
   def activities
-    Activity.for(self).all
+    Activity.enabled? ? Activity.for(self).all : []
   end
 end

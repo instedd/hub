@@ -4,6 +4,10 @@ class Activity
     new user
   end
 
+  def self.enabled?
+    not Settings.poirot.elasticsearch_url.blank?
+  end
+
   def initialize(user)
     @user = user
   end

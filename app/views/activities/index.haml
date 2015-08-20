@@ -1,6 +1,9 @@
 .row-fluid
   .span12
     %h4 Connectors Activity
-    - activities.each do |activity|
-      .row-fluid
-        = activity.fields
+    - if Activity.enabled?
+      - activities.each do |activity|
+        .row-fluid
+          = activity.fields
+    - else
+      %p Activities logs are not supported on this instance
