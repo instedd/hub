@@ -203,7 +203,11 @@ class CDXConnector < Connector
       def validate_and_exec_callback(context, path, request)
         raise "invalid token" unless authenticate_with_token(request.params[:token])
 
-        event = {event: JSON.parse(request.body.read)}
+        event_data = JSON.parse(request.body.read)
+        convert_test_assays_array_into_plain_object(event_data)
+        event = {event: event_data}
+
+        binding.pry
 
         Resque.enqueue_to(:hub, Connector::NotifyJob, self.connector.id, path, event.to_json)
       end
@@ -211,7 +215,18 @@ class CDXConnector < Connector
       def authenticate_with_token(token)
         BCrypt::Password.new(self.callback_secret) == token
       end
-    end
 
+      def convert_test_assays_array_into_plain_object(event_data)
+        if event_data.is_a?(Hash)
+          test_data = event_data["test"]
+          if test_data.is_a?(Hash)
+            assays_data = test_data["assays"]
+            if assays_data.is_a?(Array)
+              test_data["assays"] = assays_data.first
+            end
+          end
+        end
+      end
+    end
   end
 end
