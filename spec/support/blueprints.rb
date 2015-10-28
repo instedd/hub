@@ -47,8 +47,7 @@ end
 CDXConnector.blueprint do
   name { "Connector #{sn}" }
   url { "https://cdx.com" }
-  username { "john+#{sn}@doe.com/1" }
-  password { "foobarbaz" }
+  oauth_token { "foobarbaz" }
 end
 
 ResourceMapConnector.blueprint do

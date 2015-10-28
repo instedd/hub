@@ -3,10 +3,5 @@
   = f.text_field :url, value: connector.url, placeholder: "http://cdx-host.com/api"
 
 .field
-  = f.label :username, "Username"
-  = f.text_field :username, value: connector.username
-
-.field
-  = f.label :password, "Password"
-  = f.password_field :password, value: connector.password
-
+  = f.label :oauth_token, "OAuth token"
+  = f.text_field :oauth_token, value: connector.oauth_token

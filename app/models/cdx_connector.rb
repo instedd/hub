@@ -1,8 +1,8 @@
 class CDXConnector < Connector
   include Entity
-  store_accessor :settings, :url, :username, :password
+  store_accessor :settings, :url, :oauth_token
 
-  validates_presence_of :url
+  validates_presence_of :url, :oauth_token
 
   def human_type
     "CDX"
@@ -206,8 +206,6 @@ class CDXConnector < Connector
         event_data = JSON.parse(request.body.read)
         convert_test_assays_array_into_plain_object(event_data)
         event = {event: event_data}
-
-        binding.pry
 
         Resque.enqueue_to(:hub, Connector::NotifyJob, self.connector.id, path, event.to_json)
       end

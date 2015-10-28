@@ -70,7 +70,11 @@ class GuissoRestClient
   end
 
   def rest_client_resource(url)
-    RestClient::Resource.new(url, @connector.username, @connector.password)
+    if @connector.respond_to?(:oauth_token)
+      RestClient::Resource.new(url, headers: {"Authorization" => "Bearer #{@connector.oauth_token.strip}"})
+    else
+      RestClient::Resource.new(url, @connector.username, @connector.password)
+    end
   end
 
   class HttpError < RuntimeError

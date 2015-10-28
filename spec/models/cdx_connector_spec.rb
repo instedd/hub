@@ -13,8 +13,11 @@ describe CDXConnector do
     }
 
     def base_api_url
-      uri = URI(connector.url)
-      connector.url.gsub("#{uri.scheme}://", "#{uri.scheme}://#{url_encode(connector.username)}:#{url_encode(connector.password)}@")
+      URI(connector.url)
+    end
+
+    def with_oauth_token(stub_request)
+      stub_request.with(headers: {"Authorization" => "Bearer #{connector.oauth_token}"})
     end
 
     class CDXMockAction
@@ -33,7 +36,7 @@ describe CDXConnector do
       # this allow to have mock action in connector
       allow_any_instance_of(EventHandler).to receive(:notify_action_created)
 
-      stub_subscribe = stub_request(:post, "#{base_api_url}/filters/12345/subscribers.json").
+      stub_subscribe = with_oauth_token(stub_request(:post, "#{base_api_url}/filters/12345/subscribers.json")).
         to_return(status: 200, body: %({"id": 56}))
 
       expect {
@@ -52,7 +55,7 @@ describe CDXConnector do
       # this allow to have mock action in connector
       allow_any_instance_of(EventHandler).to receive(:notify_action_created)
 
-      stub_subscribe = stub_request(:post, "#{base_api_url}/filters/12345/subscribers.json").
+      stub_subscribe = with_oauth_token(stub_request(:post, "#{base_api_url}/filters/12345/subscribers.json")).
         to_return(status: 200, body: %({"id": 34}))
 
       first = event.subscribe(CDXMockAction.new(connector), "binding", request_context)
@@ -72,7 +75,7 @@ describe CDXConnector do
         event.reference_count
       }.by(-1)
 
-      stub_unsubscribe = stub_request(:delete, "#{base_api_url}/filters/12345/subscribers/34").
+      stub_unsubscribe = with_oauth_token(stub_request(:delete, "#{base_api_url}/filters/12345/subscribers/34")).
         to_return(status: 200, body: %({"id": 56}))
 
       expect {
@@ -88,14 +91,14 @@ describe CDXConnector do
       # this allow to have mock action in connector
       allow_any_instance_of(EventHandler).to receive(:notify_action_created)
 
-      stub_subscribe = stub_request(:post, "#{base_api_url}/filters/12345/subscribers.json").
+      stub_subscribe = with_oauth_token(stub_request(:post, "#{base_api_url}/filters/12345/subscribers.json")).
         to_return(status: 200, body: %({"id": 34}))
 
       first = event.subscribe(CDXMockAction.new(connector), "binding", request_context)
 
       remove_request_stub(stub_subscribe)
 
-      stub_unsubscribe = stub_request(:delete, "#{base_api_url}/filters/12345/subscribers/34").
+      stub_unsubscribe = with_oauth_token(stub_request(:delete, "#{base_api_url}/filters/12345/subscribers/34")).
         to_return(status: [404, "not found"])
 
       expect {
