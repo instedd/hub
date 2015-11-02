@@ -6,6 +6,8 @@ class EventHandler < ActiveRecord::Base
 
   after_create :notify_action_created
   after_update :notify_action_updated
+  after_create :notify_event_subscribe
+  before_update :notify_event_update
   after_destroy :notify_event_unsubscribe
 
   module QueuePollJob
@@ -47,6 +49,27 @@ class EventHandler < ActiveRecord::Base
     target_action = target_connector.lookup_path(action, RequestContext.new(user))
     if target_action.respond_to?(:after_update)
       target_action.after_update(self.binding)
+    end
+  end
+
+  def notify_event_subscribe
+    context = RequestContext.new(user)
+    source_event = connector.lookup_path(event, context)
+    source_event.subscribe(context)
+  end
+
+  def notify_event_update
+    return unless event_changed?
+
+    context = RequestContext.new(user)
+    if event_was
+      old_event = connector.lookup_path(event_was, context)
+      old_event.unsubscribe(context)
+    end
+
+    if event
+      new_event = connector.lookup_path(event, context)
+      new_event.subscribe(context)
     end
   end
 

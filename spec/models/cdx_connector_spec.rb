@@ -40,7 +40,7 @@ describe CDXConnector do
         to_return(status: 200, body: %({"id": 56}))
 
       expect {
-        event.subscribe(CDXMockAction.new(connector), "binding", request_context)
+        event.create(CDXMockAction.new(connector), "binding", request_context)
       }.to change {
         event.reference_count
       }.from(0).to(1)
@@ -58,13 +58,13 @@ describe CDXConnector do
       stub_subscribe = with_oauth_token(stub_request(:post, "#{base_api_url}/filters/12345/subscribers.json")).
         to_return(status: 200, body: %({"id": 34}))
 
-      first = event.subscribe(CDXMockAction.new(connector), "binding", request_context)
+      first = event.create(CDXMockAction.new(connector), "binding", request_context)
       second = nil
 
       remove_request_stub(stub_subscribe)
 
       expect {
-        second = event.subscribe(CDXMockAction.new(connector), "binding", request_context)
+        second = event.create(CDXMockAction.new(connector), "binding", request_context)
       }.to change {
         event.reference_count
       }.by(1)
@@ -94,7 +94,7 @@ describe CDXConnector do
       stub_subscribe = with_oauth_token(stub_request(:post, "#{base_api_url}/filters/12345/subscribers.json")).
         to_return(status: 200, body: %({"id": 34}))
 
-      first = event.subscribe(CDXMockAction.new(connector), "binding", request_context)
+      first = event.create(CDXMockAction.new(connector), "binding", request_context)
 
       remove_request_stub(stub_subscribe)
 

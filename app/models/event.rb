@@ -27,7 +27,7 @@ module Event
     }
   end
 
-  def subscribe(action, binding, context)
+  def create(action, binding, context)
     EventHandler.create(
       connector: connector,
       event: path,
@@ -37,6 +37,9 @@ module Event
       binding: binding,
       poll: respond_to?(:poll)
     )
+  end
+
+  def subscribe(context)
   end
 
   def unsubscribe(context)

@@ -14,7 +14,7 @@ class Api::EventHandlersController < BaseApiController
     event = connectors.find_by_guid(params[:event_handler][:event][:connector]).lookup_path(params[:event_handler][:event][:path], request_context)
     action = connectors.find_by_guid(params[:event_handler][:action][:connector]).lookup_path(params[:event_handler][:action][:path], request_context)
 
-    event_handler = event.subscribe(action, params[:event_handler][:binding], request_context)
+    event_handler = event.create(action, params[:event_handler][:binding], request_context)
     event_handler.name = params[:event_handler][:name]
     event_handler.enabled = params[:event_handler][:enabled]
 

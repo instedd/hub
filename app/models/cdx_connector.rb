@@ -122,7 +122,7 @@ class CDXConnector < Connector
 
       end
 
-      def subscribe(action, binding, context)
+      def subscribe(context)
         super.tap do |res|
           current_count = self.reference_count
           self.reference_count = current_count + 1
