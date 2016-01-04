@@ -1,15 +1,14 @@
 FROM instedd/nginx-rails:2.1
 
-# Install prerequisites
-RUN \
-  apt-get update && \
-  DEBIAN_FRONTEND=noninteractive apt-get install -y libzmq3-dev && \
-  apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
 # Install gem bundle
 ADD Gemfile /app/
 ADD Gemfile.lock /app/
 RUN bundle install --jobs 3 --deployment --without development test
+
+# Default environment settings
+ENV POIROT_STDOUT true
+ENV POIROT_SUPPRESS_RAILS_LOG true
+ENV PUMA_OPTIONS "--preload -w 4"
 
 # Install the application
 ADD . /app

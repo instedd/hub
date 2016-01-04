@@ -1,19 +1,19 @@
 common: &default_settings
-  server: localhost:2120
+  server: <%= ENV["POIROT_SERVER"] %>
   source: instedd-hub
+  stdout: <%= ENV["POIROT_STDOUT"] %>
+  suppress_rails_log: <%= ENV["POIROT_SUPPRESS_RAILS_LOG"] %>
+  enabled: <%= !!ENV["POIROT_SERVER"] || !!ENV["POIROT_STDOUT"] %>
   debug: false
 
 development:
   <<: *default_settings
-  enabled: true
-  debug: true
   mute:
    - /assets/
    - /_resque/
 
 production:
   <<: *default_settings
-  enabled: true
 
 test:
   <<: *default_settings
