@@ -6,7 +6,7 @@ if FileTest.exists?(VersionFilePath)
 elsif FileTest.exists?(RevisionFilePath)
   version = IO.read(RevisionFilePath)
 else
-  version = "development"
+  version = ENV["HUB_VERSION"] || "development"
 end
 
 Hub::Application.config.version_name = version

@@ -27,7 +27,7 @@ gem 'bootstrap-sass', '2.3.2.1'
 gem 'instedd-bootstrap', git: "https://bitbucket.org/instedd/instedd-bootstrap.git", branch: 'master'
 gem 'haml-rails'
 
-gem 'rails_config'
+gem 'config', github: "spalladino/config", branch: "feature/customisable_env_vars"
 gem 'devise'
 gem 'alto_guisso', github: "instedd/alto_guisso", branch: 'master'
 gem 'alto_guisso_rails', github: "instedd/alto_guisso_rails", branch: 'master'

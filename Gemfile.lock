@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/instedd/alto_guisso.git
-  revision: 6d72573c211f45ff95d36847af733449acdfa04a
+  revision: 84f2cf3f5a3d3eaf85ba9a1a9c7fa6dd28808e52
   branch: master
   specs:
     alto_guisso (0.0.2)
@@ -37,6 +37,15 @@ GIT
       guid
       json
       rails (>= 3.2)
+
+GIT
+  remote: git://github.com/spalladino/config.git
+  revision: 85b46e1f098d4221a01ec9bc9a974ef1424c2df8
+  branch: feature/customisable_env_vars
+  specs:
+    config (1.0.0)
+      activesupport (>= 3.0)
+      deep_merge (~> 1.0.1)
 
 GIT
   remote: https://bitbucket.org/instedd/instedd-bootstrap.git
@@ -130,6 +139,7 @@ GEM
     debug_inspector (0.0.2)
     debugger-linecache (1.2.0)
     decent_exposure (2.3.2)
+    deep_merge (1.0.1)
     devise (3.4.1)
       bcrypt (~> 3.0)
       orm_adapter (~> 0.1)
@@ -267,8 +277,6 @@ GEM
     rails-dev-tweaks (1.2.0)
       actionpack (>= 3.1)
       railties (>= 3.1)
-    rails_config (0.4.2)
-      activesupport (>= 3.0)
     railties (4.1.6)
       actionpack (= 4.1.6)
       activesupport (= 4.1.6)
@@ -382,6 +390,7 @@ DEPENDENCIES
   capistrano-rails
   capistrano-rvm
   coffee-rails (~> 4.0.0)
+  config!
   decent_exposure
   devise
   foreman
@@ -402,7 +411,6 @@ DEPENDENCIES
   rack-cors
   rails (= 4.1.6)
   rails-dev-tweaks
-  rails_config
   resque
   resque-scheduler
   rest-client
