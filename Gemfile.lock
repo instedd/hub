@@ -219,7 +219,7 @@ GEM
       net-ssh (>= 2.6.5)
     net-ssh (2.9.1)
     netrc (0.8.0)
-    newrelic_rpm (3.9.6.257)
+    newrelic_rpm (3.15.1.316)
     ngannotate-rails (0.10.1)
       execjs
       rails (>= 3.1)
