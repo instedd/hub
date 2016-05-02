@@ -57,7 +57,7 @@ Actions are the counterpart of events, they are executed when an event is trigge
 
 # Setup
 
-Hub is a Ruby on Rails application, and depends on Postgres for data storage, Redis for jobs queues using Resque and ElasticSearch for storing [Poirot](http://instedd.github.io/poirot/) activities. Deployment is managed with Docker using fig; refer to `fig.yml` for more details on setting up the environment.
+Hub is a Ruby on Rails application, and depends on Postgres for data storage, Redis for jobs queues using Resque and ElasticSearch for storing [Poirot](http://instedd.github.io/poirot/) activities. Deployment is managed with Docker using fig; refer to `docker-compose.yml` for more details on setting up the environment.
 
 ## Configuration files
 
