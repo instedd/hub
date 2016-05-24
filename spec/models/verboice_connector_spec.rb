@@ -174,6 +174,21 @@ describe VerboiceConnector do
               label: "Call finished",
               path: "projects/495/call_flows/740/$events/call_finished",
               reflect_url: "http://server/api/reflect/connectors/1/projects/495/call_flows/740/$events/call_finished"
+            },
+            "call_done" => {
+              label: "Call done",
+              path: "projects/495/call_flows/740/$events/call_done",
+              reflect_url: "http://server/api/reflect/connectors/1/projects/495/call_flows/740/$events/call_done"
+            },
+            "call_completed" => {
+              label: "Call completed",
+              path: "projects/495/call_flows/740/$events/call_completed",
+              reflect_url: "http://server/api/reflect/connectors/1/projects/495/call_flows/740/$events/call_completed"
+            },
+            "call_failed" => {
+              label: "Call failed",
+              path: "projects/495/call_flows/740/$events/call_failed",
+              reflect_url: "http://server/api/reflect/connectors/1/projects/495/call_flows/740/$events/call_failed"
             }
           }
         })
@@ -194,6 +209,67 @@ describe VerboiceConnector do
           label: "Call finished",
           args: {
             address: {type: :string, label: "Phone Number"},
+            status: {type: :string, label: "Status"},
+            vars: {
+              type: {
+                kind: :struct,
+                members: {
+                  "name" => {type: :string},
+                  "age" => {type: :string},
+                }
+              }
+            }
+          }
+        })
+      end
+
+      it "reflects on call flow call failed event" do
+        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495.json").
+          to_return(:status => 200, :body => %({"id": 495,"contact_vars":["name","age"]}), :headers => {})
+        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495/call_flows/740.json").
+          to_return(:status => 200, :body => %({
+            "id": 740,
+            "name": "my flow"
+          }), :headers => {})
+
+        event = connector.lookup %w(projects 495 call_flows 740 $events call_failed), context
+
+        expect(event.reflect(context)).to eq({
+          label: "Call failed",
+          args: {
+            address: {type: :string, label: "Phone Number"},
+            fail_reason: {type: :string, label: "Fail reason"},
+            status: {type: :string, label: "Status"},
+            vars: {
+              type: {
+                kind: :struct,
+                members: {
+                  "name" => {type: :string},
+                  "age" => {type: :string},
+                }
+              }
+            }
+          }
+        })
+      end
+
+      it "reflects on call flow call done event" do
+        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495.json").
+          to_return(:status => 200, :body => %({"id": 495,"contact_vars":["name","age"]}), :headers => {})
+        stub_request(:get, "https://jdoe:1234@verboice.instedd.org/api/projects/495/call_flows/740.json").
+          to_return(:status => 200, :body => %({
+            "id": 740,
+            "name": "my flow"
+          }), :headers => {})
+
+        event = connector.lookup %w(projects 495 call_flows 740 $events call_done), context
+
+        expect(event.reflect(context)).to eq({
+          label: "Call done",
+          args: {
+            address: {type: :string, label: "Phone Number"},
+            fail_reason: {type: :string, label: "Fail reason (if any)"},
+            status: {type: :string, label: "Status"},
             vars: {
               type: {
                 kind: :struct,
@@ -589,6 +665,21 @@ describe VerboiceConnector do
               label: "Call finished",
               path: "projects/495/call_flows/740/$events/call_finished",
               reflect_url: "http://server/api/reflect/connectors/1/projects/495/call_flows/740/$events/call_finished"
+            },
+            "call_done" => {
+              label: "Call done",
+              path: "projects/495/call_flows/740/$events/call_done",
+              reflect_url: "http://server/api/reflect/connectors/1/projects/495/call_flows/740/$events/call_done"
+            },
+            "call_completed" => {
+              label: "Call completed",
+              path: "projects/495/call_flows/740/$events/call_completed",
+              reflect_url: "http://server/api/reflect/connectors/1/projects/495/call_flows/740/$events/call_completed"
+            },
+            "call_failed" => {
+              label: "Call failed",
+              path: "projects/495/call_flows/740/$events/call_failed",
+              reflect_url: "http://server/api/reflect/connectors/1/projects/495/call_flows/740/$events/call_failed"
             }
           }
         })

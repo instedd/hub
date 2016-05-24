@@ -188,6 +188,10 @@ class ACTConnector < Connector
           type: "boolean",
           label: "Is any community member sick?"
         },
+        status: {
+          type: "string",
+          label: "Call exit status"
+        },
         symptoms: {
           type: {
             kind: :struct,

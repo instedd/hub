@@ -87,7 +87,7 @@ describe ACTConnector do
 
       it "includes parameters for action" do
         action = connector.lookup %w(cases $actions update_case), user
-        expect(action.args(user).keys).to match_array([:case_id, :is_sick, :community_sick, :family_sick, :symptoms])
+        expect(action.args(user).keys).to match_array([:case_id, :is_sick, :community_sick, :family_sick, :symptoms, :status])
       end
 
       it "contacts ACT API when performed" do
