@@ -1,0 +1,5 @@
+FROM instedd/hub:1.1-pre3
+
+ADD Rakefile /app/Rakefile
+
+ADD config/initializers/activerecord_monkeypatch_postgres125.rb /app/config/initializers/activerecord_monkeypatch_postgres125.rb
