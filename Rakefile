@@ -3,4 +3,6 @@
 
 require File.expand_path('../config/application', __FILE__)
 
+require File.expand_path('./config/initializers/activerecord_monkeypatch_postgres125.rb')
+
 Rails.application.load_tasks
